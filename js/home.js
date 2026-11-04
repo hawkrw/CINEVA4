@@ -364,18 +364,53 @@ async function loadCategories() {
 }
 
 /* =========================================
+   PAGE LOADER CONTROL
+========================================= */
+
+function hidePageLoader() {
+    const loader = document.querySelector("#pageLoader");
+
+    if (!loader) {
+        console.warn("CINEVA page loader element not found.");
+        return;
+    }
+
+    // Prevent the loader from blocking the homepage
+    loader.style.transition = "opacity 0.5s ease, visibility 0.5s ease";
+    loader.style.opacity = "0";
+    loader.style.visibility = "hidden";
+    loader.style.pointerEvents = "none";
+
+    loader.setAttribute("aria-hidden", "true");
+
+    // Remove it from the layout after the fade-out
+    setTimeout(() => {
+        loader.style.display = "none";
+    }, 550);
+}
+
+
+/* =========================================
    HOMEPAGE INITIALIZATION
 ========================================= */
 
 async function initializeHome() {
+    try {
+        await Promise.allSettled([
+            loadFeatured(),
+            loadLatest(),
+            loadCategories()
+        ]);
 
-    await Promise.all([
-        loadFeatured(),
-        loadLatest(),
-        loadCategories()
-    ]);
+        console.log("CINEVA homepage initialized.");
 
-    console.log("CINEVA homepage initialized.");
+    } catch (error) {
+        console.error("CINEVA homepage initialization failed:", error);
+
+    } finally {
+        // Always hide the loading screen
+        hidePageLoader();
+    }
 }
 
 /* =========================================
