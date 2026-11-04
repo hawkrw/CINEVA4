@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Explore movies and series by genre on CINEVA.">
+
+    <title>Categories | CINEVA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        .categories-page {
+            min-height: 100vh;
+            padding: 130px 5% 80px;
+        }
+
+        .categories-heading {
+            margin-bottom: 40px;
+        }
+
+        .categories-heading span {
+            color: #e50914;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 3px;
+        }
+
+        .categories-heading h1 {
+            margin: 12px 0;
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+        }
+
+        .categories-heading p {
+            color: #999;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .genre-card {
+            position: relative;
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 25px;
+            overflow: hidden;
+            border: 1px solid #292929;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, #262626, #111);
+            transition: transform .3s, border-color .3s;
+        }
+
+        .genre-card:hover {
+            transform: translateY(-7px);
+            border-color: #e50914;
+        }
+
+        .genre-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .25;
+            background: radial-gradient(
+                circle at 80% 20%,
+                var(--genre-color, #e50914),
+                transparent 65%
+            );
+        }
+
+        .genre-card > * {
+            position: relative;
+        }
+
+        .genre-icon {
+            font-size: 35px;
+            margin-bottom: 18px;
+        }
+
+        .genre-card h2 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+
+        .genre-card p {
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .genre-card .genre-arrow {
+            position: absolute;
+            right: 23px;
+            bottom: 25px;
+            font-size: 22px;
+            color: #e50914;
+        }
+
+        .categories-note {
+            margin-top: 45px;
+            padding: 25px;
+            border-radius: 10px;
+            background: #151515;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .categories-note strong {
+            color: #fff;
+        }
+
+        @media (max-width: 750px) {
+            .categories-page {
+                padding: 110px 4% 60px;
+            }
+
+            .genre-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 13px;
+            }
+
+            .genre-card {
+                min-height: 165px;
+                padding: 17px;
+            }
+
+            .genre-card h2 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .genre-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+
+            <a href="index.html" class="logo">
+                CINE<span>VA</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                id="menu-toggle"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+            >
+                ☰
+            </button>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="movies.html" class="nav-link">Movies</a>
+                <a href="series.html" class="nav-link">Series</a>
+                <a href="categories.html" class="nav-link active">Categories</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- CATEGORIES -->
+    <main class="categories-page">
+
+        <section class="categories-heading">
+            <span>CINEVA COLLECTION</span>
+
+            <h1>Explore Genres</h1>
+
+            <p>
+                Every genre has a story. Choose your favorite
+                category and discover something worth watching.
+            </p>
+        </section>
+
+        <section class="genre-grid">
+
+            <a href="movies.html?genre=Action" class="genre-card"
+               style="--genre-color:#e50914">
+                <span class="genre-icon">⚔️</span>
+                <h2>Action</h2>
+                <p>Adrenaline, adventure and excitement.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Horror" class="genre-card"
+               style="--genre-color:#8b0000">
+                <span class="genre-icon">👻</span>
+                <h2>Horror</h2>
+                <p>Dark stories and unforgettable scares.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Drama" class="genre-card"
+               style="--genre-color:#b8860b">
+                <span class="genre-icon">🎭</span>
+                <h2>Drama</h2>
+                <p>Emotional stories and powerful characters.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Highschool" class="genre-card"
+               style="--genre-color:#4169e1">
+                <span class="genre-icon">🎓</span>
+                <h2>Highschool</h2>
+                <p>Friendship, romance and school life.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Animation" class="genre-card"
+               style="--genre-color:#9932cc">
+                <span class="genre-icon">🎨</span>
+                <h2>Animation</h2>
+                <p>Creative worlds and animated adventures.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Comedy" class="genre-card"
+               style="--genre-color:#ff8c00">
+                <span class="genre-icon">😂</span>
+                <h2>Comedy</h2>
+                <p>Laugh, relax and enjoy the moment.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+            <a href="movies.html?genre=Erotic" class="genre-card"
+               style="--genre-color:#c71585">
+                <span class="genre-icon">❤️</span>
+                <h2>Erotic</h2>
+                <p>Explore mature-themed storytelling.</p>
+                <span class="genre-arrow">↗</span>
+            </a>
+
+        </section>
+
+        <section class="categories-note">
+            <strong>Discover more on CINEVA.</strong>
+            Browse our growing collection of movies and series.
+            New content can be added directly through your Supabase database.
+        </section>
+
+    </main>
+
+    <script src="js/navigation.js" defer></script>
+
+</body>
+</html>
