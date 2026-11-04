@@ -1,7 +1,7 @@
 
 import { supabase } from "./config.js";
 
-const CONTENTS_PER_PAGE = 12;
+const CONTENTS_PER_PAGE = 10;
 
 const state = {
     content: [],
@@ -56,9 +56,13 @@ let paginationElement;
 document.addEventListener("DOMContentLoaded", initializeGenrePage);
 
 async function initializeGenrePage() {
-    if (elements.footerYear) {
-        elements.footerYear.textContent = new Date().getFullYear();
-    }
+   const currentYear =
+    document.getElementById("currentYear") ||
+    document.getElementById("footer-year");
+
+if (currentYear) {
+    currentYear.textContent = new Date().getFullYear();
+}
 
     createPaginationContainer();
     readUrlParameters();
