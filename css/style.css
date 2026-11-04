@@ -84,7 +84,7 @@ body {
     width: 100%;
     min-height: 100vh;
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter',;
 
     background: var(--bg-primary);
 
@@ -1432,4 +1432,135 @@ input:focus-visible {
 
     }
 
+}
+
+/* =========================================
+   CINEVA — SEARCH STYLING
+========================================= */
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 430px;
+    padding: 10px 14px;
+    background: #171717;
+    border: 1px solid #303030;
+    border-radius: 10px;
+}
+
+.search-icon {
+    color: #aaa;
+    font-size: 22px;
+}
+
+.search-box input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 14px;
+}
+
+.search-box input::placeholder {
+    color: #888;
+}
+
+.search-box button {
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 13px;
+    cursor: pointer;
+}
+
+.search-results {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 420px;
+    overflow-y: auto;
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 15px 35px #0009;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px;
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid #292929;
+    transition: background .2s;
+}
+
+.search-result-item:hover {
+    background: #262626;
+}
+
+.search-result-item img {
+    width: 48px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-info h4 {
+    margin: 0 0 7px;
+    font-size: 14px;
+}
+
+.search-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #999;
+    font-size: 11px;
+}
+
+.search-result-arrow {
+    color: #e50914;
+    font-size: 20px;
+}
+
+.search-empty,
+.search-loading,
+.search-error {
+    padding: 25px 15px;
+    text-align: center;
+    color: #aaa;
+}
+
+.search-loading .loading-spinner {
+    margin: 0 auto 10px;
+}
+
+@media (max-width: 600px) {
+    .search-box {
+        max-width: 100%;
+    }
+
+    .search-results {
+        max-height: 350px;
+    }
 }
