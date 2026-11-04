@@ -993,82 +993,278 @@ function renderRelated(items) {
     }).join("");
 }
 
+
 /* =====================================================
-   FOOTER AND BACK TO TOP
+   CINEVA — FOOTER, BACK TO TOP & RELATED NAVIGATION
 ===================================================== */
 
 function setupPageExtras() {
+
+    /* ---------------------------------------------
+       FOOTER YEAR
+    --------------------------------------------- */
+
     if (el.footerYear) {
         el.footerYear.textContent = new Date().getFullYear();
     }
 
+
+    /* ---------------------------------------------
+       BACK TO TOP
+    --------------------------------------------- */
+
     if (el.backToTop) {
-        window.addEventListener("scroll", () => {
+
+        const updateBackToTop = () => {
             el.backToTop.classList.toggle(
                 "visible",
                 window.scrollY > 500
             );
+        };
+
+        window.addEventListener("scroll", updateBackToTop, {
+            passive: true
         });
 
         el.backToTop.addEventListener("click", () => {
+
             window.scrollTo({
                 top: 0,
                 behavior: "smooth"
             });
+
         });
+
+        updateBackToTop();
     }
+
+
+    /* ---------------------------------------------
+       RELATED CONTENT HORIZONTAL SLIDER
+    --------------------------------------------- */
+
+    const relatedGrid = document.querySelector("#related-content");
+    const relatedPrev = document.querySelector("#related-prev");
+    const relatedNext = document.querySelector("#related-next");
+
+    if (!relatedGrid) return;
+
+    const SCROLL_AMOUNT = 320;
+
+    /* Update arrow states */
+
+    function updateRelatedArrows() {
+
+        const maxScroll =
+            relatedGrid.scrollWidth - relatedGrid.clientWidth;
+
+        const canScroll = maxScroll > 5;
+
+        if (relatedPrev) {
+
+            relatedPrev.disabled =
+                !canScroll || relatedGrid.scrollLeft <= 5;
+
+            relatedPrev.classList.toggle(
+                "is-hidden",
+                !canScroll
+            );
+        }
+
+        if (relatedNext) {
+
+            relatedNext.disabled =
+                !canScroll ||
+                relatedGrid.scrollLeft >= maxScroll - 5;
+
+            relatedNext.classList.toggle(
+                "is-hidden",
+                !canScroll
+            );
+        }
+    }
+
+
+    /* Previous cards */
+
+    relatedPrev?.addEventListener("click", () => {
+
+        relatedGrid.scrollBy({
+            left: -SCROLL_AMOUNT,
+            behavior: "smooth"
+        });
+
+    });
+
+
+    /* Next cards */
+
+    relatedNext?.addEventListener("click", () => {
+
+        relatedGrid.scrollBy({
+            left: SCROLL_AMOUNT,
+            behavior: "smooth"
+        });
+
+    });
+
+
+    /* Update arrows while scrolling */
+
+    relatedGrid.addEventListener(
+        "scroll",
+        updateRelatedArrows,
+        { passive: true }
+    );
+
+
+    /* Update arrows when browser resizes */
+
+    window.addEventListener(
+        "resize",
+        updateRelatedArrows
+    );
+
+
+    /* Detect when related cards are added */
+
+    const relatedObserver = new MutationObserver(() => {
+
+        requestAnimationFrame(() => {
+            updateRelatedArrows();
+        });
+
+    });
+
+    relatedObserver.observe(relatedGrid, {
+        childList: true,
+        subtree: true
+    });
+
+
+    /* Recheck after images load */
+
+    relatedGrid.addEventListener("load", event => {
+
+        if (event.target.tagName === "IMG") {
+            updateRelatedArrows();
+        }
+
+    }, true);
+
+
+    /* Initial arrow state */
+
+    updateRelatedArrows();
 }
 
+
 /* =====================================================
-   INITIALIZE WATCH PAGE
+   CINEVA — INITIALIZE WATCH PAGE
 ===================================================== */
 
 async function initializeWatchPage() {
+
+    /* Initialize footer and page controls */
+
     setupPageExtras();
 
+
+    /* Validate content ID */
+
     if (!contentId) {
-        showError("No content selected. Please select a movie or series.");
+
+        showError(
+            "No content selected. Please select a movie or series."
+        );
+
         return;
     }
 
+
+    /* Display loading state */
+
     showLoading(true);
 
+
     try {
+
+        /* ---------------------------------------------
+           FETCH MAIN CONTENT
+        --------------------------------------------- */
+
         const item = await fetchContent();
 
         if (!item) {
-            showError("Content not found or unavailable.");
+
+            showError(
+                "Content not found or unavailable."
+            );
+
             return;
         }
 
+
+        /* ---------------------------------------------
+           STORE CURRENT CONTENT
+        --------------------------------------------- */
+
         currentContent = item;
 
+
+        /* ---------------------------------------------
+           DISPLAY CONTENT DETAILS
+        --------------------------------------------- */
+
         displayContent(item);
+
         showContent();
 
+
+        /* ---------------------------------------------
+           INITIALIZE MAIN ACTIONS
+        --------------------------------------------- */
+
         setupMainWatchButton(item);
+
         setupMainDownloadButton(item);
+
         setupLikes(item);
+
         setupShare(item);
+
         setupCommentForm(item);
 
-        // Initial player source.
+
+        /* ---------------------------------------------
+           INITIALIZE VIDEO PLAYER
+        --------------------------------------------- */
+
         if (item.video_url) {
+
             playVideo(item.video_url);
+
         } else {
+
             showPlayerMessage(
                 "Ready to watch",
                 "Select an available episode or part to begin."
             );
+
         }
 
-        // Load supporting content.
+
+        /* ---------------------------------------------
+           LOAD SUPPORTING CONTENT
+        --------------------------------------------- */
+
         const [
             episodes,
             parts,
             comments,
             related
         ] = await Promise.all([
+
             contentType === "series"
                 ? fetchEpisodes(item.id)
                 : Promise.resolve([]),
@@ -1078,34 +1274,97 @@ async function initializeWatchPage() {
             fetchComments(item),
 
             fetchRelated(item)
+
         ]);
 
+
+        /* ---------------------------------------------
+           RENDER EPISODES
+        --------------------------------------------- */
+
         renderEpisodes(episodes);
+
+
+        /* ---------------------------------------------
+           RENDER MOVIE PARTS
+        --------------------------------------------- */
+
         renderParts(parts);
+
+
+        /* ---------------------------------------------
+           RENDER COMMENTS
+        --------------------------------------------- */
+
         renderComments(comments);
+
+
+        /* ---------------------------------------------
+           RENDER RELATED CONTENT
+        --------------------------------------------- */
+
         renderRelated(related);
 
+
+        /* ---------------------------------------------
+           REFRESH RELATED SLIDER ARROWS
+        --------------------------------------------- */
+
+        requestAnimationFrame(() => {
+
+            const relatedGrid =
+                document.querySelector("#related-content");
+
+            if (relatedGrid) {
+
+                relatedGrid.dispatchEvent(
+                    new Event("scroll")
+                );
+
+            }
+
+        });
+
+
+        console.log(
+            `CINEVA: ${contentType} loaded successfully.`,
+            item.title
+        );
+
+
     } catch (error) {
-        console.error("CINEVA watch initialization error:", error);
+
+        console.error(
+            "CINEVA watch initialization error:",
+            error
+        );
 
         showError(
             error.message ||
             "Unable to load this content. Please try again."
         );
+
     }
+
 }
 
+
 /* =====================================================
-   START APPLICATION
+   START CINEVA WATCH APPLICATION
 ===================================================== */
 
 if (document.readyState === "loading") {
+
     document.addEventListener(
         "DOMContentLoaded",
-        initializeWatchPage
+        initializeWatchPage,
+        { once: true }
     );
+
 } else {
+
     initializeWatchPage();
+
 }
 
-console.log("CINEVA Watch System Initialized.");
+console.log("CINEVA Watch System Ready.");
