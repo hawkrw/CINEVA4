@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Watch | CINEVA</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/watch.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="watch-header">
+        <a href="index.html" class="logo">CINEVA</a>
+
+        <a href="index.html" class="back-home">
+            ← Back Home
+        </a>
+    </header>
+
+    <main class="watch-page">
+
+        <!-- LOADING -->
+        <div id="watch-loading" class="watch-loading">
+            Loading content...
+        </div>
+
+        <!-- ERROR -->
+        <div id="watch-error" class="watch-error" hidden></div>
+
+        <!-- VIDEO PLAYER -->
+        <section class="video-section">
+            <video
+                id="video-player"
+                class="video-player"
+                controls
+                playsinline
+                preload="metadata"
+                poster="assets/images/movie-placeholder.jpg"
+            ></video>
+        </section>
+
+        <!-- CONTENT DETAILS -->
+        <section class="watch-details">
+
+            <div class="watch-poster">
+                <img
+                    id="watch-poster"
+                    src="assets/images/movie-placeholder.jpg"
+                    alt="Content poster"
+                >
+            </div>
+
+            <div class="watch-information">
+
+                <span id="watch-type"></span>
+
+                <h1 id="watch-title">Loading...</h1>
+
+                <div class="watch-meta">
+                    <span id="watch-category"></span>
+                    <span id="watch-year"></span>
+                    <span id="watch-rating"></span>
+                </div>
+
+                <p id="watch-description"></p>
+
+            </div>
+
+        </section>
+
+        <!-- SERIES EPISODES -->
+        <section id="episodes-container" hidden></section>
+
+        <!-- RELATED CONTENT -->
+        <section class="related-section">
+
+            <h2>You May Also Like</h2>
+
+            <div id="related-content" class="movie-grid"></div>
+
+        </section>
+
+    </main>
+
+    <script type="module" src="js/watch.js"></script>
+
+</body>
+</html>
