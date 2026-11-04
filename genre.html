@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080910">
+    <title>Discover | CINEVA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <link rel="stylesheet" href="css/genre.css">
+</head>
+
+<body>
+
+<header class="genre-header">
+    <a href="index.html" class="genre-logo">CINEVA<span>.</span></a>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="genre.html?type=movie">Movies</a>
+        <a href="genre.html?type=series">Series</a>
+        <a href="genre.html?sort=rating">Top Rated</a>
+    </nav>
+
+    <a href="profile.html" class="profile-link">
+        <i class="fa-solid fa-user"></i> Profile
+    </a>
+</header>
+
+<main class="genre-main">
+
+    <section class="genre-hero">
+        <div class="genre-hero-content">
+            <span class="genre-eyebrow">YOUR ENTERTAINMENT WORLD</span>
+            <h1 id="page-title">Discover Movies & Series</h1>
+            <p id="page-description">
+                Explore your next favorite movie and series.
+            </p>
+        </div>
+    </section>
+
+    <section class="genre-toolbar">
+        <div>
+            <span class="genre-section-label">CINEVA COLLECTION</span>
+            <h2 id="results-heading">Explore Content</h2>
+            <p id="results-count">Loading content...</p>
+        </div>
+
+        <div class="genre-controls">
+            <select id="content-filter">
+                <option value="all">All Content</option>
+                <option value="movie">Movies</option>
+                <option value="series">Series</option>
+            </select>
+
+            <select id="sort-filter">
+                <option value="latest">Latest Added</option>
+                <option value="rating">Highest Rated</option>
+                <option value="popular">Most Popular</option>
+                <option value="title">A - Z</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="genre-grid-section">
+        <div id="genre-loading" class="genre-message">
+            <div class="genre-spinner"></div>
+            <p>Discovering amazing content...</p>
+        </div>
+
+        <div id="genre-grid" class="movie-grid"></div>
+
+        <div id="genre-empty" class="genre-message" hidden>
+            <i class="fa-solid fa-film"></i>
+            <h3>No content found</h3>
+            <p>There is currently no content in this collection.</p>
+            <a href="index.html">Return Home</a>
+        </div>
+
+        <div id="genre-error" class="genre-message" hidden>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Something went wrong</h3>
+            <p id="genre-error-text">Unable to load content.</p>
+            <button onclick="location.reload()">Try Again</button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="genre-footer">
+    <a href="index.html">CINEVA<span>.</span></a>
+    <p>© <span id="footer-year"></span> CINEVA. All rights reserved.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"></script>
+<script type="module" src="js/genre.js"></script>
+
+</body>
+</html>
