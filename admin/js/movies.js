@@ -46,6 +46,20 @@ const elements = {
     translator: document.getElementById("movieTranslator"),
     featured: document.getElementById("movieFeatured"),
     active: document.getElementById("movieActive")
+   previewButton: document.getElementById("previewMovieBtn"),
+previewModal: document.getElementById("moviePreviewModal"),
+closePreview: document.getElementById("closeMoviePreview"),
+
+previewBackdrop: document.getElementById("previewBackdrop"),
+previewPoster: document.getElementById("previewPoster"),
+previewTitle: document.getElementById("previewTitle"),
+previewYear: document.getElementById("previewYear"),
+previewCategory: document.getElementById("previewCategory"),
+previewRating: document.getElementById("previewRating"),
+previewOverview: document.getElementById("previewOverview"),
+previewTranslator: document.getElementById("previewTranslator"),
+previewWatch: document.getElementById("previewWatch"),
+previewDownload: document.getElementById("previewDownload")
 };
 
 /* =========================================
@@ -551,7 +565,95 @@ async function deleteMovie(id) {
 /* =========================================
    EVENT LISTENERS
 ========================================= */
+/* =========================================
+   MOVIE PREVIEW
+========================================= */
 
+function setPreviewLink(element, url) {
+    const safeUrl = getSafeExternalUrl(url);
+
+    if (safeUrl) {
+        element.href = safeUrl;
+        element.style.display = "inline-flex";
+    } else {
+        element.removeAttribute("href");
+        element.style.display = "none";
+    }
+}
+
+function getSafeExternalUrl(value) {
+    if (!value) return "";
+
+    try {
+        const url = new URL(value);
+
+        if (url.protocol !== "https:" && url.protocol !== "http:") {
+            return "";
+        }
+
+        return url.href;
+    } catch {
+        return "";
+    }
+}
+
+function previewMovie() {
+    const title = elements.title.value.trim();
+
+    if (!title) {
+        showMessage("Enter a movie title before previewing.", "error");
+        return;
+    }
+
+    const poster = getSafeExternalUrl(elements.poster.value);
+    const backdrop = getSafeExternalUrl(elements.backdrop.value);
+
+    elements.previewTitle.textContent = title;
+
+    elements.previewYear.textContent =
+        elements.year.value || "Year unavailable";
+
+    elements.previewCategory.textContent =
+        elements.category.value || "Uncategorized";
+
+    elements.previewRating.textContent =
+        elements.rating.value
+            ? `★ ${elements.rating.value}/10`
+            : "Not rated";
+
+    elements.previewOverview.textContent =
+        elements.overview.value.trim() ||
+        "No description available.";
+
+    elements.previewTranslator.textContent =
+        elements.translator.value.trim()
+            ? `Translator: ${elements.translator.value.trim()}`
+            : "";
+
+    if (poster) {
+        elements.previewPoster.src = poster;
+        elements.previewPoster.style.display = "block";
+    } else {
+        elements.previewPoster.removeAttribute("src");
+        elements.previewPoster.style.display = "none";
+    }
+
+    if (backdrop) {
+        elements.previewBackdrop.style.backgroundImage =
+            `url("${backdrop.replace(/["\\]/g, "")}")`;
+    } else {
+        elements.previewBackdrop.style.backgroundImage = "none";
+    }
+
+    setPreviewLink(elements.previewWatch, elements.watchUrl.value);
+    setPreviewLink(elements.previewDownload, elements.downloadUrl.value);
+
+    elements.previewModal.classList.add("active");
+}
+
+function closeMoviePreview() {
+    elements.previewModal?.classList.remove("active");
+}
 function initializeMovieEvents() {
 
     elements.addButton?.addEventListener("click", () => {
@@ -619,7 +721,15 @@ function initializeMovieEvents() {
         }
     });
 }
+elements.previewButton?.addEventListener("click", previewMovie);
 
+elements.closePreview?.addEventListener("click", closeMoviePreview);
+
+elements.previewModal?.addEventListener("click", event => {
+    if (event.target === elements.previewModal) {
+        closeMoviePreview();
+    }
+});
 /* =========================================
    INITIALIZE
 ========================================= */
