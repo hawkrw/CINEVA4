@@ -65,6 +65,7 @@ let recoveryMode = false;
 
 const params = new URLSearchParams(window.location.search);
 
+
 /* =========================================================
    SAFE REDIRECT
 ========================================================= */
@@ -72,39 +73,40 @@ const params = new URLSearchParams(window.location.search);
 function getRedirectUrl() {
     const redirect = params.get("redirect");
 
-    const allowedPages = [
-        "index.html",
-        "profile.html",
-        "watch.html",
-        "genre.html"
-    ];
-
     if (!redirect) {
-       return "/";
+        return "/";
     }
 
     try {
         const target = new URL(redirect, window.location.origin);
 
+        // Never allow external website redirects
         if (target.origin !== window.location.origin) {
-            return "profile.html";
+            return "/";
         }
 
-        const page = target.pathname.split("/").pop();
+        const allowedPages = [
+            "/",
+            "/index.html",
+            "/profile.html",
+            "/watch.html",
+            "/genre.html"
+        ];
 
-        if (!allowedPages.includes(page)) {
-            return "profile.html";
+        if (!allowedPages.includes(target.pathname)) {
+            return "/";
         }
 
         return target.pathname + target.search + target.hash;
 
-    } catch {
-        return "profile.html";
+    } catch (error) {
+        console.error("Invalid redirect:", error);
+        return "/";
     }
 }
 
 function redirectUser() {
-    window.location.replace(getRedirectUrl());
+    window.location.assign(getRedirectUrl());
 }
 
 /* =========================================================
