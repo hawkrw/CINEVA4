@@ -1163,3 +1163,174 @@
         min-height: 570px;
     }
 }
+/* =========================================================
+   CINEVA — OUR TRANSLATORS
+========================================================= */
+
+.translators-section {
+    width: 100%;
+    margin: 55px 0;
+    padding: 35px 0;
+    overflow: hidden;
+}
+
+.translators-section .section-header {
+    margin-bottom: 28px;
+}
+
+.translators-section .section-subtitle {
+    display: block;
+    margin-bottom: 9px;
+    color: #a78bfa;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.translators-section .section-title h2 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(23px, 3vw, 32px);
+    font-weight: 800;
+}
+
+.translators-section .section-title h2 span {
+    color: #a78bfa;
+}
+
+.translators-section .section-title p {
+    margin-top: 9px;
+    color: #9295a7;
+    font-size: 13px;
+}
+
+.translators-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 5%,
+        #000 95%,
+        transparent
+    );
+
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 5%,
+        #000 95%,
+        transparent
+    );
+}
+
+.translators-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    gap: 18px;
+
+    animation: translatorScroll 45s linear infinite;
+}
+
+.translators-wrapper:hover .translators-track {
+    animation-play-state: paused;
+}
+
+.translator-card {
+    min-width: 190px;
+    padding: 19px 24px;
+
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    background: linear-gradient(
+        145deg,
+        #171827,
+        #10111b
+    );
+
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+
+    transition: .3s ease;
+}
+
+.translator-card:hover {
+    border-color: rgba(139,92,246,.6);
+    background: #1b1930;
+    transform: translateY(-5px);
+}
+
+.translator-avatar {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: linear-gradient(135deg,#9565ff,#6235ce);
+
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.translator-details h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.translator-details span {
+    display: block;
+    margin-top: 5px;
+    color: #9295a7;
+    font-size: 10px;
+}
+
+.translator-loading {
+    padding: 20px;
+    color: #9295a7;
+    font-size: 13px;
+}
+
+@keyframes translatorScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 600px) {
+    .translators-section {
+        margin: 35px 0;
+        padding: 20px 0;
+    }
+
+    .translator-card {
+        min-width: 165px;
+        padding: 15px;
+    }
+
+    .translators-track {
+        gap: 12px;
+        animation-duration: 35s;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .translators-track {
+        animation: none;
+    }
+}
