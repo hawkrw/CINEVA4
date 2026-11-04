@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Explore the latest movies, discover new stories and watch your favorites on CINEVA.">
+
+    <title>Movies | CINEVA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        .movies-page {
+            min-height: 100vh;
+            padding: 130px 5% 80px;
+        }
+
+        .movies-heading {
+            margin-bottom: 35px;
+        }
+
+        .movies-heading .eyebrow {
+            color: #e50914;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .movies-heading h1 {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+            margin: 12px 0;
+        }
+
+        .movies-heading p {
+            color: #999;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .movies-toolbar {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) 220px 180px;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .movies-toolbar input,
+        .movies-toolbar select {
+            width: 100%;
+            min-height: 48px;
+            padding: 0 16px;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            outline: none;
+            background: #151515;
+            color: #fff;
+            font: inherit;
+        }
+
+        .movies-toolbar input:focus,
+        .movies-toolbar select:focus {
+            border-color: #e50914;
+        }
+
+        .movies-toolbar input::placeholder {
+            color: #777;
+        }
+
+        .movies-results {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .movies-empty,
+        .movies-loading {
+            grid-column: 1 / -1;
+            padding: 60px 20px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .movies-empty h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 750px) {
+            .movies-page {
+                padding: 110px 4% 60px;
+            }
+
+            .movies-toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .movies-toolbar input {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .movies-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .movies-toolbar input {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+
+            <a href="index.html" class="logo">
+                CINE<span>VA</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                id="menu-toggle"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+            >
+                ☰
+            </button>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="movies.html" class="nav-link active">Movies</a>
+                <a href="series.html" class="nav-link">Series</a>
+                <a href="categories.html" class="nav-link">Categories</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- MOVIES CONTENT -->
+    <main class="movies-page">
+
+        <section class="movies-heading">
+            <span class="eyebrow">CINEVA COLLECTION</span>
+
+            <h1>Explore Movies</h1>
+
+            <p>
+                Discover incredible stories, explore different genres
+                and find your next favorite movie.
+            </p>
+        </section>
+
+        <!-- SEARCH AND FILTERS -->
+        <section class="movies-toolbar">
+
+            <input
+                type="search"
+                id="movie-search"
+                placeholder="Search movies..."
+                aria-label="Search movies"
+            >
+
+            <select id="genre-filter" aria-label="Filter by genre">
+                <option value="all">All Genres</option>
+                <option value="Action">Action</option>
+                <option value="Horror">Horror</option>
+                <option value="Drama">Drama</option>
+                <option value="Highschool">Highschool</option>
+                <option value="Animation">Animation</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Erotic">Erotic</option>
+            </select>
+
+            <select id="sort-filter" aria-label="Sort movies">
+                <option value="latest">Latest Added</option>
+                <option value="oldest">Oldest Added</option>
+                <option value="rating">Top Rated</option>
+                <option value="title">A - Z</option>
+            </select>
+
+        </section>
+
+        <!-- RESULTS -->
+        <p class="movies-results" id="result-count">
+            Loading movies...
+        </p>
+
+        <!-- MOVIE GRID -->
+        <section
+            class="movie-grid"
+            id="movies-grid"
+            aria-live="polite"
+        >
+            <p class="movies-loading">Loading CINEVA movies...</p>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT -->
+    <script type="module" src="js/movies.js"></script>
+    <script src="js/navigation.js" defer></script>
+
+</body>
+</html>
