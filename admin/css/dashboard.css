@@ -1308,3 +1308,93 @@ a:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* MOVIE MANAGEMENT TABLE */
+
+.movie-table-poster {
+    width: 42px;
+    height: 58px;
+    object-fit: cover;
+    border-radius: 7px;
+    vertical-align: middle;
+    margin-right: 12px;
+    background: #191927;
+}
+
+.admin-table td {
+    vertical-align: middle;
+}
+
+.admin-table td button {
+    margin: 3px;
+    min-height: 34px;
+    padding: 0 12px;
+}
+
+.content-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.content-toolbar input,
+.content-toolbar select {
+    min-height: 43px;
+    padding: 0 14px;
+    color: #fff;
+    background: #141421;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 9px;
+    outline: none;
+}
+
+.content-toolbar input:focus,
+.content-toolbar select:focus {
+    border-color: #923cff;
+}
+
+.search-box {
+    flex: 1;
+}
+
+.search-box input {
+    width: 100%;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    color: #aaa5bd;
+    font-size: 12px;
+}
+
+.pagination-container button {
+    padding: 10px 16px;
+    color: #fff;
+    background: #191927;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pagination-container button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+@media(max-width:600px) {
+    .content-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .content-toolbar select {
+        width: 100%;
+    }
+}
