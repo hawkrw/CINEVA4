@@ -420,6 +420,120 @@
                         </section>
 
                     </div>
+                    <div class="modal-overlay" id="movieModal">
+
+    <div class="admin-modal">
+
+        <div class="modal-header">
+            <div>
+                <h2 id="movieModalTitle">Add New Movie</h2>
+                <p>Enter your movie information.</p>
+            </div>
+
+            <button type="button" id="closeMovieModal" class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <form id="movieForm">
+
+            <input type="hidden" id="movieId">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="movieTitle">Movie Title *</label>
+                    <input id="movieTitle" type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="movieCategory">Category *</label>
+                    <select id="movieCategory" required>
+                        <option value="">Select category</option>
+                        <option>Action</option>
+                        <option>Horror</option>
+                        <option>Drama</option>
+                        <option>Highschool</option>
+                        <option>Animation</option>
+                        <option>Comedy</option>
+                        <option>Erotic</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="movieYear">Release Year</label>
+                    <input id="movieYear" type="number" min="1900" max="2100">
+                </div>
+
+                <div class="form-group">
+                    <label for="movieRating">Rating</label>
+                    <input id="movieRating" type="number" min="0" max="10" step="0.1">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieOverview">Description</label>
+                    <textarea id="movieOverview" rows="4"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="moviePoster">Poster Image URL</label>
+                    <input id="moviePoster" type="url" placeholder="https://...">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieBackdrop">Backdrop Image URL</label>
+                    <input id="movieBackdrop" type="url" placeholder="https://...">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieWatchUrl">Your Watch URL</label>
+                    <input id="movieWatchUrl" type="url" placeholder="Your video/watch link">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieDownloadUrl">Your Download URL</label>
+                    <input id="movieDownloadUrl" type="url" placeholder="Your download link">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieTranslator">Translator</label>
+                    <input id="movieTranslator" type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movieFeatured">
+                        Featured Movie
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movieActive" checked>
+                        Active
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelMovieForm" class="secondary-button">
+                    Cancel
+                </button>
+
+                <button type="submit" id="saveMovieBtn" class="primary-button">
+                    Save Movie
+                </button>
+            </div>
+
+            <p id="movieFormMessage" role="status"></p>
+
+        </form>
+
+    </div>
+
+</div>
+
 
 
                     <!-- Platform Information -->
@@ -677,122 +791,6 @@
                 </span>
 
             </footer>
-            
-<div class="modal-overlay" id="movieModal">
-
-    <div class="admin-modal">
-
-        <div class="modal-header">
-            <div>
-                <h2 id="movieModalTitle">Add New Movie</h2>
-                <p>Enter your movie information.</p>
-            </div>
-
-            <button type="button" id="closeMovieModal" class="modal-close">
-                ×
-            </button>
-        </div>
-
-        <form id="movieForm">
-
-            <input type="hidden" id="movieId">
-
-            <div class="form-grid">
-
-                <div class="form-group">
-                    <label for="movieTitle">Movie Title *</label>
-                    <input id="movieTitle" type="text" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="movieCategory">Category *</label>
-                    <select id="movieCategory" required>
-                        <option value="">Select category</option>
-                        <option>Action</option>
-                        <option>Horror</option>
-                        <option>Drama</option>
-                        <option>Highschool</option>
-                        <option>Animation</option>
-                        <option>Comedy</option>
-                        <option>Erotic</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="movieYear">Release Year</label>
-                    <input id="movieYear" type="number" min="1900" max="2100">
-                </div>
-
-                <div class="form-group">
-                    <label for="movieRating">Rating</label>
-                    <input id="movieRating" type="number" min="0" max="10" step="0.1">
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="movieOverview">Description</label>
-                    <textarea id="movieOverview" rows="4"></textarea>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="moviePoster">Poster Image URL</label>
-                    <input id="moviePoster" type="url" placeholder="https://...">
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="movieBackdrop">Backdrop Image URL</label>
-                    <input id="movieBackdrop" type="url" placeholder="https://...">
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="movieWatchUrl">Your Watch URL</label>
-                    <input id="movieWatchUrl" type="url" placeholder="Your video/watch link">
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="movieDownloadUrl">Your Download URL</label>
-                    <input id="movieDownloadUrl" type="url" placeholder="Your download link">
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="movieTranslator">Translator</label>
-                    <input id="movieTranslator" type="text">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="movieFeatured">
-                        Featured Movie
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="movieActive" checked>
-                        Active
-                    </label>
-                </div>
-
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" id="cancelMovieForm" class="secondary-button">
-                    Cancel
-                </button>
-
-                <button type="submit" id="saveMovieBtn" class="primary-button">
-                    Save Movie
-                </button>
-            </div>
-
-            <p id="movieFormMessage" role="status"></p>
-
-        </form>
-
-    </div>
-
-</div>
-
-
         </main>
 
     </div>
