@@ -1,6 +1,7 @@
 
 /* =========================================
    CINEVA — HOMEPAGE CONTROLLER
+   Cloudflare Pages + Supabase
 ========================================= */
 
 import {
@@ -15,7 +16,8 @@ import {
 
 const HOME_CONFIG = {
     latestLimit: 20,
-    categoryLimit: 12
+    categoryLimit: 12,
+    placeholder: "assets/images/movie-placeholder.jpg"
 };
 
 const CATEGORIES = [
@@ -39,7 +41,7 @@ const elements = {
 };
 
 /* =========================================
-   SAFE HTML HELPERS
+   SECURITY HELPERS
 ========================================= */
 
 function escapeHTML(value = "") {
@@ -52,14 +54,33 @@ function escapeHTML(value = "") {
     })[char]);
 }
 
+function safeImageURL(value) {
+    if (!value) return HOME_CONFIG.placeholder;
+
+    try {
+        const url = new URL(value, window.location.href);
+
+        if (!["http:", "https:"].includes(url.protocol)) {
+            return HOME_CONFIG.placeholder;
+        }
+
+        return url.href;
+    } catch {
+        return HOME_CONFIG.placeholder;
+    }
+}
+
 function getPoster(item) {
-    return item.poster_url ||
+    return safeImageURL(
+        item.poster_url ||
         item.backdrop_url ||
-        "assets/images/movie-placeholder.jpg";
+        HOME_CONFIG.placeholder
+    );
 }
 
 function getContentUrl(item) {
-    const type = item.content_type || "movie";
+    const type = item.content_type === "series" ? "series" : "movie";
+
     return `watch.html?id=${encodeURIComponent(item.id)}&type=${type}`;
 }
 
@@ -101,6 +122,7 @@ function createMovieCard(item) {
     const poster = escapeHTML(getPoster(item));
     const category = escapeHTML(item.category || "Uncategorized");
     const year = escapeHTML(item.release_year || "");
+
     const rating = item.rating
         ? `<span class="movie-rating">★ ${escapeHTML(item.rating)}</span>`
         : "";
@@ -109,12 +131,14 @@ function createMovieCard(item) {
 
     return `
         <a class="movie-card" href="${getContentUrl(item)}">
+
             <div class="movie-poster">
+
                 <img
                     src="${poster}"
                     alt="${title}"
                     loading="lazy"
-                    onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
+                    onerror="this.onerror=null;this.src='${escapeHTML(HOME_CONFIG.placeholder)}';"
                 >
 
                 <span class="movie-type">${type}</span>
@@ -122,9 +146,11 @@ function createMovieCard(item) {
                 <div class="movie-overlay">
                     <span class="play-icon">▶</span>
                 </div>
+
             </div>
 
             <div class="movie-info">
+
                 <h3>${title}</h3>
 
                 <div class="movie-meta">
@@ -132,7 +158,9 @@ function createMovieCard(item) {
                     ${year ? `<span>${year}</span>` : ""}
                     ${rating}
                 </div>
+
             </div>
+
         </a>
     `;
 }
@@ -144,7 +172,7 @@ function createMovieCard(item) {
 function renderMovieGrid(container, movies) {
     if (!container) return;
 
-    if (!movies || movies.length === 0) {
+    if (!Array.isArray(movies) || movies.length === 0) {
         showEmpty(container);
         return;
     }
@@ -173,13 +201,17 @@ function renderHero(movie) {
     }
 
     const title = escapeHTML(movie.title || "Featured Movie");
+
     const description = escapeHTML(
         movie.description || "Discover this featured title on CINEVA."
     );
+
     const backdrop = escapeHTML(
-        movie.backdrop_url ||
-        movie.poster_url ||
-        "assets/images/hero-banner.jpg"
+        safeImageURL(
+            movie.backdrop_url ||
+            movie.poster_url ||
+            HOME_CONFIG.placeholder
+        )
     );
 
     elements.hero.innerHTML = `
@@ -189,6 +221,7 @@ function renderHero(movie) {
         ></div>
 
         <div class="hero-content">
+
             <span class="hero-label">CINEVA ORIGINAL PICK</span>
 
             <h1>${title}</h1>
@@ -196,6 +229,7 @@ function renderHero(movie) {
             <p>${description}</p>
 
             <div class="hero-actions">
+
                 <a href="${getContentUrl(movie)}" class="btn btn-primary">
                     ▶ Watch Now
                 </a>
@@ -203,7 +237,9 @@ function renderHero(movie) {
                 <a href="${getContentUrl(movie)}" class="btn btn-secondary">
                     More Details
                 </a>
+
             </div>
+
         </div>
     `;
 }
@@ -217,7 +253,11 @@ async function loadFeatured() {
 
     try {
         const featured = await getFeaturedMovies(1);
-        renderHero(featured[0] || null);
+
+        renderHero(
+            Array.isArray(featured) ? featured[0] || null : null
+        );
+
     } catch (error) {
         console.error("Featured content failed:", error);
         renderHero(null);
@@ -231,15 +271,25 @@ async function loadFeatured() {
 async function loadLatest() {
     if (!elements.latest) return;
 
-    showLoading(elements.latest, "Loading latest movies and series...");
+    showLoading(
+        elements.latest,
+        "Loading latest movies and series..."
+    );
 
     try {
-        const latest = await getLatestContent(HOME_CONFIG.latestLimit);
+        const latest = await getLatestContent(
+            HOME_CONFIG.latestLimit
+        );
 
         renderMovieGrid(elements.latest, latest);
+
     } catch (error) {
         console.error("Latest content failed:", error);
-        showEmpty(elements.latest, "Unable to load latest content.");
+
+        showEmpty(
+            elements.latest,
+            "Unable to load latest content."
+        );
     }
 }
 
@@ -254,39 +304,53 @@ async function loadCategories() {
 
     const results = await Promise.all(
         CATEGORIES.map(async category => {
+
             try {
                 const movies = await getMoviesByCategory(
                     category,
                     HOME_CONFIG.categoryLimit
                 );
 
-                return { category, movies };
+                return {
+                    category,
+                    movies: Array.isArray(movies) ? movies : []
+                };
+
             } catch (error) {
                 console.error(`${category} loading failed:`, error);
-                return { category, movies: [] };
+
+                return {
+                    category,
+                    movies: []
+                };
             }
+
         })
     );
 
     results.forEach(({ category, movies }) => {
+
         if (!movies.length) return;
 
         const section = document.createElement("section");
+
         section.className = "content-section";
 
         section.innerHTML = `
             <div class="section-header">
+
                 <div>
                     <span class="section-subtitle">EXPLORE CINEVA</span>
                     <h2>${escapeHTML(category)}</h2>
                 </div>
 
                 <a
-                    href="category.html?name=${encodeURIComponent(category)}"
+                    href="movies.html?genre=${encodeURIComponent(category)}"
                     class="view-all"
                 >
                     View All →
                 </a>
+
             </div>
 
             <div class="movie-grid">
@@ -295,6 +359,7 @@ async function loadCategories() {
         `;
 
         elements.categorySections.appendChild(section);
+
     });
 }
 
@@ -303,6 +368,7 @@ async function loadCategories() {
 ========================================= */
 
 async function initializeHome() {
+
     await Promise.all([
         loadFeatured(),
         loadLatest(),
@@ -317,7 +383,15 @@ async function initializeHome() {
 ========================================= */
 
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeHome);
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeHome,
+        { once: true }
+    );
+
 } else {
+
     initializeHome();
+
 }
