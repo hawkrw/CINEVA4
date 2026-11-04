@@ -17,7 +17,7 @@
     margin: 0;
     background: var(--admin-bg);
     color: var(--admin-text);
-    font-family: Inter, sans-serif;
+    font-family: Inter,;
     min-height: 100vh;
 }
 
@@ -606,4 +606,22 @@
 
 @media(max-width:380px) {
     .admin-stats { grid-template-columns: 1fr; }
+}
+
+.content-status {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-active {
+    color: #65e5ae;
+    background: rgba(53,214,154,.12);
+}
+
+.status-inactive {
+    color: #ff9bac;
+    background: rgba(239,49,94,.12);
 }
