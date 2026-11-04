@@ -1,0 +1,1100 @@
+
+/* =========================================================
+   CINEVA — HOMEPAGE STYLESHEET
+   File: css/home.css
+========================================================= */
+
+
+/* =========================================================
+   01. HERO SECTION
+========================================================= */
+
+.hero-section {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 650px;
+
+    display: flex;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    background: #080812;
+
+}
+
+
+/* =========================================================
+   02. HERO BACKGROUND
+========================================================= */
+
+.hero-background {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 0;
+
+}
+
+.hero-image {
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    object-position: center 25%;
+
+    opacity: 0.82;
+
+    transform: scale(1.02);
+
+    animation: heroImageReveal 1.2s ease forwards;
+
+}
+
+@keyframes heroImageReveal {
+
+    from {
+        opacity: 0;
+        transform: scale(1.08);
+    }
+
+    to {
+        opacity: 0.82;
+        transform: scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   03. HERO OVERLAY
+========================================================= */
+
+.hero-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            rgba(8, 8, 18, 1) 0%,
+            rgba(8, 8, 18, 0.96) 16%,
+            rgba(8, 8, 18, 0.75) 38%,
+            rgba(8, 8, 18, 0.22) 70%,
+            rgba(8, 8, 18, 0.12) 100%
+        ),
+
+        linear-gradient(
+            0deg,
+            #080812 0%,
+            rgba(8, 8, 18, 0.8) 8%,
+            transparent 40%
+        );
+
+}
+
+
+/* =========================================================
+   04. HERO CONTENT
+========================================================= */
+
+.hero-content {
+
+    position: relative;
+
+    z-index: 2;
+
+    padding-top: 65px;
+    padding-bottom: 90px;
+
+}
+
+.hero-information {
+
+    max-width: 650px;
+
+    animation: heroContentReveal 0.9s ease both;
+
+}
+
+@keyframes heroContentReveal {
+
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   05. FEATURED LABEL
+========================================================= */
+
+.hero-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 7px 13px;
+
+    margin-bottom: 22px;
+
+    border-radius: 30px;
+
+    background: rgba(139, 53, 245, 0.16);
+
+    border: 1px solid rgba(168, 85, 247, 0.35);
+
+    color: #d5a8ff;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+}
+
+.hero-label i {
+    color: #ff4c73;
+}
+
+
+/* =========================================================
+   06. HERO TYPE
+========================================================= */
+
+.hero-type {
+
+    display: table;
+
+    padding: 6px 15px;
+
+    margin-bottom: 16px;
+
+    background: #e52e50;
+
+    color: white;
+
+    border-radius: 30px;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.3px;
+
+    box-shadow: 0 5px 20px rgba(229, 46, 80, 0.2);
+
+}
+
+
+/* =========================================================
+   07. HERO TITLE
+========================================================= */
+
+.hero-information h1 {
+
+    max-width: 650px;
+
+    color: #ffffff;
+
+    font-size: clamp(42px, 5.4vw, 76px);
+
+    font-weight: 900;
+
+    letter-spacing: -3.5px;
+
+    line-height: 1.08;
+
+    text-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+
+}
+
+.hero-information h1 span {
+
+    display: block;
+
+    background: linear-gradient(
+        90deg,
+        #ffffff 0%,
+        #d6b8ff 50%,
+        #a855f7 100%
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+
+}
+
+
+/* =========================================================
+   08. HERO METADATA
+========================================================= */
+
+.hero-meta {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 14px;
+
+    margin-top: 23px;
+
+    color: #eeeeF5;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+.hero-meta > span {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+}
+
+.hero-meta > span:not(:first-child)::before {
+
+    content: "";
+
+    width: 4px;
+    height: 4px;
+
+    margin-right: 3px;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.5);
+
+}
+
+.match-badge {
+
+    padding: 5px 9px;
+
+    background: rgba(24, 201, 133, 0.17);
+
+    border-radius: 5px;
+
+    color: #28e39c;
+
+}
+
+.match-badge i {
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   09. HERO DESCRIPTION
+========================================================= */
+
+.hero-description {
+
+    max-width: 530px;
+
+    margin-top: 21px;
+
+    color: #c3c3d0;
+
+    font-size: 14px;
+
+    line-height: 1.9;
+
+}
+
+
+/* =========================================================
+   10. HERO BUTTONS
+========================================================= */
+
+.hero-buttons {
+
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 14px;
+
+    margin-top: 32px;
+
+}
+
+.hero-buttons .primary-btn,
+.hero-buttons .secondary-btn {
+
+    min-height: 51px;
+
+    padding-left: 25px;
+    padding-right: 25px;
+
+}
+
+.hero-buttons .primary-btn i {
+    font-size: 14px;
+}
+
+.hero-buttons .secondary-btn i {
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   11. HERO CONTROLS
+========================================================= */
+
+.hero-controls {
+
+    position: absolute;
+
+    right: 32px;
+    bottom: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+.hero-arrow {
+
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.1);
+
+    border: 1px solid rgba(255,255,255,0.2);
+
+    color: white;
+
+    font-size: 12px;
+
+    transition: all 0.3s ease;
+
+}
+
+.hero-arrow:hover {
+
+    background: var(--gradient-primary);
+
+    border-color: transparent;
+
+    transform: scale(1.08);
+
+}
+
+
+/* =========================================================
+   12. HERO INDICATORS
+========================================================= */
+
+.hero-indicators {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+.hero-indicators .indicator {
+
+    width: 23px;
+    height: 4px;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.35);
+
+    transition: all 0.35s ease;
+
+    cursor: pointer;
+
+}
+
+.hero-indicators .indicator.active {
+
+    width: 43px;
+
+    background: var(--gradient-primary);
+
+}
+
+
+/* =========================================================
+   13. HERO BOTTOM FADE
+========================================================= */
+
+.hero-bottom-fade {
+
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 130px;
+
+    z-index: 2;
+
+    background: linear-gradient(
+        0deg,
+        #080812 0%,
+        rgba(8,8,18,0.75) 30%,
+        transparent 100%
+    );
+
+    pointer-events: none;
+
+}
+
+
+/* =========================================================
+   14. TRENDING SECTION
+========================================================= */
+
+#trending {
+
+    position: relative;
+
+    padding-top: 30px;
+
+}
+
+#trending .section-icon {
+    color: #ff693d;
+}
+
+
+/* =========================================================
+   15. LATEST ADDED SECTION
+========================================================= */
+
+#latestAdded {
+
+    position: relative;
+
+    padding-top: 35px;
+
+}
+
+#latestAdded .section-icon {
+    color: #20d69a;
+}
+
+
+/* =========================================================
+   16. GENRE SECTION
+========================================================= */
+
+#categories {
+
+    padding-top: 55px;
+
+    padding-bottom: 40px;
+
+}
+
+.genre-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 17px;
+
+}
+
+
+/* =========================================================
+   17. GENRE CARD
+========================================================= */
+
+.genre-card {
+
+    position: relative;
+
+    min-height: 190px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    padding: 20px;
+
+    border-radius: 15px;
+
+    border: 1px solid rgba(255,255,255,0.07);
+
+    isolation: isolate;
+
+    transition: all 0.35s ease;
+
+}
+
+.genre-card:hover {
+
+    transform: translateY(-7px);
+
+    border-color: rgba(168,85,247,0.6);
+
+    box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+
+}
+
+
+/* =========================================================
+   18. GENRE BACKGROUND
+========================================================= */
+
+.genre-background {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -2;
+
+}
+
+.genre-background img {
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transition: transform 0.6s ease;
+
+}
+
+.genre-card:hover .genre-background img {
+
+    transform: scale(1.12);
+
+}
+
+
+/* =========================================================
+   19. GENRE OVERLAY
+========================================================= */
+
+.genre-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -1;
+
+    background: linear-gradient(
+        0deg,
+        rgba(5,5,12,0.97) 0%,
+        rgba(5,5,12,0.45) 55%,
+        rgba(5,5,12,0.05) 100%
+    );
+
+    transition: background 0.3s ease;
+
+}
+
+.genre-card:hover .genre-overlay {
+
+    background: linear-gradient(
+        0deg,
+        rgba(92,34,160,0.95) 0%,
+        rgba(5,5,12,0.4) 100%
+    );
+
+}
+
+
+/* =========================================================
+   20. GENRE CONTENT
+========================================================= */
+
+.genre-content {
+
+    position: relative;
+
+    z-index: 2;
+
+}
+
+.genre-content > i {
+
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 11px;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.15);
+
+    backdrop-filter: blur(10px);
+
+    color: white;
+
+    font-size: 16px;
+
+    transition: all 0.3s ease;
+
+}
+
+.genre-card:hover .genre-content > i {
+
+    background: var(--gradient-primary);
+
+    transform: rotate(-8deg);
+
+}
+
+.genre-content h3 {
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: 800;
+
+    margin-bottom: 5px;
+
+}
+
+.genre-content span {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: rgba(255,255,255,0.7);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+.genre-content span i {
+
+    transition: transform 0.3s ease;
+
+}
+
+.genre-card:hover .genre-content span i {
+    transform: translateX(5px);
+}
+
+
+/* =========================================================
+   21. GENRE COLOR VARIATIONS
+========================================================= */
+
+.genre-action:hover {
+    border-color: #ff693d;
+}
+
+.genre-horror:hover {
+    border-color: #a855f7;
+}
+
+.genre-drama:hover {
+    border-color: #ec4899;
+}
+
+.genre-romance:hover {
+    border-color: #f43f5e;
+}
+
+.genre-school:hover {
+    border-color: #38bdf8;
+}
+
+.genre-animation:hover {
+    border-color: #22c55e;
+}
+
+.genre-comedy:hover {
+    border-color: #facc15;
+}
+
+.genre-scifi:hover {
+    border-color: #06b6d4;
+}
+
+
+/* =========================================================
+   22. ALL MOVIES
+========================================================= */
+
+#allMovies {
+
+    padding-top: 50px;
+
+}
+
+#allMovies .section-icon {
+    color: #ff4e73;
+}
+
+
+/* =========================================================
+   23. SERIES
+========================================================= */
+
+#allSeries {
+
+    padding-top: 45px;
+
+}
+
+#allSeries .section-icon {
+    color: #a855f7;
+}
+
+
+/* =========================================================
+   24. TOP RATED
+========================================================= */
+
+#topRated {
+
+    padding-top: 45px;
+
+    padding-bottom: 40px;
+
+}
+
+#topRated .section-icon {
+    color: #ffc107;
+}
+
+
+/* =========================================================
+   25. RESPONSIVE DESIGN — TABLETS
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .hero-section {
+        min-height: 590px;
+    }
+
+    .hero-information {
+        max-width: 550px;
+    }
+
+    .hero-information h1 {
+        font-size: 58px;
+    }
+
+    .genre-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   26. RESPONSIVE DESIGN — SMALL TABLETS
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .hero-section {
+        min-height: 590px;
+    }
+
+    .hero-image {
+        object-position: 60% center;
+    }
+
+    .hero-overlay {
+
+        background:
+
+            linear-gradient(
+                90deg,
+                rgba(8,8,18,0.97),
+                rgba(8,8,18,0.72)
+            ),
+
+            linear-gradient(
+                0deg,
+                #080812,
+                transparent 75%
+            );
+
+    }
+
+    .hero-content {
+        padding-top: 65px;
+        padding-bottom: 100px;
+    }
+
+    .hero-information {
+        max-width: 520px;
+    }
+
+    .hero-information h1 {
+        font-size: clamp(42px, 8vw, 58px);
+        letter-spacing: -2px;
+    }
+
+    .hero-description {
+        max-width: 460px;
+        font-size: 13px;
+    }
+
+    .hero-controls {
+        right: 25px;
+        bottom: 25px;
+    }
+
+    .genre-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .genre-card {
+        min-height: 175px;
+    }
+
+    #categories {
+        padding-top: 35px;
+    }
+
+}
+
+
+/* =========================================================
+   27. RESPONSIVE DESIGN — MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .hero-section {
+        min-height: 570px;
+    }
+
+    .hero-content {
+        padding-top: 55px;
+        padding-bottom: 100px;
+    }
+
+    .hero-label {
+        margin-bottom: 17px;
+        font-size: 9px;
+    }
+
+    .hero-type {
+        font-size: 9px;
+        margin-bottom: 13px;
+    }
+
+    .hero-information h1 {
+        font-size: 43px;
+        line-height: 1.12;
+        letter-spacing: -2px;
+    }
+
+    .hero-meta {
+        gap: 9px;
+        margin-top: 17px;
+        font-size: 10px;
+    }
+
+    .hero-description {
+        margin-top: 16px;
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .hero-buttons {
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .hero-buttons .primary-btn,
+    .hero-buttons .secondary-btn {
+        padding: 12px 15px;
+        min-height: 45px;
+        font-size: 11px;
+    }
+
+    .hero-controls {
+        right: 18px;
+        bottom: 22px;
+    }
+
+    .hero-arrow {
+        width: 33px;
+        height: 33px;
+    }
+
+    .hero-indicators .indicator {
+        width: 17px;
+    }
+
+    .hero-indicators .indicator.active {
+        width: 32px;
+    }
+
+    .genre-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .genre-card {
+        min-height: 145px;
+        padding: 13px;
+        border-radius: 11px;
+    }
+
+    .genre-content > i {
+        width: 33px;
+        height: 33px;
+        font-size: 14px;
+    }
+
+    .genre-content h3 {
+        font-size: 14px;
+    }
+
+    .genre-content span {
+        font-size: 9px;
+    }
+
+    .newsletter-section {
+        padding: 22px 17px;
+        margin-top: 30px;
+        margin-bottom: 35px;
+    }
+
+    .newsletter-text h2 {
+        font-size: 21px;
+    }
+
+    .newsletter-text p {
+        font-size: 11px;
+    }
+
+    .newsletter-content {
+        align-items: stretch;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .newsletter-form input,
+    .newsletter-form button {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   28. SMALL MOBILE DEVICES
+========================================================= */
+
+@media (max-width: 360px) {
+
+    .hero-information h1 {
+        font-size: 36px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-buttons a {
+        width: 100%;
+    }
+
+    .genre-content h3 {
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   29. HERO IMAGE FALLBACK
+========================================================= */
+
+.hero-background img:not([src]),
+.hero-background img[src=""] {
+    display: none;
+}
+
+.hero-section:has(.hero-background img:not([src])) {
+    background:
+        radial-gradient(
+            circle at 75% 30%,
+            rgba(139,53,245,0.3),
+            transparent 40%
+        ),
+        #080812;
+}
