@@ -112,12 +112,24 @@
 
                 <!-- SEARCH -->
 
-                <button class="search-toggle" id="searchToggle"
-                    aria-label="Open search">
+                <form id="search-form" class="search-box">
 
-                    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-icon">⌕</span>
 
-                </button>
+    <input
+        type="search"
+        id="search-input"
+        placeholder="Search movies and series..."
+        autocomplete="off"
+    >
+
+    <button type="submit" aria-label="Search">
+        Search
+    </button>
+
+    <div id="search-results" class="search-results"></div>
+
+</form>
 
 
                 <!-- FAVORITES -->
@@ -182,24 +194,7 @@
 
         <!-- SEARCH PANEL -->
 
-        <div class="search-panel" id="searchPanel">
-
-            <form action="search.html" method="GET" class="search-form">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input type="search"
-                    name="q"
-                    id="globalSearch"
-                    placeholder="Search movies, series, actors..."
-                    autocomplete="off">
-
-                <button type="submit">Search</button>
-
-            </form>
-
-        </div>
-<form id="search-form" class="search-box">
+        <form id="search-form" class="search-box">
 
     <span class="search-icon">⌕</span>
 
