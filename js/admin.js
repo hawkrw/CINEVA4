@@ -416,4 +416,333 @@ async function initializeAdmin() {
     }
 }
 
+
+/* =========================================
+   TMDB ADMIN MOVIE SEARCH
+========================================= */
+
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/";
+
+const tmdbSearchForm = $("#tmdbSearchForm");
+const tmdbResults = $("#tmdbResults");
+const tmdbMessage = $("#tmdbSearchMessage");
+const tmdbSearchButton = $("#tmdbSearchButton");
+
+function setTMDBMessage(message, type = "info") {
+    tmdbMessage.textContent = message;
+    tmdbMessage.dataset.type = type;
+}
+
+function getTMDBImage(path, size = "w500") {
+    return path
+        ? `${TMDB_IMAGE_BASE}${size}${path}`
+        : "";
+}
+
+async function searchTMDBMovies(query, year) {
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session?.access_token) {
+        throw new Error("Your session has expired. Please sign in again.");
+    }
+
+    const { data, error } = await supabase.functions.invoke(
+        "tmdb-admin-search",
+        {
+            body: { query, year }
+        }
+    );
+
+    if (error) {
+        throw new Error(error.message || "TMDB search failed.");
+    }
+
+    if (!data?.success) {
+        throw new Error(data?.error || "Unable to search TMDB.");
+    }
+
+    return data.results || [];
+}
+
+function renderTMDBMovies(movies) {
+    if (!movies.length) {
+        tmdbResults.innerHTML =
+            `<p class="panel-note">No matching movies found.</p>`;
+        return;
+    }
+
+    tmdbResults.innerHTML = movies.map(movie => {
+        const title = escapeHTML(movie.title || "Untitled");
+        const year = movie.release_date
+            ? movie.release_date.slice(0, 4)
+            : "Unknown year";
+
+        const poster = getTMDBImage(movie.poster_path);
+
+        return `
+            <button
+                type="button"
+                class="tmdb-result-card"
+                data-tmdb-movie="${Number(movie.id)}"
+            >
+                <img
+                    src="${poster || "assets/images/movie-placeholder.jpg"}"
+                    alt="${title}"
+                    loading="lazy"
+                >
+
+                <div class="tmdb-result-info">
+                    <strong>${title}</strong>
+                    <small>${escapeHTML(year)}</small>
+                    <small>Rating: ${Number(movie.vote_average || 0).toFixed(1)}/10</small>
+                </div>
+            </button>
+        `;
+    }).join("");
+
+    window.cinevaTMDBResults = movies;
+}
+
+tmdbSearchForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const query = $("#tmdbQuery").value.trim();
+    const year = $("#tmdbYear").value.trim();
+
+    if (query.length < 2) {
+        setTMDBMessage("Enter at least two characters.", "error");
+        return;
+    }
+
+    tmdbSearchButton.disabled = true;
+    tmdbSearchButton.textContent = "Searching...";
+    tmdbResults.innerHTML = "";
+
+    try {
+        const movies = await searchTMDBMovies(query, year);
+
+        renderTMDBMovies(movies);
+
+        setTMDBMessage(
+            `${movies.length} matching results found.`,
+            "success"
+        );
+
+    } catch (error) {
+        console.error(error);
+        setTMDBMessage(error.message, "error");
+
+    } finally {
+        tmdbSearchButton.disabled = false;
+        tmdbSearchButton.textContent = "Search TMDB";
+    }
+});
+
+/* =========================================
+   SELECT TMDB RESULT
+========================================= */
+
+tmdbResults?.addEventListener("click", event => {
+    const card = event.target.closest("[data-tmdb-movie]");
+
+    if (!card) return;
+
+    const tmdbId = Number(card.dataset.tmdbMovie);
+
+    const movie = window.cinevaTMDBResults?.find(
+        item => Number(item.id) === tmdbId
+    );
+
+    if (!movie) return;
+
+    selectTMDBMovie(movie);
+});
+
+function selectTMDBMovie(movie) {
+    const releaseYear = movie.release_date
+        ? movie.release_date.slice(0, 4)
+        : "";
+
+    const posterUrl = getTMDBImage(movie.poster_path);
+    const backdropUrl = getTMDBImage(movie.backdrop_path, "w1280");
+
+    $("#movieTmdbId").value = movie.id;
+    $("#movieTitle").value = movie.title || "";
+    $("#movieYear").value = releaseYear;
+    $("#movieRating").value = Number(movie.vote_average || 0).toFixed(1);
+    $("#movieOverview").value = movie.overview || "";
+
+    $("#moviePosterPath").value = movie.poster_path || "";
+    $("#movieBackdropPath").value = movie.backdrop_path || "";
+
+    $("#moviePoster").value = posterUrl;
+    $("#movieBackdrop").value = backdropUrl;
+
+    $("#selectedMoviePreview").innerHTML = `
+        ${posterUrl
+            ? `<img src="${posterUrl}" alt="">`
+            : ""}
+        <div>
+            <strong>${escapeHTML(movie.title || "")}</strong>
+            <small>TMDB ID: ${Number(movie.id)}</small>
+            <small>${escapeHTML(releaseYear || "Release year unavailable")}</small>
+        </div>
+    `;
+
+    $("#movieForm").hidden = false;
+
+    $("#movieForm").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    setTMDBMessage(
+        "Movie selected. Add your streaming information below.",
+        "success"
+    );
+}
+
+/* =========================================
+   CANCEL MOVIE FORM
+========================================= */
+
+$("#cancelMovieForm")?.addEventListener("click", () => {
+    $("#movieForm").reset();
+    $("#movieForm").hidden = true;
+    $("#selectedMoviePreview").innerHTML = "";
+    setTMDBMessage("Select another movie whenever you're ready.");
+});
+
+/* =========================================
+   SAVE MOVIE TO SUPABASE
+========================================= */
+
+$("#movieForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = $("#saveMovieButton");
+    const message = $("#movieSaveMessage");
+
+    button.disabled = true;
+    button.textContent = "Saving movie...";
+    message.textContent = "";
+
+    try {
+        const {
+            data: { user },
+            error: authError
+        } = await supabase.auth.getUser();
+
+        if (authError || !user || user.app_metadata?.role !== "admin") {
+            throw new Error("Administrator authentication required.");
+        }
+
+        const title = $("#movieTitle").value.trim();
+        const videoUrl = $("#movieVideoUrl").value.trim();
+        const downloadUrl = $("#movieDownloadUrl").value.trim();
+
+        if (!title || !videoUrl) {
+            throw new Error("Movie title and watch URL are required.");
+        }
+
+        const validHttpUrl = value => {
+            if (!value) return true;
+
+            try {
+                const url = new URL(value);
+                return url.protocol === "https:" || url.protocol === "http:";
+            } catch {
+                return false;
+            }
+        };
+
+        if (!validHttpUrl(videoUrl) || !validHttpUrl(downloadUrl)) {
+            throw new Error("Enter valid HTTP or HTTPS streaming/download links.");
+        }
+
+        const tmdbId = Number($("#movieTmdbId").value);
+
+        if (!Number.isInteger(tmdbId) || tmdbId <= 0) {
+            throw new Error("Select a valid movie from TMDB first.");
+        }
+
+        // Only insert the fields managed by this form.
+        // User-provided streaming and translator values are kept separate
+        // from TMDB metadata.
+        const movieRecord = {
+            title,
+            tmdb_id: tmdbId,
+            category: $("#movieCategory").value,
+            year: $("#movieYear").value
+                ? Number($("#movieYear").value)
+                : null,
+            release_date: $("#movieYear").value
+                ? `${$("#movieYear").value}-01-01`
+                : null,
+            vote_average: Number($("#movieRating").value || 0),
+            rating: Number($("#movieRating").value || 0),
+            runtime: Number($("#movieRuntime").value || 0) || null,
+            overview: $("#movieOverview").value.trim(),
+            description: $("#movieOverview").value.trim(),
+            poster_path: $("#moviePosterPath").value || null,
+            backdrop_path: $("#movieBackdropPath").value || null,
+            poster: $("#moviePoster").value.trim() || null,
+            backdrop: $("#movieBackdrop").value.trim() || null,
+            video_url: videoUrl,
+            download_url: downloadUrl || null,
+            translator: $("#movieTranslator").value.trim() || null,
+            language: $("#movieLanguage").value.trim() || null,
+            quality: $("#movieQuality").value || null,
+            featured: $("#movieFeatured").checked,
+            is_active: true
+        };
+
+        // Duplicate protection by TMDB ID.
+        const { data: existing, error: duplicateError } = await supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("id")
+            .eq("tmdb_id", tmdbId)
+            .limit(1);
+
+        if (duplicateError) throw duplicateError;
+
+        if (existing?.length) {
+            throw new Error("This movie already exists in your database.");
+        }
+
+        const { error: insertError } = await supabase
+            .from(APP_CONFIG.moviesTable)
+            .insert(movieRecord);
+
+        if (insertError) throw insertError;
+
+        message.textContent = "Movie successfully added to CINEVA!";
+        message.dataset.type = "success";
+
+        $("#movieForm").reset();
+        $("#movieForm").hidden = true;
+        $("#selectedMoviePreview").innerHTML = "";
+
+        await Promise.all([
+            loadStatistics(),
+            loadRecentMovies()
+        ]);
+
+    } catch (error) {
+        console.error("Movie save error:", error);
+
+        message.textContent = error.message || "Unable to save movie.";
+        message.dataset.type = "error";
+
+    } finally {
+        button.disabled = false;
+        button.textContent = "Save Movie to Supabase";
+    }
+});
+
+// START ADMIN ROOM
 initializeAdmin();
+
