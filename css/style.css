@@ -1894,3 +1894,28 @@ input:focus-visible {
     }
 }
 
+/* CINEVA NAVIGATION FINAL POLISH */
+
+@media (max-width: 900px) {
+    body.menu-open {
+        overflow: hidden;
+    }
+}
+
+.notification-btn.notification-active {
+    color: var(--primary-light);
+    background: rgba(139, 53, 245, .15);
+}
+
+/* Light theme foundation */
+body.light-theme {
+    --bg-primary: #f5f5fa;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #eeeeF7;
+    --text-primary: #171321;
+    --text-secondary: #575467;
+    --text-muted: #777487;
+    --border-color: rgba(0, 0, 0, .1);
+}
+
