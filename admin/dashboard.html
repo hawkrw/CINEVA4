@@ -515,6 +515,12 @@
                 </div>
 
             </div>
+            <button
+    type="button"
+    id="previewMovieBtn"
+    class="secondary-button">
+    Preview Movie
+</button>
 
             <div class="modal-actions">
                 <button type="button" id="cancelMovieForm" class="secondary-button">
@@ -533,7 +539,74 @@
     </div>
 
 </div>
+<!-- MOVIE PREVIEW MODAL -->
+<div class="modal-overlay" id="moviePreviewModal">
+    <div class="admin-modal movie-preview-modal">
 
+        <div class="modal-header">
+            <div>
+                <h2>Movie Preview</h2>
+                <p>Preview how your movie information looks.</p>
+            </div>
+
+            <button
+                type="button"
+                id="closeMoviePreview"
+                class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <div class="movie-preview-content">
+            <div class="movie-preview-backdrop" id="previewBackdrop">
+                <div class="movie-preview-overlay"></div>
+            </div>
+
+            <div class="movie-preview-details">
+                <img
+                    id="previewPoster"
+                    class="movie-preview-poster"
+                    src=""
+                    alt="Movie poster">
+
+                <div class="movie-preview-info">
+                    <h2 id="previewTitle">Movie Title</h2>
+
+                    <div class="movie-preview-meta">
+                        <span id="previewYear">Year</span>
+                        <span id="previewCategory">Category</span>
+                        <span id="previewRating">Rating</span>
+                    </div>
+
+                    <p id="previewOverview">
+                        Movie description will appear here.
+                    </p>
+
+                    <p id="previewTranslator"></p>
+
+                    <div class="movie-preview-links">
+                        <a
+                            id="previewWatch"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Watch Movie
+                        </a>
+
+                        <a
+                            id="previewDownload"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Download Movie
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 
                     <!-- Platform Information -->
