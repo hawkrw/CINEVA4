@@ -1,0 +1,197 @@
+
+/* =========================================
+   CINEVA — WATCH PAGE STYLING
+========================================= */
+
+.watch-header {
+    height: 75px;
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #101010;
+    border-bottom: 1px solid #292929;
+}
+
+.watch-header .logo {
+    color: #e50914;
+    font-size: 27px;
+    font-weight: 900;
+    text-decoration: none;
+    letter-spacing: 2px;
+}
+
+.back-home {
+    color: #ddd;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-home:hover {
+    color: #e50914;
+}
+
+.watch-page {
+    width: min(1200px, 92%);
+    margin: 35px auto;
+}
+
+.watch-loading,
+.watch-error {
+    padding: 20px;
+    text-align: center;
+    color: #ccc;
+}
+
+.watch-error {
+    color: #ff5555;
+}
+
+.video-section {
+    width: 100%;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #303030;
+}
+
+.video-player {
+    display: block;
+    width: 100%;
+    max-height: 680px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.watch-details {
+    display: flex;
+    gap: 25px;
+    margin: 35px 0;
+}
+
+.watch-poster img {
+    width: 160px;
+    height: 230px;
+    object-fit: cover;
+    border-radius: 9px;
+}
+
+.watch-information {
+    flex: 1;
+}
+
+.watch-information h1 {
+    margin: 10px 0;
+    color: #fff;
+    font-size: clamp(25px, 4vw, 38px);
+}
+
+.watch-information > span {
+    color: #e50914;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.watch-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: #aaa;
+    font-size: 13px;
+    margin: 15px 0;
+}
+
+#watch-rating {
+    color: #ffc107;
+}
+
+#watch-description {
+    color: #bbb;
+    line-height: 1.8;
+    max-width: 800px;
+}
+
+.related-section {
+    margin-top: 45px;
+}
+
+.related-section h2 {
+    color: white;
+    margin-bottom: 25px;
+}
+
+#episodes-container {
+    margin: 35px 0;
+}
+
+#episodes-container h2 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.episode-list {
+    display: grid;
+    gap: 10px;
+}
+
+.episode-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    background: #191919;
+    border: 1px solid #303030;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+}
+
+.episode-item strong {
+    flex: 1;
+}
+
+.episode-item:hover,
+.episode-item.active {
+    border-color: #e50914;
+    background: #242424;
+}
+
+.player-error {
+    color: #ff7777;
+    margin: 12px 0;
+}
+
+.player-message {
+    min-height: 200px;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    color: #ccc;
+}
+
+@media (max-width: 600px) {
+    .watch-page {
+        width: 94%;
+        margin: 20px auto;
+    }
+
+    .watch-details {
+        gap: 15px;
+    }
+
+    .watch-poster img {
+        width: 105px;
+        height: 155px;
+    }
+
+    .watch-meta {
+        gap: 9px;
+    }
+
+    .episode-item {
+        gap: 10px;
+        padding: 13px;
+    }
+}
