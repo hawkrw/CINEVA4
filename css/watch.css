@@ -2138,3 +2138,58 @@
     opacity: 0.35;
     cursor: not-allowed;
 }
+
+/* =====================================================
+   CINEVA — EPISODE DOWNLOAD ICON BUTTON
+===================================================== */
+
+.episode-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.episode-download-btn {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 12px;
+
+    background: rgba(16, 185, 129, 0.10);
+    color: #10b981;
+
+    font-size: 16px;
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.episode-download-btn:hover:not(:disabled) {
+    background: #10b981;
+    color: #07130e;
+    border-color: #10b981;
+    transform: translateY(-2px);
+}
+
+.episode-download-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.episode-download-btn i {
+    pointer-events: none;
+}
+
+.episode-watch-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
