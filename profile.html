@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080910">
+
+    <title>My Profile | CINEVA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<header class="profile-header">
+    <a href="index.html" class="profile-logo">CINEVA<span>.</span></a>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="genre.html?type=movie">Movies</a>
+        <a href="genre.html?type=series">Series</a>
+    </nav>
+
+    <a href="index.html" class="profile-back">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Home
+    </a>
+</header>
+
+<main class="profile-main">
+
+    <section class="profile-banner">
+        <div class="profile-banner-content">
+            <span>YOUR CINEVA ACCOUNT</span>
+            <h1>My Profile</h1>
+            <p>Manage your account and enjoy your personal entertainment collection.</p>
+        </div>
+    </section>
+
+    <section class="profile-layout">
+
+        <aside class="profile-sidebar">
+
+            <div class="profile-user-card">
+
+                <div class="profile-avatar" id="profile-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <h2 id="profile-name">CINEVA User</h2>
+                <p id="profile-email">Loading account...</p>
+
+                <span class="profile-member-badge">
+                    <i class="fa-solid fa-circle-check"></i>
+                    CINEVA MEMBER
+                </span>
+
+            </div>
+
+            <div class="profile-menu">
+
+                <button class="profile-tab active" data-tab="favorites">
+                    <i class="fa-solid fa-heart"></i>
+                    My Favorites
+                </button>
+
+                <button class="profile-tab" data-tab="watchlist">
+                    <i class="fa-solid fa-bookmark"></i>
+                    My Watchlist
+                </button>
+
+                <button class="profile-tab" data-tab="account">
+                    <i class="fa-solid fa-user-gear"></i>
+                    Account Details
+                </button>
+
+                <button class="profile-tab logout-tab" id="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Sign Out
+                </button>
+
+            </div>
+
+        </aside>
+
+        <section class="profile-content">
+
+            <div class="profile-section active" id="favorites-section">
+                <div class="profile-section-heading">
+                    <div>
+                        <span>YOUR COLLECTION</span>
+                        <h2>My Favorites</h2>
+                        <p>Your favorite movies and series in one place.</p>
+                    </div>
+                    <span class="profile-counter" id="favorites-count">0 Titles</span>
+                </div>
+
+                <div class="profile-content-grid" id="favorites-grid"></div>
+
+                <div class="profile-empty" id="favorites-empty">
+                    <i class="fa-regular fa-heart"></i>
+                    <h3>No favorites yet</h3>
+                    <p>Explore CINEVA and save your favorite movies and series.</p>
+                    <a href="index.html">Discover Content</a>
+                </div>
+            </div>
+
+            <div class="profile-section" id="watchlist-section">
+                <div class="profile-section-heading">
+                    <div>
+                        <span>WATCH LATER</span>
+                        <h2>My Watchlist</h2>
+                        <p>Keep track of content you want to watch.</p>
+                    </div>
+                </div>
+
+                <div class="profile-content-grid" id="watchlist-grid"></div>
+
+                <div class="profile-empty" id="watchlist-empty">
+                    <i class="fa-solid fa-bookmark"></i>
+                    <h3>Your watchlist is empty</h3>
+                    <p>Save content to watch later.</p>
+                    <a href="index.html">Explore Movies</a>
+                </div>
+            </div>
+
+            <div class="profile-section" id="account-section">
+                <div class="profile-section-heading">
+                    <div>
+                        <span>PERSONAL INFORMATION</span>
+                        <h2>Account Details</h2>
+                        <p>View your CINEVA account information.</p>
+                    </div>
+                </div>
+
+                <div class="account-details-card">
+
+                    <div class="account-detail">
+                        <span>Full Name</span>
+                        <strong id="account-name">Loading...</strong>
+                    </div>
+
+                    <div class="account-detail">
+                        <span>Email Address</span>
+                        <strong id="account-email">Loading...</strong>
+                    </div>
+
+                    <div class="account-detail">
+                        <span>Account Status</span>
+                        <strong id="account-status">Checking...</strong>
+                    </div>
+
+                    <div class="account-detail">
+                        <span>Member Since</span>
+                        <strong id="account-created">Loading...</strong>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="profile-loading" id="profile-loading">
+                <div class="profile-spinner"></div>
+                <p>Loading your profile...</p>
+            </div>
+
+            <div class="profile-error" id="profile-error" hidden>
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <h3>Unable to load profile</h3>
+                <p id="profile-error-message">Please try again.</p>
+                <a href="login.html">Sign In</a>
+            </div>
+
+        </section>
+
+    </section>
+
+</main>
+
+<footer class="profile-footer">
+    <a href="index.html">CINEVA<span>.</span></a>
+    <p>© <span id="profile-footer-year"></span> CINEVA. All rights reserved.</p>
+</footer>
+
+<script type="module" src="js/profile.js"></script>
+
+</body>
+</html>
