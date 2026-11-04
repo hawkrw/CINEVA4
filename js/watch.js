@@ -136,14 +136,19 @@ function getDescription(item) {
 }
 
 
+
 /* =====================================================
-   SMART DOWNLOAD LINK DETECTION
-   Supports different Supabase JSON formats.
+   CINEVA — SMART DOWNLOAD LINK DETECTION
+   Supports Supabase URLs, JSON, arrays and objects.
 ===================================================== */
 
-function normalizeLinks(item) {
+function normalizeLinks(item = {}) {
 
     const links = [];
+
+    /* ---------------------------------------------
+       ADD AND VALIDATE DOWNLOAD URL
+    --------------------------------------------- */
 
     const addLink = (value, title = "Download") => {
 
@@ -153,63 +158,67 @@ function normalizeLinks(item) {
 
         if (!url || !isSafeHttpUrl(url)) return;
 
+        // Prevent duplicate download URLs.
         if (links.some(link => link.url === url)) return;
 
         links.push({
-            title,
+            title: title || "Download",
             url
         });
     };
 
 
-    // Direct download columns.
-    addLink(item.download_url, "Download");
-    addLink(item.download_link, "Download");
-    addLink(item.download, "Download");
-    addLink(item.file_url, "Download");
-    addLink(item.link, "Download");
+    /* ---------------------------------------------
+       EXTRACT LINKS FROM DIFFERENT FORMATS
+    --------------------------------------------- */
 
-
-    // Handle JSON arrays and objects.
     function extractLinks(value, label = "Download") {
 
-        if (!value) return;
+        if (value === null || value === undefined) return;
 
-        // JSON may already be an array.
+
+        // FORMAT 1: STRING OR JSON STRING
+        if (typeof value === "string") {
+
+            const trimmed = value.trim();
+
+            if (!trimmed) return;
+
+            // Detect JSON stored as text.
+            if (
+                (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+                (trimmed.startsWith("{") && trimmed.endsWith("}"))
+            ) {
+
+                try {
+
+                    const parsed = JSON.parse(trimmed);
+
+                    extractLinks(parsed, label);
+
+                    return;
+
+                } catch (error) {
+
+                    // Continue and try treating it as a URL.
+                }
+            }
+
+            addLink(trimmed, label);
+
+            return;
+        }
+
+
+        // FORMAT 2: ARRAY OF DOWNLOAD LINKS
         if (Array.isArray(value)) {
 
             value.forEach((entry, index) => {
 
-                if (typeof entry === "string") {
-
-                    addLink(entry, `${label} ${index + 1}`);
-
-                } else if (entry && typeof entry === "object") {
-
-                    const name =
-                        entry.title ||
-                        entry.name ||
-                        entry.quality ||
-                        entry.label ||
-                        `${label} ${index + 1}`;
-
-                    const directUrl =
-                        entry.url ||
-                        entry.href ||
-                        entry.download_url ||
-                        entry.download_link ||
-                        entry.downloadUrl ||
-                        entry.file_url ||
-                        entry.direct_link ||
-                        entry.link;
-
-                    if (directUrl) {
-                        addLink(directUrl, name);
-                    } else {
-                        extractLinks(entry, name);
-                    }
-
-                }
+                extractLinks(
+                    entry,
+                    `${label} ${index + 1}`
+                );
 
             });
 
@@ -217,104 +226,193 @@ function normalizeLinks(item) {
         }
 
 
-        // JSON may be an object.
+        // FORMAT 3: OBJECT WITH DOWNLOAD URL
         if (typeof value === "object") {
 
-            const directUrl =
-                value.url ||
-                value.href ||
-                value.download_url ||
-                value.download_link ||
-                value.downloadUrl ||
-                value.file_url ||
-                value.direct_link ||
-                value.link;
+            const urlFields = [
+                "url",
+                "href",
+                "download_url",
+                "download_link",
+                "downloadUrl",
+                "file_url",
+                "direct_link",
+                "link"
+            ];
 
-            if (directUrl) {
-                addLink(
-                    directUrl,
-                    value.title || value.name || label
-                );
-                return;
+            let foundDirectUrl = false;
+
+            for (const field of urlFields) {
+
+                if (typeof value[field] === "string") {
+
+                    addLink(
+                        value[field],
+                        value.title ||
+                        value.name ||
+                        value.quality ||
+                        value.label ||
+                        label
+                    );
+
+                    foundDirectUrl = true;
+                }
             }
 
-            // Support formats such as:
-            // { "480p": "https://...", "720p": "https://..." }
+            if (foundDirectUrl) return;
+
+
+            // FORMAT 4: QUALITY-BASED OBJECT
+            // Example:
+            // {
+            //   "480p": "https://example.com/480.mp4",
+            //   "720p": "https://example.com/720.mp4"
+            // }
+
             Object.entries(value).forEach(([key, entry]) => {
 
-                if (typeof entry === "string") {
-
-                    addLink(entry, key);
-
-                } else if (entry && typeof entry === "object") {
-
-                    extractLinks(entry, key);
-
-                }
+                extractLinks(entry, key);
 
             });
-
         }
-
     }
 
 
-    // Check all known download fields.
-    extractLinks(item.download_links);
+    /* ---------------------------------------------
+       DIRECT SUPABASE DOWNLOAD COLUMNS
+    --------------------------------------------- */
 
-    extractLinks(item.download_options);
+    [
+        "download_url",
+        "download_link",
+        "download",
+        "file_url",
+        "direct_link",
+        "link"
+    ].forEach(field => {
 
-    extractLinks(item.downloads);
+        extractLinks(item[field], field);
+
+    });
 
 
-    return links;
-}
-    // Remove duplicate URLs.
+    /* ---------------------------------------------
+       SUPABASE JSON DOWNLOAD COLUMNS
+    --------------------------------------------- */
+
+    [
+        "download_links",
+        "download_options",
+        "downloads"
+    ].forEach(field => {
+
+        extractLinks(item[field], field);
+
+    });
+
+
+    /* ---------------------------------------------
+       RETURN UNIQUE DOWNLOAD LINKS
+    --------------------------------------------- */
+
     return links.filter((link, index, array) =>
-        array.findIndex(item => item.url === link.url) === index
+
+        array.findIndex(
+            item => item.url === link.url
+        ) === index
+
     );
 }
 
-function isSafeHttpUrl(value) {
-    try {
-        const url = new URL(value, window.location.href);
 
-        return ["http:", "https:"].includes(url.protocol);
-    } catch {
+/* =====================================================
+   VALIDATE HTTP / HTTPS URL
+===================================================== */
+
+function isSafeHttpUrl(value) {
+
+    try {
+
+        const url = new URL(
+            value,
+            window.location.href
+        );
+
+        return (
+            url.protocol === "http:" ||
+            url.protocol === "https:"
+        );
+
+    } catch (error) {
+
         return false;
+
     }
 }
+
+
+/* =====================================================
+   LOADING STATE
+===================================================== */
 
 function showLoading(show) {
+
     if (el.loading) {
+
         el.loading.hidden = !show;
+
     }
+
 }
+
+
+/* =====================================================
+   ERROR STATE
+===================================================== */
 
 function showError(message) {
+
     showLoading(false);
 
     if (el.error) {
+
         el.error.hidden = false;
+
         el.error.textContent = message;
+
     }
 
     if (el.content) {
+
         el.content.hidden = true;
+
     }
+
 }
+
+
+/* =====================================================
+   CONTENT DISPLAY STATE
+===================================================== */
 
 function showContent() {
+
     showLoading(false);
 
     if (el.error) {
+
         el.error.hidden = true;
+
     }
 
     if (el.content) {
+
         el.content.hidden = false;
+
     }
+
 }
+
 
 /* =====================================================
    FETCH MAIN CONTENT
