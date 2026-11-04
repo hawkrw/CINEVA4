@@ -135,39 +135,140 @@ function getDescription(item) {
     );
 }
 
+
+/* =====================================================
+   SMART DOWNLOAD LINK DETECTION
+   Supports different Supabase JSON formats.
+===================================================== */
+
 function normalizeLinks(item) {
+
     const links = [];
 
-    if (item.download_url) {
+    const addLink = (value, title = "Download") => {
+
+        if (typeof value !== "string") return;
+
+        const url = value.trim();
+
+        if (!url || !isSafeHttpUrl(url)) return;
+
+        if (links.some(link => link.url === url)) return;
+
         links.push({
-            title: "Download",
-            url: item.download_url
+            title,
+            url
         });
-    }
+    };
 
-    const extra = item.download_links;
 
-    if (Array.isArray(extra)) {
-        extra.forEach((link, index) => {
-            if (typeof link === "string" && link.trim()) {
-                links.push({
-                    title: `Download ${index + 1}`,
-                    url: link
-                });
-            } else if (link && typeof link === "object") {
-                const url = link.url || link.href || link.download_url;
+    // Direct download columns.
+    addLink(item.download_url, "Download");
+    addLink(item.download_link, "Download");
+    addLink(item.download, "Download");
+    addLink(item.file_url, "Download");
+    addLink(item.link, "Download");
 
-                if (url) {
-                    links.push({
-                        title: link.title || link.name ||
-                            `Download ${index + 1}`,
-                        url
-                    });
+
+    // Handle JSON arrays and objects.
+    function extractLinks(value, label = "Download") {
+
+        if (!value) return;
+
+        // JSON may already be an array.
+        if (Array.isArray(value)) {
+
+            value.forEach((entry, index) => {
+
+                if (typeof entry === "string") {
+
+                    addLink(entry, `${label} ${index + 1}`);
+
+                } else if (entry && typeof entry === "object") {
+
+                    const name =
+                        entry.title ||
+                        entry.name ||
+                        entry.quality ||
+                        entry.label ||
+                        `${label} ${index + 1}`;
+
+                    const directUrl =
+                        entry.url ||
+                        entry.href ||
+                        entry.download_url ||
+                        entry.download_link ||
+                        entry.downloadUrl ||
+                        entry.file_url ||
+                        entry.direct_link ||
+                        entry.link;
+
+                    if (directUrl) {
+                        addLink(directUrl, name);
+                    } else {
+                        extractLinks(entry, name);
+                    }
+
                 }
+
+            });
+
+            return;
+        }
+
+
+        // JSON may be an object.
+        if (typeof value === "object") {
+
+            const directUrl =
+                value.url ||
+                value.href ||
+                value.download_url ||
+                value.download_link ||
+                value.downloadUrl ||
+                value.file_url ||
+                value.direct_link ||
+                value.link;
+
+            if (directUrl) {
+                addLink(
+                    directUrl,
+                    value.title || value.name || label
+                );
+                return;
             }
-        });
+
+            // Support formats such as:
+            // { "480p": "https://...", "720p": "https://..." }
+            Object.entries(value).forEach(([key, entry]) => {
+
+                if (typeof entry === "string") {
+
+                    addLink(entry, key);
+
+                } else if (entry && typeof entry === "object") {
+
+                    extractLinks(entry, key);
+
+                }
+
+            });
+
+        }
+
     }
 
+
+    // Check all known download fields.
+    extractLinks(item.download_links);
+
+    extractLinks(item.download_options);
+
+    extractLinks(item.downloads);
+
+
+    return links;
+}
     // Remove duplicate URLs.
     return links.filter((link, index, array) =>
         array.findIndex(item => item.url === link.url) === index
@@ -488,8 +589,9 @@ async function fetchEpisodes(seriesId) {
     return data || [];
 }
 
+
 /* =====================================================
-   RENDER SERIES EPISODES
+   RENDER SERIES EPISODES — CINEVA PRO
 ===================================================== */
 
 function renderEpisodes(episodes) {
@@ -502,11 +604,14 @@ function renderEpisodes(episodes) {
 
     el.episodesContainer.hidden = false;
 
+    currentEpisodes = Array.isArray(episodes) ? episodes : [];
+
     if (el.episodeCount) {
-        el.episodeCount.textContent = `${episodes.length} Episodes`;
+        el.episodeCount.textContent =
+            `${currentEpisodes.length} Episodes`;
     }
 
-    if (!episodes.length) {
+    if (!currentEpisodes.length) {
         if (el.episodesGrid) {
             el.episodesGrid.innerHTML = `
                 <p class="episodes-empty">
@@ -514,13 +619,24 @@ function renderEpisodes(episodes) {
                 </p>
             `;
         }
+
+        if (el.seasonSelector) {
+            el.seasonSelector.innerHTML = "";
+        }
+
         return;
     }
 
-    const seasons = [...new Set(
-        episodes.map(episode => Number(episode.season_number) || 1)
-    )];
+    // Get actual season numbers from Supabase
+    const seasons = [
+        ...new Set(
+            currentEpisodes.map(episode =>
+                Number(episode.season_number) || 1
+            )
+        )
+    ].sort((a, b) => a - b);
 
+    // Build season selector
     if (el.seasonSelector) {
         el.seasonSelector.innerHTML = seasons.map(season => `
             <option value="${season}">
@@ -533,65 +649,249 @@ function renderEpisodes(episodes) {
         };
     }
 
-    currentEpisodes = episodes;
-
+    // Display first available season
     renderSeason(seasons[0]);
 }
+
+
+/* =====================================================
+   EXTRACT EPISODE DOWNLOAD LINKS
+   Supports Supabase JSON, arrays and direct URLs
+===================================================== */
+
+function getEpisodeDownloadLinks(episode) {
+    const links = [];
+
+    const addLink = (value, label = "Download") => {
+        if (typeof value !== "string") return;
+
+        const url = value.trim();
+
+        if (!url) return;
+
+        try {
+            const parsed = new URL(url, window.location.origin);
+
+            if (!["http:", "https:"].includes(parsed.protocol)) {
+                return;
+            }
+
+            if (!links.some(item => item.url === parsed.href)) {
+                links.push({
+                    label,
+                    url: parsed.href
+                });
+            }
+        } catch (error) {
+            console.warn("Invalid episode download URL:", value);
+        }
+    };
+
+    const readValue = (value, label = "Download") => {
+        if (value === null || value === undefined) return;
+
+        // Direct URL
+        if (typeof value === "string") {
+            const trimmed = value.trim();
+
+            // Try parsing JSON stored as text
+            if (
+                (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+                (trimmed.startsWith("{") && trimmed.endsWith("}"))
+            ) {
+                try {
+                    readValue(JSON.parse(trimmed), label);
+                    return;
+                } catch (error) {
+                    // Continue and treat it as a direct URL
+                }
+            }
+
+            addLink(trimmed, label);
+            return;
+        }
+
+        // Array of download links
+        if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+                readValue(item, `Download ${index + 1}`);
+            });
+            return;
+        }
+
+        // Object containing URL fields or quality options
+        if (typeof value === "object") {
+            const urlFields = [
+                "url",
+                "href",
+                "download_url",
+                "download_link",
+                "downloadUrl",
+                "file_url",
+                "direct_link",
+                "link"
+            ];
+
+            for (const field of urlFields) {
+                if (value[field]) {
+                    addLink(
+                        value[field],
+                        value.label || value.quality || label
+                    );
+                }
+            }
+
+            // Support objects such as:
+            // { "480p": "https://...", "720p": "https://..." }
+            if (!urlFields.some(field => value[field])) {
+                Object.entries(value).forEach(([key, item]) => {
+                    readValue(item, key);
+                });
+            }
+        }
+    };
+
+    // Check possible Supabase download columns
+    [
+        "download_url",
+        "download_link",
+        "download",
+        "file_url",
+        "direct_link",
+        "link"
+    ].forEach(field => {
+        readValue(episode[field], field);
+    });
+
+    // Check JSON download columns
+    [
+        "download_links",
+        "download_options",
+        "downloads"
+    ].forEach(field => {
+        readValue(episode[field], field);
+    });
+
+    return links;
+}
+
+
+/* =====================================================
+   RENDER SELECTED SEASON
+===================================================== */
 
 function renderSeason(seasonNumber) {
     if (!el.episodesGrid) return;
 
-    const episodes = currentEpisodes.filter(
-        episode => Number(episode.season_number || 1) === seasonNumber
-    );
+    const selectedSeason = Number(seasonNumber);
 
-    el.episodesGrid.innerHTML = episodes.map(episode => `
-        <article class="episode-card">
-            <div class="episode-top">
-                <span>
-                    S${escapeHTML(episode.season_number || 1)}
-                    E${escapeHTML(episode.episode_number)}
-                </span>
-                <span>${episode.runtime ? `${escapeHTML(episode.runtime)} min` : ""}</span>
-            </div>
+    const episodes = currentEpisodes
+        .filter(episode =>
+            (Number(episode.season_number) || 1) === selectedSeason
+        )
+        .sort((a, b) =>
+            (Number(a.episode_number) || 0) -
+            (Number(b.episode_number) || 0)
+        );
 
-            <h3>${escapeHTML(episode.title || "Untitled Episode")}</h3>
-
-            <p class="episode-description">
-                ${escapeHTML(episode.description || "")}
+    if (!episodes.length) {
+        el.episodesGrid.innerHTML = `
+            <p class="episodes-empty">
+                No episodes found in this season.
             </p>
+        `;
+        return;
+    }
 
-            <div class="episode-actions">
-                <button
-                    class="episode-watch-btn"
-                    type="button"
-                    data-action="play"
-                    data-id="${episode.id}"
-                >
-                    ▶ Watch
-                </button>
+    el.episodesGrid.innerHTML = episodes.map(episode => {
+        const season = Number(episode.season_number) || 1;
 
-                <button
-                    class="episode-download-btn"
-                    type="button"
-                    data-action="download"
-                    data-id="${episode.id}"
-                >
-                    ↓ Download
-                </button>
-            </div>
-        </article>
-    `).join("");
+        // Use the real episode number stored in Supabase
+        const episodeNumber = episode.episode_number ?? "—";
 
+        const hasVideo =
+            typeof episode.video_url === "string" &&
+            episode.video_url.trim() !== "";
+
+        const downloadLinks = getEpisodeDownloadLinks(episode);
+        const hasDownload = downloadLinks.length > 0;
+
+        return `
+            <article class="episode-card">
+
+                <div class="episode-top">
+                    <span class="episode-number">
+                        S${escapeHTML(season)}
+                        E${escapeHTML(episodeNumber)}
+                    </span>
+
+                    <span class="episode-runtime">
+                        ${
+                            episode.runtime
+                                ? `${escapeHTML(episode.runtime)} min`
+                                : ""
+                        }
+                    </span>
+                </div>
+
+                <h3>
+                    ${escapeHTML(
+                        episode.title || `Episode ${episodeNumber}`
+                    )}
+                </h3>
+
+                <p class="episode-description">
+                    ${escapeHTML(episode.description || "")}
+                </p>
+
+                <div class="episode-actions">
+
+                    <button
+                        class="episode-watch-btn"
+                        type="button"
+                        data-action="play"
+                        data-id="${escapeHTML(episode.id)}"
+                        ${hasVideo ? "" : "disabled"}
+                        aria-label="Watch episode ${escapeHTML(episodeNumber)}"
+                    >
+                        <i class="fa-solid fa-play"></i>
+                        <span>Watch</span>
+                    </button>
+
+                    <button
+                        class="episode-download-btn"
+                        type="button"
+                        data-action="download"
+                        data-id="${escapeHTML(episode.id)}"
+                        ${hasDownload ? "" : "disabled"}
+                        title="${hasDownload ? "Download episode" : "No download link available"}"
+                        aria-label="Download episode ${escapeHTML(episodeNumber)}"
+                    >
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+
+                </div>
+
+            </article>
+        `;
+    }).join("");
+
+    // Attach episode actions
     el.episodesGrid.querySelectorAll("button").forEach(button => {
         button.addEventListener("click", () => {
-            const episode = episodes.find(
+            const episode = currentEpisodes.find(
                 item => String(item.id) === button.dataset.id
             );
 
             if (!episode) return;
 
+            // WATCH EPISODE
             if (button.dataset.action === "play") {
+                if (!episode.video_url) {
+                    alert("No video URL is available for this episode.");
+                    return;
+                }
+
                 playVideo(episode.video_url, true);
 
                 document.querySelector(".video-player-wrapper")
@@ -601,13 +901,21 @@ function renderSeason(seasonNumber) {
                     });
             }
 
+            // DOWNLOAD EPISODE
             if (button.dataset.action === "download") {
-                const links = normalizeLinks(episode);
+                const links = getEpisodeDownloadLinks(episode);
 
-                if (links.length) {
+                if (links.length > 0) {
                     openDownload(links[0].url);
                 } else {
-                    alert("No download link for this episode.");
+                    console.error(
+                        "Episode download link not found. Supabase episode record:",
+                        episode
+                    );
+
+                    alert(
+                        "No valid download URL was found for this episode. Check the episode download column in Supabase."
+                    );
                 }
             }
         });
