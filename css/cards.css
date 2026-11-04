@@ -1130,3 +1130,406 @@
     }
 
 }
+
+/* =========================================================
+   CINEVA — PREMIUM CARD & SECTION UPGRADE
+   Equal dimensions • Aligned details • Clean separators
+========================================================= */
+
+
+/* =========================================================
+   01. UNIFORM GRID
+========================================================= */
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+    gap: 22px;
+    width: 100%;
+}
+
+
+/* =========================================================
+   02. EQUAL CARD DIMENSIONS
+========================================================= */
+
+.movie-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    align-self: stretch;
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   03. UNIFORM POSTER SIZE
+========================================================= */
+
+.movie-poster {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    flex: 0 0 auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.movie-poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}
+
+
+/* =========================================================
+   04. EQUAL INFORMATION AREA
+========================================================= */
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 11px 13px;
+}
+
+
+/* =========================================================
+   05. ALIGNED MOVIE TITLES
+========================================================= */
+
+.movie-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+
+    overflow: hidden;
+    overflow-wrap: anywhere;
+
+    min-height: 39px;
+    max-height: 39px;
+
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   06. ALIGNED METADATA
+========================================================= */
+
+.movie-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    min-height: 22px;
+    margin-top: 6px;
+
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.movie-year,
+.movie-rating {
+    flex: 0 0 auto;
+}
+
+.movie-rating {
+    margin-left: auto;
+}
+
+
+/* =========================================================
+   07. ALIGNED UPLOAD DETAILS
+========================================================= */
+
+.movie-upload-time {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    min-height: 20px;
+    max-height: 20px;
+
+    margin-top: 5px;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   08. ACTION BUTTONS ALWAYS ALIGN
+========================================================= */
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: auto;
+    padding-top: 10px;
+
+    width: 100%;
+}
+
+.card-watch-btn {
+    min-width: 0;
+    min-height: 34px;
+    flex: 1;
+}
+
+.card-info-btn {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+}
+
+
+/* =========================================================
+   09. HORIZONTAL CAROUSEL CARD SIZE
+========================================================= */
+
+.movie-grid.horizontal-scroll {
+    display: flex;
+    align-items: stretch;
+    grid-auto-rows: auto;
+}
+
+.movie-grid.horizontal-scroll .movie-card {
+    display: flex;
+    flex: 0 0 190px;
+    width: 190px;
+    min-width: 190px;
+    height: auto;
+    align-self: stretch;
+}
+
+
+/* =========================================================
+   10. SECTION SEPARATORS
+========================================================= */
+
+.home-section,
+.content-section,
+.movie-section {
+    position: relative;
+    padding-bottom: 27px;
+    margin-bottom: 27px;
+}
+
+.home-section + .home-section,
+.content-section + .content-section,
+.movie-section + .movie-section,
+main > section + section {
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-top: 27px;
+}
+
+
+/* Optional decorative separator for section headings */
+
+.section-divider {
+    width: 100%;
+    height: 1px;
+    margin: 20px 0 25px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(168, 85, 247, 0.65),
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+}
+
+
+/* =========================================================
+   11. SECTION HEADINGS
+========================================================= */
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.section-title {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 900;
+    line-height: 1.4;
+}
+
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 22px;
+    flex: 0 0 4px;
+
+    border-radius: 5px;
+    background: var(--gradient-primary);
+}
+
+
+/* =========================================================
+   12. SKELETON CARDS MATCH REAL CARDS
+========================================================= */
+
+.movie-skeleton {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.movie-skeleton .skeleton-poster {
+    aspect-ratio: 2 / 3;
+    flex: 0 0 auto;
+}
+
+.movie-skeleton .skeleton-info {
+    flex: 1;
+    min-height: 100px;
+}
+
+
+/* =========================================================
+   13. TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+        gap: 17px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 175px;
+        width: 175px;
+        min-width: 175px;
+    }
+}
+
+
+/* =========================================================
+   14. MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 13px;
+    }
+
+    .movie-info {
+        padding: 10px 8px 11px;
+    }
+
+    .movie-title {
+        min-height: 34px;
+        max-height: 34px;
+        font-size: 11px;
+    }
+
+    .movie-meta {
+        font-size: 9px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 155px;
+        width: 155px;
+        min-width: 155px;
+    }
+
+    .home-section,
+    .content-section,
+    .movie-section {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 16px;
+    }
+}
+
+
+/* =========================================================
+   15. SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+    .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 145px;
+        width: 145px;
+        min-width: 145px;
+    }
+
+    .movie-card {
+        border-radius: 9px;
+    }
+
+    .movie-title {
+        font-size: 11px;
+        min-height: 33px;
+        max-height: 33px;
+    }
+
+    .movie-info {
+        padding: 9px 8px 10px;
+    }
+
+    .card-actions {
+        gap: 6px;
+    }
+
+    .card-watch-btn {
+        font-size: 9px;
+    }
+
+    .section-header {
+        margin-bottom: 14px;
+    }
+
+    .section-title {
+        font-size: 15px;
+    }
+}
+
+
+/* =========================================================
+   16. ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .movie-card,
+    .movie-poster img {
+        transition: none !important;
+    }
+}
