@@ -1,0 +1,1132 @@
+
+/* =========================================================
+   CINEVA — MOVIE & SERIES CARDS
+   File: css/cards.css
+========================================================= */
+
+
+/* =========================================================
+   01. MOVIE GRID
+========================================================= */
+
+.movie-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(175px, 1fr)
+    );
+
+    gap: 22px;
+
+    width: 100%;
+
+    align-items: start;
+
+}
+
+
+/* =========================================================
+   02. HORIZONTAL CAROUSEL
+========================================================= */
+
+.movie-grid.horizontal-scroll {
+
+    display: flex;
+
+    flex-wrap: nowrap;
+
+    gap: 15px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+
+    scroll-snap-type: x mandatory;
+
+    padding: 5px 2px 18px;
+
+    scrollbar-width: thin;
+
+}
+
+.movie-grid.horizontal-scroll .movie-card {
+
+    flex: 0 0 190px;
+
+    min-width: 190px;
+
+    scroll-snap-align: start;
+
+}
+
+
+/* =========================================================
+   03. CAROUSEL WRAPPER
+========================================================= */
+
+.movie-carousel-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+}
+
+.carousel-arrow {
+
+    position: absolute;
+
+    top: 40%;
+
+    z-index: 20;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(12, 12, 25, 0.9);
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    color: white;
+
+    font-size: 13px;
+
+    backdrop-filter: blur(10px);
+
+    transition: all 0.3s ease;
+
+}
+
+.carousel-arrow:hover {
+
+    background: var(--gradient-primary);
+
+    border-color: transparent;
+
+    transform: scale(1.1);
+
+}
+
+.carousel-arrow.prev {
+    left: -17px;
+}
+
+.carousel-arrow.next {
+    right: -17px;
+}
+
+
+/* =========================================================
+   04. MOVIE CARD
+========================================================= */
+
+.movie-card {
+
+    position: relative;
+
+    min-width: 0;
+
+    background: var(--bg-card);
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
+
+    isolation: isolate;
+
+    cursor: pointer;
+
+}
+
+.movie-card:hover {
+
+    transform: translateY(-7px);
+
+    border-color: rgba(168,85,247,0.5);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,0.4),
+        0 5px 20px rgba(139,53,245,0.13);
+
+}
+
+
+/* =========================================================
+   05. POSTER CONTAINER
+========================================================= */
+
+.movie-poster {
+
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 2 / 3;
+
+    overflow: hidden;
+
+    background: #171727;
+
+}
+
+.movie-poster img {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transition: transform 0.6s ease;
+
+}
+
+.movie-card:hover .movie-poster img {
+
+    transform: scale(1.08);
+
+}
+
+
+/* =========================================================
+   06. POSTER IMAGE FALLBACK
+========================================================= */
+
+.poster-placeholder {
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(139,53,245,0.22),
+            transparent 65%
+        ),
+        #151523;
+
+    color: var(--text-muted);
+
+}
+
+.poster-placeholder i {
+    font-size: 35px;
+}
+
+.poster-placeholder span {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+
+/* =========================================================
+   07. POSTER GRADIENT OVERLAY
+========================================================= */
+
+.poster-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(5,5,12,0.55);
+
+    opacity: 0;
+
+    transition: opacity 0.35s ease;
+
+}
+
+.movie-card:hover .poster-overlay {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   08. PLAY BUTTON
+========================================================= */
+
+.card-play-btn {
+
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: var(--gradient-primary);
+
+    color: white;
+
+    border-radius: 50%;
+
+    font-size: 17px;
+
+    box-shadow: 0 8px 25px rgba(139,53,245,0.4);
+
+    transform: scale(0.7);
+
+    transition: all 0.35s ease;
+
+}
+
+.movie-card:hover .card-play-btn {
+
+    transform: scale(1);
+
+}
+
+.card-play-btn:hover {
+
+    background: var(--gradient-hover);
+
+    transform: scale(1.12) !important;
+
+}
+
+
+/* =========================================================
+   09. POSTER BADGES
+========================================================= */
+
+.card-badges {
+
+    position: absolute;
+
+    top: 9px;
+    left: 9px;
+    right: 9px;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    pointer-events: none;
+
+    z-index: 5;
+
+}
+
+.badge-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 6px;
+
+}
+
+.card-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 5px 8px;
+
+    border-radius: 5px;
+
+    color: white;
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.4px;
+
+    text-transform: uppercase;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+
+}
+
+.badge-new {
+    background: #10bd86;
+}
+
+.badge-fhd {
+    background: #ed304b;
+}
+
+.badge-hd {
+    background: #287be7;
+}
+
+.badge-4k {
+    background: #8b35f5;
+}
+
+.badge-premium {
+    background: #e7a927;
+    color: #17110a;
+}
+
+.badge-trending {
+    background: #ff653d;
+}
+
+
+/* =========================================================
+   10. GENRE LABEL
+========================================================= */
+
+.card-genre {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 8px;
+
+    background: rgba(5,5,12,0.78);
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    color: white;
+
+    border-radius: 5px;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    backdrop-filter: blur(8px);
+
+}
+
+.card-genre i {
+    color: #ffc107;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   11. VIEW COUNTER
+========================================================= */
+
+.card-views {
+
+    position: absolute;
+
+    right: 8px;
+    bottom: 9px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 8px;
+
+    border-radius: 5px;
+
+    background: rgba(0,0,0,0.75);
+
+    color: white;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    z-index: 5;
+
+}
+
+.card-views i {
+    color: #ffc107;
+}
+
+
+/* =========================================================
+   12. FAVORITE BUTTON
+========================================================= */
+
+.card-favorite {
+
+    position: absolute;
+
+    top: 9px;
+    right: 9px;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(5,5,12,0.75);
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    border-radius: 50%;
+
+    color: white;
+
+    font-size: 12px;
+
+    opacity: 0;
+
+    transform: scale(0.8);
+
+    transition: all 0.3s ease;
+
+    z-index: 10;
+
+}
+
+.movie-card:hover .card-favorite {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.card-favorite:hover,
+.card-favorite.active {
+
+    background: #ed304b;
+
+    border-color: #ed304b;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   13. MOVIE INFORMATION
+========================================================= */
+
+.movie-info {
+
+    padding: 11px 10px 12px;
+
+}
+
+.movie-title {
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    line-height: 1.5;
+
+    transition: color 0.3s ease;
+
+}
+
+.movie-card:hover .movie-title {
+    color: #c18bff;
+}
+
+
+/* =========================================================
+   14. MOVIE METADATA
+========================================================= */
+
+.movie-meta {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 7px;
+
+    margin-top: 5px;
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+}
+
+.movie-year {
+    color: var(--text-secondary);
+}
+
+.movie-rating {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    color: #ffc107;
+
+    font-weight: 800;
+
+}
+
+.movie-rating i {
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   15. RELEASE TIME
+========================================================= */
+
+.movie-upload-time {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 5px;
+
+    color: #88889c;
+
+    font-size: 9px;
+
+}
+
+.movie-upload-time i {
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   16. CARD ACTIONS
+========================================================= */
+
+.card-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 10px;
+
+}
+
+.card-watch-btn {
+
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 8px;
+
+    border-radius: 7px;
+
+    background: var(--gradient-primary);
+
+    color: white;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    transition: all 0.3s ease;
+
+}
+
+.card-watch-btn:hover {
+    background: var(--gradient-hover);
+}
+
+.card-info-btn {
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255,255,255,0.07);
+
+    color: var(--text-secondary);
+
+    border-radius: 7px;
+
+    transition: all 0.3s ease;
+
+}
+
+.card-info-btn:hover {
+
+    color: white;
+
+    background: var(--primary);
+
+}
+
+
+/* =========================================================
+   17. HOVER INFORMATION
+========================================================= */
+
+.movie-hover-info {
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding: 40px 12px 13px;
+
+    background: linear-gradient(
+        0deg,
+        rgba(5,5,12,0.98),
+        rgba(5,5,12,0.75),
+        transparent
+    );
+
+    opacity: 0;
+
+    transform: translateY(10px);
+
+    transition: all 0.35s ease;
+
+    pointer-events: none;
+
+}
+
+.movie-card:hover .movie-hover-info {
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+}
+
+.movie-hover-info p {
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 3;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+
+    color: rgba(255,255,255,0.85);
+
+    font-size: 10px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   18. LANDSCAPE CARD
+========================================================= */
+
+.movie-card.landscape .movie-poster {
+    aspect-ratio: 16 / 9;
+}
+
+.movie-card.landscape .movie-poster img {
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   19. SERIES BADGES
+========================================================= */
+
+.badge-series {
+
+    background: #7838e8;
+
+}
+
+.badge-episodes {
+
+    background: rgba(0,0,0,0.78);
+
+    color: #ffffff;
+
+    padding: 5px 8px;
+
+    border-radius: 5px;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+}
+
+
+/* =========================================================
+   20. SKELETON LOADING
+========================================================= */
+
+.movie-skeleton {
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+    background: var(--bg-card);
+
+}
+
+.skeleton-poster {
+
+    width: 100%;
+
+    aspect-ratio: 2 / 3;
+
+}
+
+.skeleton-info {
+    padding: 12px;
+}
+
+.skeleton-line {
+
+    height: 10px;
+
+    margin-bottom: 10px;
+
+    border-radius: 5px;
+
+    background: #252538;
+
+}
+
+.skeleton-line.short {
+    width: 55%;
+}
+
+.skeleton-line.medium {
+    width: 75%;
+}
+
+.skeleton-shimmer {
+
+    background: linear-gradient(
+        90deg,
+        #171727 25%,
+        #28283b 50%,
+        #171727 75%
+    );
+
+    background-size: 200% 100%;
+
+    animation: skeletonLoading 1.5s infinite linear;
+
+}
+
+@keyframes skeletonLoading {
+
+    to {
+        background-position: -200% 0;
+    }
+
+}
+
+
+/* =========================================================
+   21. CARD IMAGE ERROR
+========================================================= */
+
+.movie-poster img.image-error {
+    display: none;
+}
+
+
+/* =========================================================
+   22. EMPTY MOVIE GRID
+========================================================= */
+
+.movie-grid:empty::after {
+
+    content: "New entertainment coming soon...";
+
+    width: 100%;
+
+    min-height: 100px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   23. RESPONSIVE — LARGE SCREENS
+========================================================= */
+
+@media (min-width: 1500px) {
+
+    .movie-grid {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(190px, 1fr)
+        );
+    }
+
+}
+
+
+/* =========================================================
+   24. RESPONSIVE — TABLETS
+========================================================= */
+
+@media (max-width: 1024px) {
+
+    .movie-grid {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(160px, 1fr)
+        );
+
+        gap: 17px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 175px;
+        min-width: 175px;
+    }
+
+    .carousel-arrow {
+        width: 36px;
+        height: 36px;
+    }
+
+}
+
+
+/* =========================================================
+   25. RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .movie-grid {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(140px, 1fr)
+        );
+
+        gap: 13px;
+    }
+
+    .movie-grid.horizontal-scroll {
+        gap: 12px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 155px;
+        min-width: 155px;
+    }
+
+    .movie-info {
+        padding: 9px 8px 10px;
+    }
+
+    .movie-title {
+        font-size: 11px;
+    }
+
+    .movie-meta {
+        font-size: 9px;
+    }
+
+    .carousel-arrow {
+        display: none;
+    }
+
+    .card-favorite {
+        opacity: 1;
+        transform: scale(1);
+        width: 29px;
+        height: 29px;
+    }
+
+    .movie-hover-info {
+        display: none;
+    }
+
+}
+
+
+/* =========================================================
+   26. RESPONSIVE — SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 145px;
+        min-width: 145px;
+    }
+
+    .movie-poster {
+        border-radius: 9px 9px 0 0;
+    }
+
+    .movie-card {
+        border-radius: 9px;
+    }
+
+    .card-badges {
+        top: 7px;
+        left: 7px;
+        right: 7px;
+    }
+
+    .card-badge {
+        font-size: 8px;
+        padding: 4px 6px;
+    }
+
+    .card-genre {
+        font-size: 8px;
+        padding: 4px 6px;
+    }
+
+    .card-views {
+        right: 6px;
+        bottom: 7px;
+        font-size: 8px;
+    }
+
+    .movie-title {
+        font-size: 11px;
+    }
+
+    .movie-upload-time {
+        font-size: 8px;
+    }
+
+}
+
+
+/* =========================================================
+   27. HOVER SUPPORT
+========================================================= */
+
+@media (hover: none) {
+
+    .movie-card:hover {
+        transform: none;
+    }
+
+    .movie-card:hover .movie-poster img {
+        transform: none;
+    }
+
+    .poster-overlay {
+        display: none;
+    }
+
+    .card-favorite {
+        opacity: 1;
+        transform: none;
+    }
+
+    .movie-hover-info {
+        display: none;
+    }
+
+}
+
+
+/* =========================================================
+   28. ACCESSIBILITY
+========================================================= */
+
+.movie-card:focus-within {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .movie-card,
+    .movie-poster img,
+    .poster-overlay,
+    .card-play-btn,
+    .genre-card {
+        transition: none !important;
+        animation: none !important;
+    }
+
+}
