@@ -2127,3 +2127,14 @@
         white-space: nowrap;
     }
 }
+
+.related-arrow.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.related-arrow:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
