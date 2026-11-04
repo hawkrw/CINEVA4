@@ -1,15 +1,6 @@
 
-/* =========================================================
-   CINEVA PRO — ADMIN AUTHENTICATION
-   Secure Supabase Login
-========================================================= */
-
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
-
-/* =========================================================
-   1. DOM ELEMENTS
-========================================================= */
 
 const loginForm = document.getElementById("adminLoginForm");
 const emailInput = document.getElementById("adminEmail");
@@ -18,18 +9,9 @@ const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
 const togglePassword = document.getElementById("togglePassword");
 
-/* =========================================================
-   2. CONFIGURATION
-========================================================= */
-
 const DASHBOARD_URL = "/admin/dashboard.html";
-const LOGIN_URL = "/admin/";
 
 let isAuthenticating = false;
-
-/* =========================================================
-   3. MESSAGE HANDLER
-========================================================= */
 
 function showMessage(message = "", type = "") {
     if (!loginMessage) return;
@@ -41,10 +23,6 @@ function showMessage(message = "", type = "") {
         loginMessage.classList.add(type);
     }
 }
-
-/* =========================================================
-   4. BUTTON LOADING STATE
-========================================================= */
 
 function setLoading(loading) {
     if (!loginButton) return;
@@ -58,37 +36,25 @@ function setLoading(loading) {
             ? "AUTHENTICATING..."
             : "ACCESS ADMIN PANEL";
     }
-
-    loginButton.setAttribute(
-        "aria-busy",
-        String(loading)
-    );
 }
 
-/* =========================================================
-   5. ADMIN VERIFICATION
-========================================================= */
-
-async function checkAdminAccess() {
+async function checkExistingSession() {
     try {
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        if (!data.session) return;
+
         const result = await verifyAdmin();
 
         if (result.authorized) {
             window.location.replace(DASHBOARD_URL);
-            return true;
         }
-
-        return false;
-
     } catch (error) {
-        console.error("Admin access check failed:", error);
-        return false;
+        console.error("Session verification error:", error);
     }
 }
-
-/* =========================================================
-   6. LOGIN PROCESS
-========================================================= */
 
 async function handleLogin(event) {
     event.preventDefault();
@@ -99,10 +65,7 @@ async function handleLogin(event) {
     const password = passwordInput?.value;
 
     if (!email || !password) {
-        showMessage(
-            "Please enter your administrator email and password.",
-            "error"
-        );
+        showMessage("Enter your email and password.", "error");
         return;
     }
 
@@ -111,45 +74,32 @@ async function handleLogin(event) {
     showMessage();
 
     try {
-        /* Authenticate with Supabase */
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
-        if (!data?.user) {
-            throw new Error("Authentication failed. Please try again.");
-        }
-
-        /* Verify the authenticated user against admins */
         const result = await verifyAdmin();
 
         if (!result.authorized) {
             await supabase.auth.signOut();
 
             throw new Error(
-                result.reason ||
-                "Your account does not have administrator permission."
+                result.reason || "Administrator access denied."
             );
         }
 
-        showMessage(
-            "Access granted. Opening CINEVA PRO...",
-            "success"
-        );
+        showMessage("Access granted. Opening dashboard...", "success");
 
-        /* Open the protected dashboard */
         window.location.replace(DASHBOARD_URL);
 
     } catch (error) {
-        console.error("CINEVA admin login error:", error);
+        console.error("Admin login error:", error);
 
         showMessage(
-            error.message || "Unable to sign in. Please try again.",
+            error.message || "Unable to sign in.",
             "error"
         );
 
@@ -158,10 +108,6 @@ async function handleLogin(event) {
         setLoading(false);
     }
 }
-
-/* =========================================================
-   7. PASSWORD VISIBILITY
-========================================================= */
 
 function initializePasswordToggle() {
     if (!togglePassword || !passwordInput) return;
@@ -172,62 +118,17 @@ function initializePasswordToggle() {
         passwordInput.type = show ? "text" : "password";
 
         togglePassword.textContent = show ? "Hide" : "Show";
-
-        togglePassword.setAttribute(
-            "aria-label",
-            show ? "Hide password" : "Show password"
-        );
     });
 }
-
-/* =========================================================
-   8. CLEAR ERRORS WHILE TYPING
-========================================================= */
-
-function initializeInputListeners() {
-    emailInput?.addEventListener("input", () => {
-        showMessage();
-    });
-
-    passwordInput?.addEventListener("input", () => {
-        showMessage();
-    });
-}
-
-/* =========================================================
-   9. AUTH STATE HANDLING
-========================================================= */
-
-function initializeAuthStateListener() {
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (
-            event === "SIGNED_OUT" &&
-            window.location.pathname.includes("/admin/dashboard")
-        ) {
-            window.location.replace(LOGIN_URL);
-        }
-    });
-}
-
-/* =========================================================
-   10. INITIALIZATION
-========================================================= */
 
 async function initializeAdminLogin() {
-    if (!loginForm || !emailInput || !passwordInput) {
-        console.error("CINEVA: Admin login HTML elements are missing.");
-        return;
-    }
+    if (!loginForm) return;
 
     initializePasswordToggle();
-    initializeInputListeners();
-    initializeAuthStateListener();
-
-    await checkAdminAccess();
 
     loginForm.addEventListener("submit", handleLogin);
 
-    console.log("CINEVA PRO: Admin authentication initialized.");
+    await checkExistingSession();
 }
 
 initializeAdminLogin();
