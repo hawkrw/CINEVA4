@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Discover and explore the latest TV series on CINEVA.">
+
+    <title>TV Series | CINEVA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        .series-page {
+            min-height: 100vh;
+            padding: 130px 5% 80px;
+        }
+
+        .series-heading {
+            margin-bottom: 35px;
+        }
+
+        .series-heading .eyebrow {
+            color: #e50914;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .series-heading h1 {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+            margin: 12px 0;
+        }
+
+        .series-heading p {
+            color: #999;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .series-toolbar {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) 220px 180px;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .series-toolbar input,
+        .series-toolbar select {
+            width: 100%;
+            min-height: 48px;
+            padding: 0 16px;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            outline: none;
+            background: #151515;
+            color: #fff;
+            font: inherit;
+        }
+
+        .series-toolbar input:focus,
+        .series-toolbar select:focus {
+            border-color: #e50914;
+        }
+
+        .series-toolbar input::placeholder {
+            color: #777;
+        }
+
+        .series-results {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .series-empty,
+        .series-loading {
+            grid-column: 1 / -1;
+            padding: 60px 20px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .series-empty h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 750px) {
+            .series-page {
+                padding: 110px 4% 60px;
+            }
+
+            .series-toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .series-toolbar input {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .series-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .series-toolbar input {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+
+            <a href="index.html" class="logo">
+                CINE<span>VA</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                id="menu-toggle"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+            >
+                ☰
+            </button>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="movies.html" class="nav-link">Movies</a>
+                <a href="series.html" class="nav-link active">Series</a>
+                <a href="categories.html" class="nav-link">Categories</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- SERIES CONTENT -->
+    <main class="series-page">
+
+        <section class="series-heading">
+            <span class="eyebrow">CINEVA COLLECTION</span>
+
+            <h1>Explore TV Series</h1>
+
+            <p>
+                Discover exciting series, follow unforgettable characters
+                and enjoy your favorite episodes.
+            </p>
+        </section>
+
+        <!-- SEARCH AND FILTERS -->
+        <section class="series-toolbar">
+
+            <input
+                type="search"
+                id="series-search"
+                placeholder="Search series..."
+                aria-label="Search series"
+            >
+
+            <select id="series-genre-filter" aria-label="Filter by genre">
+                <option value="all">All Genres</option>
+                <option value="Action">Action</option>
+                <option value="Horror">Horror</option>
+                <option value="Drama">Drama</option>
+                <option value="Highschool">Highschool</option>
+                <option value="Animation">Animation</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Erotic">Erotic</option>
+            </select>
+
+            <select id="series-sort-filter" aria-label="Sort series">
+                <option value="latest">Latest Added</option>
+                <option value="oldest">Oldest Added</option>
+                <option value="rating">Top Rated</option>
+                <option value="title">A - Z</option>
+            </select>
+
+        </section>
+
+        <!-- RESULTS -->
+        <p class="series-results" id="series-result-count">
+            Loading series...
+        </p>
+
+        <!-- SERIES GRID -->
+        <section
+            class="movie-grid"
+            id="series-grid"
+            aria-live="polite"
+        >
+            <p class="series-loading">Loading CINEVA series...</p>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT -->
+    <script type="module" src="js/series.js"></script>
+    <script src="js/navigation.js" defer></script>
+
+</body>
+</html>
