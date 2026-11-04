@@ -1527,3 +1527,133 @@ a:focus-visible {
         min-width: 700px;
     }
 }
+
+/* =========================================
+   CINEVA MOVIE PREVIEW
+========================================= */
+
+.movie-preview-modal {
+    max-width: 950px;
+}
+
+.movie-preview-content {
+    overflow: hidden;
+    border-radius: 12px;
+    background: #0d0c19;
+}
+
+.movie-preview-backdrop {
+    position: relative;
+    min-height: 260px;
+    background-color: #17142a;
+    background-position: center;
+    background-size: cover;
+}
+
+.movie-preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        0deg,
+        #0d0c19 0%,
+        rgba(13, 12, 25, .5) 55%,
+        rgba(13, 12, 25, .1) 100%
+    );
+}
+
+.movie-preview-details {
+    position: relative;
+    display: flex;
+    gap: 25px;
+    padding: 0 25px 30px;
+    margin-top: -100px;
+}
+
+.movie-preview-poster {
+    width: 155px;
+    height: 225px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #211d35;
+    border: 3px solid #211d35;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    flex-shrink: 0;
+}
+
+.movie-preview-info {
+    padding-top: 105px;
+    min-width: 0;
+}
+
+.movie-preview-info h2 {
+    color: #fff;
+    font-size: 25px;
+    margin: 0 0 12px;
+}
+
+.movie-preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.movie-preview-meta span {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #211d35;
+    color: #c8b7f5;
+    font-size: 12px;
+}
+
+.movie-preview-info > p {
+    color: #aaa8bd;
+    line-height: 1.7;
+    font-size: 13px;
+}
+
+.movie-preview-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.movie-preview-links a {
+    padding: 12px 20px;
+    border-radius: 7px;
+    background: #853bf2;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.movie-preview-links a:last-child {
+    background: #252139;
+}
+
+.movie-preview-links a:hover {
+    filter: brightness(1.2);
+}
+
+@media(max-width: 600px) {
+    .movie-preview-details {
+        flex-direction: column;
+        margin-top: -70px;
+        padding: 0 18px 25px;
+    }
+
+    .movie-preview-poster {
+        width: 120px;
+        height: 175px;
+    }
+
+    .movie-preview-info {
+        padding-top: 0;
+    }
+
+    .movie-preview-info h2 {
+        font-size: 21px;
+    }
+}
