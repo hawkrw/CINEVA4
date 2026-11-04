@@ -1328,6 +1328,7 @@ async function initializeHome() {
             loadLatest(),
 
             loadCategories()
+           loadOurTranslators();
 
         ]);
 
