@@ -1,0 +1,641 @@
+
+/* =========================================================
+   CINEVA — RESPONSIVE DESIGN
+   File: css/responsive.css
+========================================================= */
+
+
+/* =========================================================
+   01. LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1500px) {
+
+    :root {
+        --container-width: 1440px;
+    }
+
+    .hero-section {
+        min-height: 720px;
+    }
+
+    .hero-information {
+        max-width: 720px;
+    }
+
+    .hero-information h1 {
+        font-size: 82px;
+    }
+
+    .genre-card {
+        min-height: 220px;
+    }
+
+}
+
+
+/* =========================================================
+   02. LAPTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .container {
+        width: calc(100% - 45px);
+    }
+
+    .navbar {
+        gap: 15px;
+    }
+
+    .nav-menu {
+        gap: 2px;
+    }
+
+    .nav-link {
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+    .nav-actions {
+        gap: 9px;
+    }
+
+    .footer-container {
+        gap: 30px;
+    }
+
+}
+
+
+/* =========================================================
+   03. TABLET NAVIGATION
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .nav-menu {
+
+        position: absolute;
+
+        top: 100%;
+        left: 0;
+
+        width: 100%;
+
+        padding: 15px 25px 22px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 5px;
+
+        background: rgba(10, 10, 21, 0.98);
+
+        backdrop-filter: blur(20px);
+
+        border-bottom: 1px solid var(--border-color);
+
+        opacity: 0;
+
+        visibility: hidden;
+
+        transform: translateY(-12px);
+
+        transition: all 0.3s ease;
+
+    }
+
+    .nav-menu.active {
+
+        opacity: 1;
+
+        visibility: visible;
+
+        transform: translateY(0);
+
+    }
+
+    .nav-link {
+
+        width: 100%;
+
+        padding: 13px 15px;
+
+        font-size: 13px;
+
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+/* =========================================================
+   04. TABLET LAYOUT
+========================================================= */
+
+@media (max-width: 768px) {
+
+    :root {
+        --header-height: 68px;
+    }
+
+    .container {
+        width: calc(100% - 36px);
+    }
+
+    body {
+        padding-bottom: 68px;
+    }
+
+    /* HEADER */
+
+    .navbar {
+        gap: 10px;
+    }
+
+    .logo-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+
+    .logo-text h2 {
+        font-size: 21px;
+    }
+
+    .logo-text small {
+        font-size: 8px;
+    }
+
+    .nav-actions {
+        gap: 6px;
+    }
+
+    .nav-icon,
+    .search-toggle {
+        width: 34px;
+        height: 36px;
+        font-size: 15px;
+    }
+
+    .sign-in-btn {
+        padding: 10px 13px;
+        font-size: 11px;
+    }
+
+    /* SEARCH */
+
+    .search-panel {
+        padding: 14px 18px;
+    }
+
+    /* SECTIONS */
+
+    .content-section {
+        padding-top: 28px;
+    }
+
+    .section-title h2 {
+        font-size: 19px;
+    }
+
+    .section-title p {
+        font-size: 11px;
+    }
+
+    .section-icon {
+        width: 39px;
+        height: 39px;
+    }
+
+    /* NEWSLETTER */
+
+    .newsletter-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .newsletter-form {
+        width: 100%;
+    }
+
+    /* FOOTER */
+
+    .footer-container {
+        gap: 35px 25px;
+    }
+
+    .mobile-bottom-nav {
+
+        position: fixed;
+
+        left: 0;
+        bottom: 0;
+
+        width: 100%;
+
+        height: 66px;
+
+        z-index: 1500;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: space-around;
+
+        padding: 5px 8px;
+
+        background: rgba(9, 9, 19, 0.97);
+
+        backdrop-filter: blur(20px);
+
+        border-top: 1px solid rgba(255,255,255,0.1);
+
+    }
+
+    .mobile-bottom-nav a {
+
+        flex: 1;
+
+        height: 100%;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        flex-direction: column;
+
+        gap: 4px;
+
+        color: #85859a;
+
+        font-size: 9px;
+
+        font-weight: 600;
+
+        transition: all 0.3s ease;
+
+    }
+
+    .mobile-bottom-nav a i {
+        font-size: 17px;
+    }
+
+    .mobile-bottom-nav a.active,
+    .mobile-bottom-nav a:hover {
+
+        color: var(--primary-light);
+
+    }
+
+    .mobile-bottom-nav a.active i {
+        transform: translateY(-2px);
+    }
+
+    /* SCROLL BUTTON */
+
+    .scroll-top {
+        right: 17px;
+        bottom: 82px;
+        width: 39px;
+        height: 39px;
+    }
+
+}
+
+
+/* =========================================================
+   05. SMALL TABLET
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .container {
+        width: calc(100% - 30px);
+    }
+
+    .nav-actions {
+        gap: 4px;
+    }
+
+    .notification-btn,
+    .theme-toggle {
+        display: none;
+    }
+
+    .sign-in-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 9px;
+    }
+
+    .sign-in-btn span {
+        display: none;
+    }
+
+    .sign-in-btn i {
+        font-size: 14px;
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .footer-bottom-content {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+}
+
+
+/* =========================================================
+   06. MOBILE DEVICES
+========================================================= */
+
+@media (max-width: 480px) {
+
+    :root {
+        --header-height: 62px;
+    }
+
+    .container {
+        width: calc(100% - 26px);
+    }
+
+    body {
+        padding-bottom: 65px;
+    }
+
+    /* HEADER */
+
+    .main-header {
+        height: var(--header-height);
+    }
+
+    .logo {
+        gap: 7px;
+    }
+
+    .logo-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 15px;
+    }
+
+    .logo-text h2 {
+        font-size: 19px;
+    }
+
+    .logo-text small {
+        font-size: 7px;
+        letter-spacing: 0.8px;
+    }
+
+    .nav-actions {
+        gap: 3px;
+    }
+
+    .search-toggle {
+        width: 33px;
+        height: 34px;
+    }
+
+    .mobile-menu-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .nav-menu {
+        padding: 12px 13px 18px;
+    }
+
+    .nav-link {
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    /* SEARCH */
+
+    .search-panel {
+        padding: 12px;
+    }
+
+    .search-form {
+        gap: 8px;
+        padding-left: 11px;
+    }
+
+    .search-form input {
+        font-size: 11px;
+    }
+
+    .search-form button {
+        padding: 10px 13px;
+        font-size: 11px;
+    }
+
+    /* SECTION HEADINGS */
+
+    .section-heading {
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+    .section-title {
+        gap: 9px;
+    }
+
+    .section-title h2 {
+        font-size: 16px;
+    }
+
+    .section-title p {
+        font-size: 9px;
+    }
+
+    .section-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 14px;
+    }
+
+    .view-all {
+        font-size: 10px;
+        gap: 5px;
+    }
+
+    /* CONTENT */
+
+    .content-section {
+        padding-top: 25px;
+        padding-bottom: 12px;
+    }
+
+    /* FOOTER */
+
+    .footer-container {
+        padding-top: 35px;
+        padding-bottom: 35px;
+        gap: 28px 15px;
+    }
+
+    .footer-column h3 {
+        font-size: 12px;
+        margin-bottom: 14px;
+    }
+
+    .footer-column ul {
+        gap: 10px;
+    }
+
+    .footer-column ul li a {
+        font-size: 10px;
+    }
+
+    .footer-brand p {
+        font-size: 11px;
+    }
+
+    .social-links a {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .footer-bottom p,
+    .footer-bottom-links {
+        font-size: 10px;
+    }
+
+    /* MOBILE NAVIGATION */
+
+    .mobile-bottom-nav {
+        height: 64px;
+    }
+
+    .mobile-bottom-nav a {
+        font-size: 8px;
+    }
+
+    .mobile-bottom-nav a i {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================================
+   07. VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 350px) {
+
+    .container {
+        width: calc(100% - 20px);
+    }
+
+    .logo-text small {
+        display: none;
+    }
+
+    .logo-text h2 {
+        font-size: 17px;
+    }
+
+    .nav-icon,
+    .search-toggle {
+        width: 29px;
+    }
+
+    .mobile-menu-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .section-title h2 {
+        font-size: 14px;
+    }
+
+    .view-all {
+        font-size: 9px;
+    }
+
+    .footer-container {
+        gap: 25px 10px;
+    }
+
+}
+
+
+/* =========================================================
+   08. LANDSCAPE MOBILE
+========================================================= */
+
+@media (max-height: 500px) and (max-width: 900px) {
+
+    .hero-section {
+        min-height: 450px;
+    }
+
+    .hero-content {
+        padding-top: 35px;
+        padding-bottom: 70px;
+    }
+
+    .hero-information h1 {
+        font-size: 42px;
+    }
+
+    .hero-description {
+        margin-top: 10px;
+    }
+
+    .hero-buttons {
+        margin-top: 15px;
+    }
+
+}
+
+
+/* =========================================================
+   09. HIDE MOBILE ELEMENTS ON DESKTOP
+========================================================= */
+
+@media (min-width: 769px) {
+
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+
+    .mobile-menu-btn {
+        display: none !important;
+    }
+
+    body {
+        padding-bottom: 0;
+    }
+
+}
