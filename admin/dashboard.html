@@ -470,20 +470,66 @@
                      PLACEHOLDER MANAGEMENT PAGES
                 ========================================== -->
 
-                <section class="dashboard-page" id="page-movies">
-                    <div class="page-heading">
-                        <div>
-                            <div class="page-eyebrow">CONTENT MANAGEMENT</div>
-                            <h1>Movie <span>Management</span></h1>
-                            <p>Manage your existing movies and add new titles.</p>
-                        </div>
-                    </div>
-                    <div class="panel coming-soon">
-                        <span>▣</span>
-                        <h2>Movie Management</h2>
-                        <p>Movie database tools will be connected to your Supabase movies table in the next step.</p>
-                    </div>
-                </section>
+              
+<section class="dashboard-page" id="page-movies">
+
+    <div class="page-heading">
+        <div>
+            <h2>Movies Management</h2>
+            <p>Manage your CINEVA movie collection.</p>
+        </div>
+
+        <button class="primary-button" id="addMovieBtn">
+            + Add New Movie
+        </button>
+    </div>
+
+    <div class="content-toolbar">
+        <div class="search-box">
+            <input
+                type="search"
+                id="movieSearch"
+                placeholder="Search movies..."
+                autocomplete="off"
+            >
+        </div>
+
+        <select id="movieCategoryFilter">
+            <option value="">All Categories</option>
+            <option value="Action">Action</option>
+            <option value="Horror">Horror</option>
+            <option value="Drama">Drama</option>
+            <option value="Highschool">Highschool</option>
+            <option value="Animation">Animation</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Erotic">Erotic</option>
+        </select>
+    </div>
+
+    <div class="table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Movie</th>
+                    <th>Category</th>
+                    <th>Year</th>
+                    <th>Views</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="moviesTableBody">
+                <tr>
+                    <td colspan="6">Loading movies...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container" id="moviesPagination"></div>
+
+</section>
 
 
                 <section class="dashboard-page" id="page-series">
@@ -631,6 +677,121 @@
                 </span>
 
             </footer>
+            
+<div class="modal-overlay" id="movieModal">
+
+    <div class="admin-modal">
+
+        <div class="modal-header">
+            <div>
+                <h2 id="movieModalTitle">Add New Movie</h2>
+                <p>Enter your movie information.</p>
+            </div>
+
+            <button type="button" id="closeMovieModal" class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <form id="movieForm">
+
+            <input type="hidden" id="movieId">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="movieTitle">Movie Title *</label>
+                    <input id="movieTitle" type="text" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="movieCategory">Category *</label>
+                    <select id="movieCategory" required>
+                        <option value="">Select category</option>
+                        <option>Action</option>
+                        <option>Horror</option>
+                        <option>Drama</option>
+                        <option>Highschool</option>
+                        <option>Animation</option>
+                        <option>Comedy</option>
+                        <option>Erotic</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="movieYear">Release Year</label>
+                    <input id="movieYear" type="number" min="1900" max="2100">
+                </div>
+
+                <div class="form-group">
+                    <label for="movieRating">Rating</label>
+                    <input id="movieRating" type="number" min="0" max="10" step="0.1">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieOverview">Description</label>
+                    <textarea id="movieOverview" rows="4"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="moviePoster">Poster Image URL</label>
+                    <input id="moviePoster" type="url" placeholder="https://...">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieBackdrop">Backdrop Image URL</label>
+                    <input id="movieBackdrop" type="url" placeholder="https://...">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieWatchUrl">Your Watch URL</label>
+                    <input id="movieWatchUrl" type="url" placeholder="Your video/watch link">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieDownloadUrl">Your Download URL</label>
+                    <input id="movieDownloadUrl" type="url" placeholder="Your download link">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="movieTranslator">Translator</label>
+                    <input id="movieTranslator" type="text">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movieFeatured">
+                        Featured Movie
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movieActive" checked>
+                        Active
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelMovieForm" class="secondary-button">
+                    Cancel
+                </button>
+
+                <button type="submit" id="saveMovieBtn" class="primary-button">
+                    Save Movie
+                </button>
+            </div>
+
+            <p id="movieFormMessage" role="status"></p>
+
+        </form>
+
+    </div>
+
+</div>
+
 
         </main>
 
