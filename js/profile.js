@@ -1,8 +1,43 @@
 
+/* =========================================================
+   CINEVA — USER PROFILE SYSTEM
+   Authentication, Account Details, Favorites & Watchlist
+========================================================= */
+
 import { supabase } from "./config.js";
 
 /* =========================================================
-   CINEVA PROFILE SYSTEM
+   DOM ELEMENTS
+========================================================= */
+
+const elements = {
+    loading: document.getElementById("profile-loading"),
+    error: document.getElementById("profile-error"),
+    errorMessage: document.getElementById("profile-error-message"),
+
+    avatar: document.getElementById("profile-avatar"),
+    name: document.getElementById("profile-name"),
+    email: document.getElementById("profile-email"),
+
+    accountName: document.getElementById("account-name"),
+    accountEmail: document.getElementById("account-email"),
+    accountStatus: document.getElementById("account-status"),
+    accountCreated: document.getElementById("account-created"),
+
+    favoritesGrid: document.getElementById("favorites-grid"),
+    favoritesEmpty: document.getElementById("favorites-empty"),
+    favoritesCount: document.getElementById("favorites-count"),
+
+    watchlistGrid: document.getElementById("watchlist-grid"),
+    watchlistEmpty: document.getElementById("watchlist-empty"),
+
+    logoutButton: document.getElementById("logout-btn"),
+
+    footerYear: document.getElementById("profile-footer-year")
+};
+
+/* =========================================================
+   STORAGE KEYS
 ========================================================= */
 
 const STORAGE_KEYS = {
@@ -10,322 +45,459 @@ const STORAGE_KEYS = {
     watchlist: "cineva_watchlist"
 };
 
-const elements = {
-    name: document.getElementById("profile-name"),
-    email: document.getElementById("profile-email"),
-    avatar: document.getElementById("profile-avatar"),
-
-    accountName: document.getElementById("account-name"),
-    accountEmail: document.getElementById("account-email"),
-    accountStatus: document.getElementById("account-status"),
-    accountCreated: document.getElementById("account-created"),
-
-    loading: document.getElementById("profile-loading"),
-    error: document.getElementById("profile-error"),
-    errorMessage: document.getElementById("profile-error-message"),
-
-    favoritesGrid: document.getElementById("favorites-grid"),
-    watchlistGrid: document.getElementById("watchlist-grid"),
-
-    favoritesEmpty: document.getElementById("favorites-empty"),
-    watchlistEmpty: document.getElementById("watchlist-empty"),
-
-    favoritesCount: document.getElementById("favorites-count"),
-    logout: document.getElementById("logout-btn"),
-    footerYear: document.getElementById("profile-footer-year")
-};
+/* =========================================================
+   PROFILE STATE
+========================================================= */
 
 let currentUser = null;
+let activeTab = "favorites";
 
 /* =========================================================
-   INITIALIZE
+   SAFE TEXT HELPERS
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", initializeProfile);
-
-async function initializeProfile() {
-    elements.footerYear.textContent = new Date().getFullYear();
-
-    connectProfileTabs();
-    connectLogout();
-
-    await loadProfile();
+function escapeHTML(value = "") {
+    return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
 }
 
-/* =========================================================
-   AUTHENTICATION
-========================================================= */
-
-async function loadProfile() {
-    showLoading();
-
-    try {
-        const { data, error } = await supabase.auth.getUser();
-
-        if (error) throw error;
-
-        currentUser = data.user;
-
-        if (!currentUser) {
-            window.location.replace(
-                "login.html?redirect=" +
-                encodeURIComponent("profile.html")
-            );
-            return;
-        }
-
-        renderUserInformation(currentUser);
-        renderFavorites();
-        renderWatchlist();
-
-        showProfile();
-
-    } catch (error) {
-        console.error("CINEVA profile error:", error);
-
-        showProfileError(
-            error.message || "Unable to load your account."
-        );
-    }
+function getDisplayName(user) {
+    return (
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.display_name ||
+        user?.user_metadata?.name ||
+        user?.email?.split("@")[0] ||
+        "CINEVA Member"
+    );
 }
 
-/* =========================================================
-   USER INFORMATION
-========================================================= */
-
-function renderUserInformation(user) {
-    const metadata = user.user_metadata || {};
-
-    const fullName =
-        metadata.full_name ||
-        metadata.name ||
-        metadata.display_name ||
-        user.email?.split("@")[0] ||
-        "CINEVA User";
-
-    const email = user.email || "No email available";
-
-    elements.name.textContent = fullName;
-    elements.email.textContent = email;
-
-    elements.accountName.textContent = fullName;
-    elements.accountEmail.textContent = email;
-    elements.accountStatus.textContent =
-        user.email_confirmed_at ? "Verified Account" : "Email Not Verified";
-
-    elements.accountCreated.textContent = user.created_at
-        ? new Date(user.created_at).toLocaleDateString("en", {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        })
-        : "Unavailable";
-
-    renderAvatar(metadata.avatar_url || metadata.picture, fullName);
+function getInitials(name) {
+    return String(name)
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join("") || "C";
 }
 
-function renderAvatar(imageUrl, name) {
-    elements.avatar.innerHTML = "";
+function formatDate(dateValue) {
+    if (!dateValue) return "Not available";
 
-    if (imageUrl && isSafeImageUrl(imageUrl)) {
-        const image = document.createElement("img");
+    const date = new Date(dateValue);
 
-        image.src = imageUrl;
-        image.alt = name;
-
-        image.style.width = "100%";
-        image.style.height = "100%";
-        image.style.objectFit = "cover";
-        image.style.borderRadius = "50%";
-
-        image.onerror = () => {
-            elements.avatar.innerHTML =
-                '<i class="fa-solid fa-user"></i>';
-        };
-
-        elements.avatar.appendChild(image);
-        return;
+    if (Number.isNaN(date.getTime())) {
+        return "Not available";
     }
 
-    const icon = document.createElement("i");
-    icon.className = "fa-solid fa-user";
-
-    elements.avatar.appendChild(icon);
-}
-
-function isSafeImageUrl(value) {
-    try {
-        const url = new URL(value);
-        return url.protocol === "https:" || url.protocol === "http:";
-    } catch {
-        return false;
-    }
-}
-
-/* =========================================================
-   LOCAL FAVORITES AND WATCHLIST
-========================================================= */
-
-function readStoredItems(key) {
-    try {
-        const stored = localStorage.getItem(key);
-
-        if (!stored) return [];
-
-        const parsed = JSON.parse(stored);
-
-        return Array.isArray(parsed) ? parsed : [];
-
-    } catch (error) {
-        console.error("CINEVA storage error:", error);
-        return [];
-    }
-}
-
-function renderFavorites() {
-    const favorites = readStoredItems(STORAGE_KEYS.favorites);
-
-    elements.favoritesGrid.innerHTML = "";
-
-    elements.favoritesCount.textContent =
-        `${favorites.length} ${favorites.length === 1 ? "Title" : "Titles"}`;
-
-    renderContentCards(favorites, elements.favoritesGrid);
-
-    elements.favoritesEmpty.style.display =
-        favorites.length ? "none" : "flex";
-}
-
-function renderWatchlist() {
-    const watchlist = readStoredItems(STORAGE_KEYS.watchlist);
-
-    elements.watchlistGrid.innerHTML = "";
-
-    renderContentCards(watchlist, elements.watchlistGrid);
-
-    elements.watchlistEmpty.style.display =
-        watchlist.length ? "none" : "flex";
-}
-
-/* =========================================================
-   CONTENT CARDS
-========================================================= */
-
-function renderContentCards(items, container) {
-    const fragment = document.createDocumentFragment();
-
-    items.forEach(item => {
-        if (!item || !item.id) return;
-
-        const card = createContentCard(item);
-
-        if (card) fragment.appendChild(card);
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
     });
-
-    container.appendChild(fragment);
 }
 
-function createContentCard(item) {
-    const type = item.content_type || item.type || "movie";
-
-    if (!["movie", "series"].includes(type)) return null;
-
-    const card = document.createElement("a");
-
-    card.className = "movie-card";
-
-    card.href =
-        `watch.html?id=${encodeURIComponent(item.id)}&type=${type}`;
-
-    const image = document.createElement("img");
-
-    image.src = getPoster(item);
-    image.alt = item.title || "CINEVA content";
-    image.loading = "lazy";
-
-    image.onerror = () => {
-        image.onerror = null;
-        image.src =
-            "https://placehold.co/400x600/151522/ffffff?text=CINEVA";
-    };
-
-    const title = document.createElement("h3");
-    title.textContent = item.title || "Untitled";
-
-    const info = document.createElement("p");
-
-    info.textContent = [
-        item.year || item.release_date?.substring(0, 4) || "",
-        type === "series" ? "Series" : "Movie"
-    ].filter(Boolean).join(" • ");
-
-    card.append(image, title, info);
-
-    return card;
-}
+/* =========================================================
+   IMAGE HELPERS
+========================================================= */
 
 function getPoster(item) {
     const poster =
         item.poster ||
         item.poster_path ||
+        item.thumbnail ||
         item.image ||
-        item.thumbnail;
+        "";
 
     if (!poster) {
-        return "https://placehold.co/400x600/151522/ffffff?text=CINEVA";
+        return "";
     }
 
-    if (poster.startsWith("https://") || poster.startsWith("http://")) {
+    if (
+        poster.startsWith("http://") ||
+        poster.startsWith("https://") ||
+        poster.startsWith("data:")
+    ) {
         return poster;
     }
 
-    return `https://image.tmdb.org/t/p/w500/${
-        poster.replace(/^\/+/, "")
-    }`;
+    if (poster.startsWith("/")) {
+        return `https://image.tmdb.org/t/p/w500${poster}`;
+    }
+
+    return poster;
+}
+
+function getContentType(item) {
+    const type = item.content_type || item.type || "movie";
+
+    return type.toLowerCase() === "series"
+        ? "series"
+        : "movie";
+}
+
+function getContentUrl(item) {
+    const id = item.id;
+
+    const type = getContentType(item);
+
+    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
 }
 
 /* =========================================================
-   PROFILE NAVIGATION
+   LOCAL STORAGE HELPERS
 ========================================================= */
 
-function connectProfileTabs() {
-    const tabs = document.querySelectorAll(".profile-tab[data-tab]");
+function readStorage(key) {
+    try {
+        const value = localStorage.getItem(key);
 
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            const target = tab.dataset.tab;
+        if (!value) return [];
 
-            tabs.forEach(button => {
-                button.classList.remove("active");
-            });
+        const parsed = JSON.parse(value);
 
-            tab.classList.add("active");
+        return Array.isArray(parsed) ? parsed : [];
 
-            document.querySelectorAll(".profile-section").forEach(section => {
-                section.classList.remove("active");
-            });
-
-            const targetSection = document.getElementById(
-                `${target}-section`
-            );
-
-            if (targetSection) {
-                targetSection.classList.add("active");
-            }
-
-            history.replaceState(
-                null,
-                "",
-                `#${encodeURIComponent(target)}`
-            );
-        });
-    });
-
-    openRequestedTab();
+    } catch (error) {
+        console.error("Storage read error:", error);
+        return [];
+    }
 }
 
-function openRequestedTab() {
-    const requestedTab = location.hash.replace("#", "");
+function writeStorage(key, data) {
+    try {
+        localStorage.setItem(
+            key,
+            JSON.stringify(data)
+        );
+
+        return true;
+
+    } catch (error) {
+        console.error("Storage write error:", error);
+        return false;
+    }
+}
+
+/* =========================================================
+   PROFILE AVATAR
+========================================================= */
+
+function renderAvatar(user) {
+    if (!elements.avatar) return;
+
+    const name = getDisplayName(user);
+
+    const avatarUrl =
+        user.user_metadata?.avatar_url ||
+        user.user_metadata?.picture ||
+        "";
+
+    if (avatarUrl) {
+        const safeUrl = escapeHTML(avatarUrl);
+
+        elements.avatar.innerHTML = `
+            <img
+                src="${safeUrl}"
+                alt="${escapeHTML(name)}"
+                class="profile-avatar-image"
+                referrerpolicy="no-referrer"
+            >
+        `;
+
+        const image = elements.avatar.querySelector("img");
+
+        image.addEventListener("error", () => {
+            elements.avatar.textContent = getInitials(name);
+        }, { once: true });
+
+    } else {
+        elements.avatar.textContent = getInitials(name);
+    }
+}
+
+/* =========================================================
+   PROFILE INFORMATION
+========================================================= */
+
+function renderProfile(user) {
+    const name = getDisplayName(user);
+
+    if (elements.name) {
+        elements.name.textContent = name;
+    }
+
+    if (elements.email) {
+        elements.email.textContent = user.email || "";
+    }
+
+    if (elements.accountName) {
+        elements.accountName.textContent = name;
+    }
+
+    if (elements.accountEmail) {
+        elements.accountEmail.textContent = user.email || "";
+    }
+
+    if (elements.accountStatus) {
+        elements.accountStatus.textContent =
+            user.email_confirmed_at
+                ? "Verified Account"
+                : "Email Not Yet Verified";
+    }
+
+    if (elements.accountCreated) {
+        elements.accountCreated.textContent =
+            formatDate(user.created_at);
+    }
+
+    renderAvatar(user);
+}
+
+/* =========================================================
+   CONTENT CARD GENERATOR
+========================================================= */
+
+function createContentCard(item, listType) {
+    if (!item || !item.id || !item.title) {
+        return "";
+    }
+
+    const title = escapeHTML(item.title);
+
+    const poster = getPoster(item);
+
+    const type = getContentType(item);
+
+    const safePoster = escapeHTML(poster);
+
+    const url = getContentUrl(item);
+
+    const rating = Number(
+        item.vote_average ?? item.rating ?? 0
+    );
+
+    const ratingText = Number.isFinite(rating)
+        ? rating.toFixed(1)
+        : "N/A";
+
+    const label = type === "series" ? "SERIES" : "MOVIE";
+
+    return `
+        <article class="profile-content-card">
+
+            <a href="${escapeHTML(url)}" class="profile-card-link">
+
+                <div class="profile-card-poster">
+
+                    ${
+                        safePoster
+                            ? `
+                                <img
+                                    src="${safePoster}"
+                                    alt="${title}"
+                                    loading="lazy"
+                                    onerror="this.style.display='none'"
+                                >
+                            `
+                            : `
+                                <div class="profile-no-poster">
+                                    <i class="fa-solid fa-film"></i>
+                                </div>
+                            `
+                    }
+
+                    <span class="profile-card-type">
+                        ${label}
+                    </span>
+
+                    <div class="profile-card-overlay">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+
+                </div>
+
+                <div class="profile-card-details">
+
+                    <h3>${title}</h3>
+
+                    <div class="profile-card-meta">
+                        <span>
+                            <i class="fa-solid fa-star"></i>
+                            ${ratingText}
+                        </span>
+
+                        <span>${label}</span>
+                    </div>
+
+                </div>
+
+            </a>
+
+            <button
+                type="button"
+                class="profile-remove-btn"
+                data-remove-type="${listType}"
+                data-remove-id="${escapeHTML(item.id)}"
+                aria-label="Remove ${title}"
+                title="Remove from ${listType}"
+            >
+                <i class="fa-solid fa-trash"></i>
+            </button>
+
+        </article>
+    `;
+}
+
+/* =========================================================
+   RENDER FAVORITES
+========================================================= */
+
+function renderFavorites() {
+    if (!elements.favoritesGrid) return;
+
+    const favorites = readStorage(STORAGE_KEYS.favorites);
+
+    if (elements.favoritesCount) {
+        elements.favoritesCount.textContent =
+            favorites.length;
+    }
+
+    elements.favoritesGrid.innerHTML = favorites
+        .map(item => createContentCard(item, "favorites"))
+        .join("");
+
+    if (elements.favoritesEmpty) {
+        elements.favoritesEmpty.hidden =
+            favorites.length > 0;
+    }
+
+    elements.favoritesGrid.hidden =
+        favorites.length === 0;
+}
+
+/* =========================================================
+   RENDER WATCHLIST
+========================================================= */
+
+function renderWatchlist() {
+    if (!elements.watchlistGrid) return;
+
+    const watchlist = readStorage(STORAGE_KEYS.watchlist);
+
+    elements.watchlistGrid.innerHTML = watchlist
+        .map(item => createContentCard(item, "watchlist"))
+        .join("");
+
+    if (elements.watchlistEmpty) {
+        elements.watchlistEmpty.hidden =
+            watchlist.length > 0;
+    }
+
+    elements.watchlistGrid.hidden =
+        watchlist.length === 0;
+}
+
+/* =========================================================
+   REMOVE CONTENT FROM LISTS
+========================================================= */
+
+document.addEventListener("click", event => {
+    const button = event.target.closest(
+        ".profile-remove-btn"
+    );
+
+    if (!button) return;
+
+    const listType = button.dataset.removeType;
+    const itemId = button.dataset.removeId;
+
+    const key =
+        listType === "favorites"
+            ? STORAGE_KEYS.favorites
+            : STORAGE_KEYS.watchlist;
+
+    const items = readStorage(key);
+
+    const updatedItems = items.filter(
+        item => String(item.id) !== String(itemId)
+    );
+
+    if (!writeStorage(key, updatedItems)) {
+        return;
+    }
+
+    if (listType === "favorites") {
+        renderFavorites();
+    } else {
+        renderWatchlist();
+    }
+});
+
+/* =========================================================
+   PROFILE TAB NAVIGATION
+========================================================= */
+
+function setActiveTab(tab) {
+    const allowedTabs = [
+        "favorites",
+        "watchlist",
+        "account"
+    ];
+
+    if (!allowedTabs.includes(tab)) {
+        tab = "favorites";
+    }
+
+    activeTab = tab;
+
+    document.querySelectorAll("[data-tab]").forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.dataset.tab === tab
+        );
+    });
+
+    document.querySelectorAll(".profile-section").forEach(
+        section => {
+            section.classList.toggle(
+                "active",
+                section.id === `${tab}-section`
+            );
+        }
+    );
+
+    if (tab === "favorites") {
+        renderFavorites();
+    }
+
+    if (tab === "watchlist") {
+        renderWatchlist();
+    }
+
+    history.replaceState(
+        null,
+        "",
+        `#${tab}`
+    );
+}
+
+document.querySelectorAll("[data-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+        setActiveTab(button.dataset.tab);
+    });
+});
+
+/* =========================================================
+   INITIAL TAB
+========================================================= */
+
+function initializeTabs() {
+    const requestedTab = window.location.hash.replace("#", "");
 
     const allowedTabs = [
         "favorites",
@@ -333,31 +505,35 @@ function openRequestedTab() {
         "account"
     ];
 
-    if (!allowedTabs.includes(requestedTab)) return;
-
-    const tab = document.querySelector(
-        `.profile-tab[data-tab="${requestedTab}"]`
+    setActiveTab(
+        allowedTabs.includes(requestedTab)
+            ? requestedTab
+            : "favorites"
     );
-
-    if (tab) tab.click();
 }
 
 /* =========================================================
    LOGOUT
 ========================================================= */
 
-function connectLogout() {
-    elements.logout.addEventListener("click", logoutUser);
-}
+async function logout() {
+    if (!elements.logoutButton) return;
 
-async function logoutUser() {
     const confirmed = window.confirm(
         "Are you sure you want to sign out of CINEVA?"
     );
 
     if (!confirmed) return;
 
-    elements.logout.disabled = true;
+    elements.logoutButton.disabled = true;
+
+    const originalContent =
+        elements.logoutButton.innerHTML;
+
+    elements.logoutButton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Signing out...
+    `;
 
     try {
         const { error } = await supabase.auth.signOut();
@@ -367,34 +543,99 @@ async function logoutUser() {
         window.location.replace("login.html");
 
     } catch (error) {
-        console.error("CINEVA logout error:", error);
+        console.error("Logout error:", error);
 
-        window.alert(
+        alert(
+            error.message ||
             "Unable to sign out. Please try again."
         );
 
-        elements.logout.disabled = false;
+        elements.logoutButton.disabled = false;
+
+        elements.logoutButton.innerHTML =
+            originalContent;
+    }
+}
+
+if (elements.logoutButton) {
+    elements.logoutButton.addEventListener(
+        "click",
+        logout
+    );
+}
+
+/* =========================================================
+   PAGE LOADING / ERROR STATES
+========================================================= */
+
+function showLoading() {
+    if (elements.loading) {
+        elements.loading.hidden = false;
+    }
+
+    if (elements.error) {
+        elements.error.hidden = true;
+    }
+}
+
+function hideLoading() {
+    if (elements.loading) {
+        elements.loading.hidden = true;
+    }
+}
+
+function showError(message) {
+    hideLoading();
+
+    if (elements.error) {
+        elements.error.hidden = false;
+    }
+
+    if (elements.errorMessage) {
+        elements.errorMessage.textContent = message;
     }
 }
 
 /* =========================================================
-   UI STATES
+   LOAD PROFILE
 ========================================================= */
 
-function showLoading() {
-    elements.loading.hidden = false;
-    elements.error.hidden = true;
-}
+async function loadProfile() {
+    showLoading();
 
-function showProfile() {
-    elements.loading.hidden = true;
-    elements.error.hidden = true;
-}
+    try {
+        const { data, error } =
+            await supabase.auth.getUser();
 
-function showProfileError(message) {
-    elements.loading.hidden = true;
-    elements.error.hidden = false;
-    elements.errorMessage.textContent = message;
+        if (error) throw error;
+
+        if (!data.user) {
+            window.location.replace(
+                "login.html?redirect=profile.html"
+            );
+
+            return;
+        }
+
+        currentUser = data.user;
+
+        renderProfile(currentUser);
+
+        renderFavorites();
+
+        renderWatchlist();
+
+        initializeTabs();
+
+        hideLoading();
+
+    } catch (error) {
+        console.error("Profile loading error:", error);
+
+        showError(
+            "We couldn't load your profile. Please refresh the page or sign in again."
+        );
+    }
 }
 
 /* =========================================================
@@ -402,7 +643,31 @@ function showProfileError(message) {
 ========================================================= */
 
 supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT") {
+
+    if (event === "SIGNED_OUT" || !session) {
         window.location.replace("login.html");
     }
+
+    if (event === "USER_UPDATED" && session?.user) {
+        currentUser = session.user;
+        renderProfile(currentUser);
+    }
+
 });
+
+/* =========================================================
+   FOOTER YEAR
+========================================================= */
+
+if (elements.footerYear) {
+    elements.footerYear.textContent =
+        new Date().getFullYear();
+}
+
+/* =========================================================
+   INITIALIZE CINEVA PROFILE
+========================================================= */
+
+loadProfile();
+
+console.log("CINEVA profile system initialized.");
