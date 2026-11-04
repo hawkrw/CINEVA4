@@ -80,7 +80,7 @@ function getRedirectUrl() {
     ];
 
     if (!redirect) {
-        return "profile.html";
+       return "/";
     }
 
     try {
