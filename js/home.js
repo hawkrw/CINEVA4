@@ -1350,7 +1350,90 @@ async function initializeHome() {
 
 }
 
+/* =========================================================
+   CINEVA — OUR TRANSLATORS FROM SUPABASE
+========================================================= */
 
+async function loadOurTranslators() {
+    const track = document.getElementById("translatorsTrack");
+
+    if (!track) return;
+
+    try {
+        const [movies, series] = await Promise.all([
+            supabase
+                .from("movies")
+                .select("translator")
+                .eq("is_active", true)
+                .not("translator", "is", null),
+
+            supabase
+                .from("series")
+                .select("translator")
+                .eq("is_active", true)
+                .not("translator", "is", null)
+        ]);
+
+        if (movies.error) throw movies.error;
+        if (series.error) throw series.error;
+
+        const names = [
+            ...(movies.data || []),
+            ...(series.data || [])
+        ]
+            .map(item => item.translator?.trim())
+            .filter(Boolean);
+
+        const uniqueNames = [
+            ...new Set(names)
+        ].sort((a, b) => a.localeCompare(b));
+
+        if (!uniqueNames.length) {
+            track.innerHTML =
+                '<div class="translator-loading">No translators available yet.</div>';
+
+            track.style.animation = "none";
+            return;
+        }
+
+        const cards = uniqueNames.map(name => {
+            const initial = name.charAt(0).toUpperCase();
+
+            const safeName = name.replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+
+            return `
+                <div class="translator-card">
+                    <div class="translator-avatar">${initial}</div>
+                    <div class="translator-details">
+                        <h3>${safeName}</h3>
+                        <span>CINEVA Translator</span>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        // Duplicate cards for continuous scrolling
+        track.innerHTML = cards + cards;
+
+        if (uniqueNames.length < 2) {
+            track.style.animation = "none";
+        }
+
+    } catch (error) {
+        console.error("OUR TRANSLATORS:", error);
+
+        track.innerHTML =
+            '<div class="translator-loading">Unable to load translators.</div>';
+
+        track.style.animation = "none";
+    }
+}
 /* =========================================================
    32. START HOMEPAGE
 ========================================================= */
