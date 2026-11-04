@@ -606,6 +606,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 
 });
 
+
 /* =========================================================
    INITIAL SESSION CHECK
 ========================================================= */
@@ -618,8 +619,13 @@ async function initializeAuth() {
         if (error) throw error;
 
         if (data.session) {
-            redirectUser();
-            return;
+            console.log(
+                "CINEVA: Existing session detected.",
+                data.session.user.email
+            );
+
+            // Do not automatically redirect.
+            // Allow the user to access the login page.
         }
 
     } catch (error) {
