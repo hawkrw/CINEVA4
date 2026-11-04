@@ -438,11 +438,28 @@ function initializeLogout() {
 ========================================= */
 
 async function initializeDashboard() {
+    // Wait for Supabase to restore the saved session.
+    const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+    if (sessionError) {
+        console.error("Session restoration failed:", sessionError);
+        window.location.replace("/admin/");
+        return;
+    }
+
+    if (!sessionData.session) {
+        window.location.replace("/admin/");
+        return;
+    }
+
+    // Verify that the authenticated user is an administrator.
     const result = await verifyAdmin();
 
     if (!result.authorized) {
         console.error("Dashboard access denied:", result.reason);
-        window.location.replace(LOGIN_URL);
+
+        window.location.replace("/admin/");
         return;
     }
 
@@ -468,7 +485,3 @@ async function initializeDashboard() {
 
     console.log("CINEVA PRO dashboard initialized.");
 }
-
-initializeDashboard().catch(error => {
-    console.error("Dashboard initialization failed:", error);
-});
