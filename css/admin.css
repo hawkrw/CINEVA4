@@ -625,3 +625,28 @@
     color: #ff9bac;
     background: rgba(239,49,94,.12);
 }
+
+.form-message[data-type="success"] {
+    color: #65e5ae;
+}
+
+.form-message[data-type="error"] {
+    color: #ff829b;
+}
+
+.tmdb-result-card {
+    width: 100%;
+    padding: 0;
+    color: white;
+    text-align: left;
+    font-family: inherit;
+}
+
+.tmdb-result-card:focus-visible {
+    outline: 2px solid #a855f7;
+    outline-offset: 3px;
+}
+
+.tmdb-result-card img {
+    object-fit: cover;
+}
