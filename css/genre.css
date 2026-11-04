@@ -501,3 +501,80 @@ body {
 .genre-card-meta i {
     margin-right: 3px;
 }
+
+/* =========================================================
+   CINEVA PREMIUM PAGINATION
+========================================================= */
+
+.genre-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    width: 100%;
+    margin: 45px auto 65px;
+    padding: 10px 15px;
+}
+
+.genre-pagination[hidden] {
+    display: none !important;
+}
+
+.pagination-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 43px;
+    height: 43px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.045);
+    color: #d8d8e5;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.17);
+    border-color: #8b5cf6;
+    color: #ffffff;
+    transform: translateY(-3px);
+}
+
+.pagination-button.active {
+    background: linear-gradient(135deg, #8b5cf6, #6235ce);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 5px 20px rgba(124, 58, 237, 0.3);
+}
+
+.pagination-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pagination-dots {
+    color: #9994ae;
+    font-weight: 700;
+    padding: 0 3px;
+}
+
+@media (max-width: 480px) {
+    .genre-pagination {
+        gap: 6px;
+        margin: 30px auto 45px;
+    }
+
+    .pagination-button {
+        min-width: 36px;
+        height: 38px;
+        padding: 0 9px;
+        border-radius: 9px;
+        font-size: 13px;
+    }
+}
