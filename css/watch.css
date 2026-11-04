@@ -1,197 +1,1891 @@
 
-/* =========================================
-   CINEVA — WATCH PAGE STYLING
-========================================= */
+/* =========================================================
+   CINEVA PRO — WATCH PAGE
+   Premium dark navy / violet / emerald design
+========================================================= */
 
-.watch-header {
-    height: 75px;
-    padding: 0 5%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #101010;
-    border-bottom: 1px solid #292929;
+
+/* =========================================================
+   01. ROOT VARIABLES
+========================================================= */
+
+:root {
+    --watch-bg: #090b13;
+    --watch-bg-soft: #10131e;
+    --watch-card: #141927;
+    --watch-card-light: #1a2030;
+
+    --watch-border: rgba(255, 255, 255, 0.09);
+
+    --watch-text: #f5f6fa;
+    --watch-muted: #929bad;
+
+    --watch-primary: #a855f7;
+    --watch-primary-light: #c084fc;
+    --watch-primary-dark: #7c3aed;
+
+    --watch-green: #10b981;
+    --watch-green-dark: #059669;
+
+    --watch-gold: #f5bd4f;
+    --watch-red: #ef4444;
+
+    --watch-radius: 18px;
+    --watch-transition: 0.3s ease;
+
+    --watch-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.25);
 }
 
-.watch-header .logo {
-    color: #e50914;
-    font-size: 27px;
-    font-weight: 900;
+
+/* =========================================================
+   02. GLOBAL WATCH PAGE
+========================================================= */
+
+.watch-page-body {
+    min-height: 100vh;
+    margin: 0;
+    background:
+        radial-gradient(
+            circle at 85% 5%,
+            rgba(124, 58, 237, 0.09),
+            transparent 28%
+        ),
+        var(--watch-bg);
+
+    color: var(--watch-text);
+
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden;
+}
+
+.watch-page-body *,
+.watch-page-body *::before,
+.watch-page-body *::after {
+    box-sizing: border-box;
+}
+
+.watch-page-body button,
+.watch-page-body input,
+.watch-page-body textarea,
+.watch-page-body select {
+    font: inherit;
+}
+
+.watch-page-body button {
+    cursor: pointer;
+}
+
+.watch-page-body a {
     text-decoration: none;
-    letter-spacing: 2px;
-}
-
-.back-home {
-    color: #ddd;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.back-home:hover {
-    color: #e50914;
+    color: inherit;
 }
 
 .watch-page {
-    width: min(1200px, 92%);
-    margin: 35px auto;
+    width: min(1440px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 35px 0 90px;
 }
 
-.watch-loading,
-.watch-error {
-    padding: 20px;
-    text-align: center;
-    color: #ccc;
+.watch-content {
+    display: block;
+    animation: watchFadeIn 0.5s ease;
 }
 
-.watch-error {
-    color: #ff5555;
+@keyframes watchFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.video-section {
+
+/* =========================================================
+   03. HEADER
+========================================================= */
+
+.watch-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
     width: 100%;
-    background: #000;
-    border-radius: 12px;
+    background: rgba(9, 11, 19, 0.92);
+
+    border-bottom: 1px solid var(--watch-border);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.watch-header-inner {
+    width: min(1440px, calc(100% - 48px));
+    min-height: 76px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.watch-logo {
+    display: inline-flex;
+    align-items: center;
+
+    font-family: "Outfit", sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+
+    color: #fff;
+}
+
+.watch-logo span {
+    color: var(--watch-primary-light);
+}
+
+.watch-navigation {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.watch-navigation a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    color: var(--watch-muted);
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: var(--watch-transition);
+}
+
+.watch-navigation a:hover {
+    color: white;
+}
+
+.watch-navigation i {
+    color: var(--watch-primary-light);
+}
+
+.back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 11px 17px;
+
+    border: 1px solid var(--watch-border);
+    border-radius: 10px;
+
+    color: var(--watch-text);
+    background: rgba(255, 255, 255, 0.035);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: var(--watch-transition);
+}
+
+.back-home:hover {
+    background: var(--watch-primary-dark);
+    border-color: var(--watch-primary);
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   04. LOADING & ERROR
+========================================================= */
+
+.watch-loading {
+    min-height: 60vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+
+    color: var(--watch-muted);
+    text-align: center;
+}
+
+.watch-loader {
+    width: 48px;
+    height: 48px;
+
+    border: 4px solid rgba(168, 85, 247, 0.15);
+    border-top-color: var(--watch-primary-light);
+
+    border-radius: 50%;
+
+    animation: watchSpin 0.8s linear infinite;
+}
+
+@keyframes watchSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.watch-error {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 45px 25px;
+
+    text-align: center;
+
+    background: var(--watch-card);
+    border: 1px solid var(--watch-border);
+    border-radius: var(--watch-radius);
+}
+
+.watch-error > i {
+    color: var(--watch-red);
+    font-size: 45px;
+}
+
+.watch-error h2 {
+    margin: 18px 0 10px;
+}
+
+.watch-error p {
+    color: var(--watch-muted);
+    line-height: 1.7;
+}
+
+.watch-error-btn {
+    display: inline-flex;
+    margin-top: 18px;
+    padding: 12px 22px;
+
+    border-radius: 9px;
+    background: var(--watch-primary-dark);
+    color: white;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   05. PLAYER SECTION
+========================================================= */
+
+.player-section {
+    margin-bottom: 35px;
+}
+
+.player-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 15px;
+}
+
+.player-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+
+    color: var(--watch-muted);
+    font-size: 12px;
+}
+
+.player-breadcrumb a {
+    color: var(--watch-primary-light);
+}
+
+.player-breadcrumb a:hover {
+    color: white;
+}
+
+.player-breadcrumb i {
+    font-size: 9px;
+    opacity: 0.5;
+}
+
+.player-live-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    color: var(--watch-primary-light);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.player-live-label span {
+    width: 7px;
+    height: 7px;
+
+    background: var(--watch-green);
+    border-radius: 50%;
+
+    box-shadow: 0 0 12px var(--watch-green);
+}
+
+.video-player-wrapper {
+    position: relative;
+
+    width: 100%;
+    aspect-ratio: 16 / 9;
+
+    max-height: 760px;
+
     overflow: hidden;
-    border: 1px solid #303030;
+
+    background: #000;
+
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: 18px;
+
+    box-shadow:
+        0 20px 65px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(124, 58, 237, 0.07);
 }
 
 .video-player {
     display: block;
+
     width: 100%;
-    max-height: 680px;
-    aspect-ratio: 16 / 9;
+    height: 100%;
+
+    object-fit: contain;
     background: #000;
 }
 
-.watch-details {
+.player-empty {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
     display: flex;
-    gap: 25px;
-    margin: 35px 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(124, 58, 237, 0.2),
+            transparent 55%
+        ),
+        #080910;
+
+    text-align: center;
+}
+
+.player-empty[hidden] {
+    display: none !important;
+}
+
+.player-empty > i {
+    color: var(--watch-primary-light);
+    font-size: 65px;
+    margin-bottom: 15px;
+}
+
+.player-empty h3 {
+    font-family: "Outfit", sans-serif;
+    font-size: 24px;
+    margin: 0 0 10px;
+}
+
+.player-empty p {
+    color: var(--watch-muted);
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   06. PLAYER ACTION BAR
+========================================================= */
+
+.player-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    margin-top: 17px;
+    padding: 17px 20px;
+
+    background: var(--watch-card);
+    border: 1px solid var(--watch-border);
+    border-radius: 14px;
+}
+
+.player-action-left,
+.player-action-right {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.player-action-btn {
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 0 21px;
+
+    border: 0;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    transition: var(--watch-transition);
+}
+
+.primary-watch-btn {
+    color: #fff;
+
+    background:
+        linear-gradient(
+            120deg,
+            var(--watch-primary-dark),
+            var(--watch-primary)
+        );
+
+    box-shadow: 0 5px 20px rgba(124, 58, 237, 0.2);
+}
+
+.primary-watch-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+}
+
+.download-watch-btn {
+    color: #042c20;
+    background: var(--watch-green);
+}
+
+.download-watch-btn:hover {
+    background: #34d399;
+    transform: translateY(-2px);
+}
+
+.engagement-btn {
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 0 13px;
+
+    border: 1px solid var(--watch-border);
+    border-radius: 9px;
+
+    color: var(--watch-muted);
+    background: rgba(255, 255, 255, 0.035);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition: var(--watch-transition);
+}
+
+.engagement-btn:hover {
+    color: white;
+    border-color: var(--watch-primary);
+    background: rgba(168, 85, 247, 0.12);
+}
+
+.engagement-btn i {
+    font-size: 15px;
+}
+
+#like-count {
+    color: var(--watch-primary-light);
+}
+
+.engagement-btn.liked {
+    color: #fb7185;
+    border-color: rgba(251, 113, 133, 0.35);
+    background: rgba(251, 113, 133, 0.09);
+}
+
+
+/* =========================================================
+   07. CONTENT DETAILS
+========================================================= */
+
+.watch-details-section {
+    margin: 35px 0 50px;
+}
+
+.watch-details {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    align-items: start;
+    gap: 28px;
+
+    padding: 25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(26, 32, 48, 0.9),
+            rgba(16, 19, 30, 0.95)
+        );
+
+    border: 1px solid var(--watch-border);
+    border-radius: var(--watch-radius);
+}
+
+.watch-poster {
+    position: relative;
+
+    width: 100%;
+    aspect-ratio: 2 / 3;
+
+    overflow: hidden;
+
+    background: #1b2030;
+    border-radius: 13px;
+
+    box-shadow: var(--watch-shadow);
 }
 
 .watch-poster img {
-    width: 160px;
-    height: 230px;
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
     object-fit: cover;
-    border-radius: 9px;
+}
+
+.watch-type-badge {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+
+    padding: 6px 10px;
+
+    background: var(--watch-primary-dark);
+    color: white;
+
+    border-radius: 6px;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
 .watch-information {
-    flex: 1;
+    min-width: 0;
+}
+
+.watch-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.watch-small-label {
+    display: block;
+    margin-bottom: 9px;
+
+    color: var(--watch-primary-light);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
 }
 
 .watch-information h1 {
-    margin: 10px 0;
-    color: #fff;
-    font-size: clamp(25px, 4vw, 38px);
+    margin: 0;
+
+    color: white;
+
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(27px, 4vw, 43px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1px;
 }
 
-.watch-information > span {
-    color: #e50914;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
+.watch-quality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    padding: 9px 12px;
+
+    color: var(--watch-gold);
+    background: rgba(245, 189, 79, 0.1);
+    border: 1px solid rgba(245, 189, 79, 0.2);
+    border-radius: 8px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
 }
 
 .watch-meta {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
-    color: #aaa;
-    font-size: 13px;
-    margin: 15px 0;
-}
-
-#watch-rating {
-    color: #ffc107;
-}
-
-#watch-description {
-    color: #bbb;
-    line-height: 1.8;
-    max-width: 800px;
-}
-
-.related-section {
-    margin-top: 45px;
-}
-
-.related-section h2 {
-    color: white;
-    margin-bottom: 25px;
-}
-
-#episodes-container {
-    margin: 35px 0;
-}
-
-#episodes-container h2 {
-    color: white;
-    margin-bottom: 20px;
-}
-
-.episode-list {
-    display: grid;
     gap: 10px;
+
+    margin: 19px 0;
 }
 
-.episode-item {
+.watch-meta span {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 11px;
+
+    color: #c5ccda;
+    background: rgba(255, 255, 255, 0.055);
+
+    border-radius: 6px;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.watch-meta span:empty {
+    display: none;
+}
+
+.watch-description {
+    max-width: 900px;
+
+    margin: 0;
+
+    color: var(--watch-muted);
+
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.watch-information-footer {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 16px;
-    background: #191919;
-    border: 1px solid #303030;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    text-align: left;
+    flex-wrap: wrap;
+    gap: 22px;
+
+    margin-top: 25px;
+    padding-top: 17px;
+
+    border-top: 1px solid var(--watch-border);
 }
 
-.episode-item strong {
+.watch-information-footer span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--watch-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.watch-information-footer i {
+    color: var(--watch-green);
+}
+
+
+/* =========================================================
+   08. SHARED SECTION HEADINGS
+========================================================= */
+
+.watch-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 24px;
+}
+
+.section-eyebrow {
+    display: block;
+    margin-bottom: 8px;
+
+    color: var(--watch-primary-light);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.watch-section-heading h2 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+
+    margin: 0;
+
+    color: white;
+
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(23px, 3vw, 29px);
+    font-weight: 800;
+}
+
+.watch-section-heading h2 > i {
+    color: var(--watch-primary-light);
+    font-size: 21px;
+}
+
+.watch-section-heading p {
+    margin: 9px 0 0;
+
+    color: var(--watch-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   09. MOVIE PARTS
+========================================================= */
+
+.movie-parts-section {
+    margin: 50px 0;
+    padding: 27px;
+
+    background: var(--watch-bg-soft);
+
+    border: 1px solid var(--watch-border);
+    border-radius: var(--watch-radius);
+}
+
+.movie-parts-section[hidden],
+.episodes-section[hidden] {
+    display: none !important;
+}
+
+.movie-parts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.movie-part-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    min-width: 0;
+    padding: 16px;
+
+    background: var(--watch-card);
+    border: 1px solid var(--watch-border);
+    border-radius: 13px;
+
+    transition: var(--watch-transition);
+}
+
+.movie-part-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(168, 85, 247, 0.5);
+    background: var(--watch-card-light);
+}
+
+.movie-part-number,
+.episode-number {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7c3aed,
+            #a855f7
+        );
+
+    border-radius: 12px;
+
+    font-family: "Outfit", sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.movie-part-info,
+.episode-information {
+    min-width: 0;
     flex: 1;
 }
 
-.episode-item:hover,
-.episode-item.active {
-    border-color: #e50914;
-    background: #242424;
+.movie-part-info h3,
+.episode-information h3 {
+    overflow: hidden;
+    margin: 0;
+
+    color: white;
+
+    font-family: "Outfit", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.player-error {
-    color: #ff7777;
-    margin: 12px 0;
+.movie-part-info p,
+.episode-information p {
+    margin: 7px 0 0;
+
+    color: var(--watch-muted);
+    font-size: 11px;
 }
 
-.player-message {
-    min-height: 200px;
+.movie-part-actions,
+.episode-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.part-watch-btn,
+.part-download-btn,
+.episode-watch-btn,
+.episode-download-btn {
+    min-height: 35px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 0 12px;
+
+    border: 0;
+    border-radius: 7px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    transition: var(--watch-transition);
+}
+
+.part-watch-btn,
+.episode-watch-btn {
+    color: white;
+    background: var(--watch-primary-dark);
+}
+
+.part-watch-btn:hover,
+.episode-watch-btn:hover {
+    background: var(--watch-primary);
+}
+
+.part-download-btn,
+.episode-download-btn {
+    color: #032d20;
+    background: var(--watch-green);
+}
+
+.part-download-btn:hover,
+.episode-download-btn:hover {
+    background: #34d399;
+}
+
+
+/* =========================================================
+   10. SERIES EPISODES
+========================================================= */
+
+.episodes-section {
+    margin: 50px 0;
+    padding: 27px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20, 25, 39, 0.95),
+            rgba(13, 16, 26, 0.95)
+        );
+
+    border: 1px solid var(--watch-border);
+    border-radius: var(--watch-radius);
+}
+
+.episode-total {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 10px 13px;
+
+    color: var(--watch-primary-light);
+    background: rgba(168, 85, 247, 0.1);
+
+    border: 1px solid rgba(168, 85, 247, 0.18);
+    border-radius: 9px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.season-filter-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 13px;
+
+    margin-bottom: 22px;
+}
+
+.season-filter-wrapper label {
+    color: var(--watch-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.season-selector {
+    min-width: 180px;
+    min-height: 42px;
+
+    padding: 0 35px 0 13px;
+
+    color: white;
+    background: var(--watch-card);
+
+    border: 1px solid var(--watch-border);
+    border-radius: 8px;
+
+    outline: none;
+    cursor: pointer;
+}
+
+.season-selector:focus {
+    border-color: var(--watch-primary);
+}
+
+.season-selector option {
+    color: white;
+    background: var(--watch-card);
+}
+
+.episodes-grid {
     display: grid;
-    place-content: center;
-    text-align: center;
-    color: #ccc;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
 }
 
-@media (max-width: 600px) {
+.episode-card {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    gap: 17px;
+    padding: 17px;
+
+    background: #10131c;
+    border: 1px solid var(--watch-border);
+    border-radius: 14px;
+
+    transition: var(--watch-transition);
+}
+
+.episode-card:hover {
+    border-color: rgba(168, 85, 247, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.episode-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+.episode-card .episode-number {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 11px;
+
+    font-size: 14px;
+}
+
+.episode-information h3 {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.episode-information p {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+}
+
+.episode-description {
+    display: -webkit-box;
+    overflow: hidden;
+
+    margin: 0;
+
+    color: var(--watch-muted);
+
+    font-size: 11px;
+    line-height: 1.7;
+
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.episode-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+}
+
+.episode-watch-btn {
+    width: 100%;
+    min-height: 39px;
+}
+
+.episode-download-btn {
+    width: 40px;
+    min-height: 39px;
+
+    padding: 0;
+}
+
+.episode-card.active {
+    border-color: var(--watch-primary);
+    background: rgba(124, 58, 237, 0.09);
+}
+
+.episode-card.active .episode-number {
+    background: var(--watch-green);
+    color: #042c20;
+}
+
+
+/* =========================================================
+   11. COMMENTS
+========================================================= */
+
+.comments-section {
+    margin: 65px 0;
+}
+
+.comments-count {
+    color: var(--watch-muted);
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.comment-form-card {
+    padding: 25px;
+
+    background: var(--watch-card);
+    border: 1px solid var(--watch-border);
+    border-radius: 14px;
+}
+
+.comment-form-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 24px;
+    padding-bottom: 17px;
+
+    border-bottom: 1px solid var(--watch-border);
+}
+
+.comment-form-heading > i {
+    color: var(--watch-gold);
+    font-size: 19px;
+}
+
+.comment-form-heading h3 {
+    margin: 0;
+
+    color: white;
+
+    font-family: "Outfit", sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.comment-field {
+    margin-bottom: 18px;
+}
+
+.comment-field label {
+    display: block;
+    margin-bottom: 9px;
+
+    color: #d8dce5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.comment-field label span {
+    color: var(--watch-gold);
+}
+
+.comment-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.comment-label-row > span {
+    color: var(--watch-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.comment-field input,
+.comment-field textarea {
+    display: block;
+
+    width: 100%;
+
+    padding: 13px 14px;
+
+    color: white;
+    background: #0e111a;
+
+    border: 1px solid var(--watch-border);
+    border-radius: 9px;
+
+    outline: none;
+
+    font-size: 13px;
+
+    transition: var(--watch-transition);
+}
+
+.comment-field input {
+    height: 46px;
+}
+
+.comment-field textarea {
+    min-height: 125px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.comment-field input::placeholder,
+.comment-field textarea::placeholder {
+    color: #737d90;
+}
+
+.comment-field input:focus,
+.comment-field textarea:focus {
+    border-color: var(--watch-primary);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.post-comment-btn {
+    width: 100%;
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    padding: 12px 20px;
+
+    color: white;
+    background:
+        linear-gradient(
+            110deg,
+            #7c3aed,
+            #a855f7
+        );
+
+    border: 0;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    transition: var(--watch-transition);
+}
+
+.post-comment-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+.post-comment-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.comment-feedback {
+    margin: 12px 0 0;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.comment-feedback:empty {
+    display: none;
+}
+
+.comment-feedback.success {
+    color: var(--watch-green);
+}
+
+.comment-feedback.error {
+    color: #fb7185;
+}
+
+
+/* COMMENTS LIST */
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+
+    margin-top: 22px;
+}
+
+.comment-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+
+    padding: 18px;
+
+    background: var(--watch-bg-soft);
+    border: 1px solid var(--watch-border);
+    border-radius: 12px;
+}
+
+.comment-avatar {
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: white;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+
+    border-radius: 50%;
+
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.comment-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-user-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.comment-user-row h4 {
+    margin: 0;
+
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.comment-date {
+    color: var(--watch-muted);
+    font-size: 10px;
+}
+
+.comment-text {
+    margin: 9px 0 0;
+
+    color: #bdc5d4;
+
+    font-size: 12px;
+    line-height: 1.8;
+
+    overflow-wrap: anywhere;
+}
+
+.comments-empty {
+    padding: 30px 15px;
+
+    color: var(--watch-muted);
+    background: var(--watch-bg-soft);
+
+    border: 1px dashed var(--watch-border);
+    border-radius: 12px;
+
+    text-align: center;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   12. RELATED CONTENT
+========================================================= */
+
+.related-section {
+    margin: 70px 0 20px;
+}
+
+.related-view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    flex-shrink: 0;
+
+    color: var(--watch-primary-light);
+    font-size: 12px;
+    font-weight: 700;
+
+    transition: var(--watch-transition);
+}
+
+.related-view-all:hover {
+    color: white;
+    gap: 13px;
+}
+
+.related-grid {
+    width: 100%;
+}
+
+
+/* =========================================================
+   13. FOOTER
+========================================================= */
+
+.watch-footer {
+    margin-top: 70px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111523,
+            #090b13
+        );
+
+    border-top: 1px solid var(--watch-border);
+}
+
+.watch-footer-inner {
+    width: min(1440px, calc(100% - 48px));
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 45px;
+
+    padding: 60px 0 45px;
+}
+
+.footer-brand p {
+    max-width: 340px;
+
+    margin: 17px 0 0;
+
+    color: var(--watch-muted);
+
+    font-size: 12px;
+    line-height: 1.9;
+}
+
+.footer-links h3,
+.footer-social h3 {
+    margin: 5px 0 20px;
+
+    color: white;
+
+    font-family: "Outfit", sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.footer-links a {
+    color: var(--watch-muted);
+    font-size: 12px;
+
+    transition: var(--watch-transition);
+}
+
+.footer-links a:hover {
+    color: var(--watch-primary-light);
+    transform: translateX(3px);
+}
+
+.footer-social-links {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.footer-social-links a {
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid var(--watch-border);
+    border-radius: 10px;
+
+    transition: var(--watch-transition);
+}
+
+.footer-social-links a:hover {
+    color: white;
+    background: var(--watch-primary-dark);
+    border-color: var(--watch-primary);
+    transform: translateY(-3px);
+}
+
+.watch-footer-bottom {
+    width: min(1440px, calc(100% - 48px));
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+
+    padding: 20px 0;
+
+    border-top: 1px solid var(--watch-border);
+}
+
+.watch-footer-bottom p,
+.watch-footer-bottom > span {
+    margin: 0;
+
+    color: var(--watch-muted);
+    font-size: 11px;
+}
+
+.watch-footer-bottom > span i {
+    color: #fb7185;
+    margin-left: 5px;
+}
+
+
+/* =========================================================
+   14. BACK TO TOP
+========================================================= */
+
+.back-to-top {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 900;
+
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    background: var(--watch-primary-dark);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 13px;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+
+    transition: var(--watch-transition);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: var(--watch-primary);
+    transform: translateY(-4px);
+}
+
+
+/* =========================================================
+   15. RESPONSIVE — TABLETS
+========================================================= */
+
+@media (max-width: 1050px) {
+
+    .episodes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .watch-footer-inner {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 35px;
+    }
+
+    .movie-part-card {
+        flex-wrap: wrap;
+    }
+
+    .movie-part-actions {
+        width: 100%;
+    }
+
+    .movie-part-actions button {
+        flex: 1;
+    }
+
+}
+
+
+/* =========================================================
+   16. RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
     .watch-page {
-        width: 94%;
-        margin: 20px auto;
+        width: calc(100% - 28px);
+        padding-top: 22px;
+    }
+
+    .watch-header-inner {
+        width: calc(100% - 28px);
+        min-height: 65px;
+    }
+
+    .watch-logo {
+        font-size: 25px;
+    }
+
+    .watch-navigation {
+        display: none;
+    }
+
+    .back-home {
+        padding: 9px 11px;
+        font-size: 11px;
+    }
+
+    .player-topbar {
+        align-items: flex-start;
+    }
+
+    .player-live-label {
+        font-size: 8px;
+    }
+
+    .video-player-wrapper {
+        aspect-ratio: 16 / 9;
+        border-radius: 11px;
+    }
+
+    .player-action-bar {
+        align-items: stretch;
+        padding: 13px;
+    }
+
+    .player-action-left,
+    .player-action-right {
+        width: 100%;
+    }
+
+    .player-action-left {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .player-action-btn {
+        padding: 0 9px;
+        font-size: 11px;
+    }
+
+    .player-action-right {
+        justify-content: flex-start;
     }
 
     .watch-details {
+        grid-template-columns: 105px minmax(0, 1fr);
         gap: 15px;
+        padding: 15px;
     }
 
-    .watch-poster img {
-        width: 105px;
-        height: 155px;
+    .watch-title-row {
+        display: block;
+    }
+
+    .watch-information h1 {
+        font-size: 23px;
+    }
+
+    .watch-small-label {
+        font-size: 8px;
+    }
+
+    .watch-quality-badge {
+        display: inline-flex;
+        margin-top: 12px;
+        padding: 6px 8px;
+        font-size: 8px;
     }
 
     .watch-meta {
-        gap: 9px;
+        gap: 6px;
+        margin: 12px 0;
     }
 
-    .episode-item {
+    .watch-meta span {
+        padding: 5px 7px;
+        font-size: 9px;
+    }
+
+    .watch-description {
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .watch-information-footer {
         gap: 10px;
+        margin-top: 14px;
+        padding-top: 12px;
+    }
+
+    .watch-information-footer span {
+        font-size: 9px;
+    }
+
+    .watch-section-heading {
+        align-items: flex-start;
+    }
+
+    .watch-section-heading h2 {
+        font-size: 22px;
+    }
+
+    .movie-parts-section,
+    .episodes-section {
+        padding: 17px;
+    }
+
+    .movie-parts-grid,
+    .episodes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .movie-part-card {
+        flex-wrap: nowrap;
+    }
+
+    .movie-part-actions {
+        width: auto;
+    }
+
+    .movie-part-actions button {
+        flex: initial;
+    }
+
+    .episode-total {
+        font-size: 9px;
+        padding: 8px;
+    }
+
+    .comment-form-card {
+        padding: 17px;
+    }
+
+    .related-view-all {
+        font-size: 10px;
+    }
+
+    .watch-footer-inner {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 30px 20px;
+        padding: 40px 0 30px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .watch-footer-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 17px 0;
+    }
+
+}
+
+
+/* =========================================================
+   17. RESPONSIVE — SMALL PHONES
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .watch-page {
+        width: calc(100% - 20px);
+    }
+
+    .watch-header-inner {
+        width: calc(100% - 20px);
+    }
+
+    .back-home span {
+        display: none;
+    }
+
+    .back-home {
+        width: 38px;
+        height: 38px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .player-breadcrumb {
+        font-size: 10px;
+    }
+
+    .player-live-label {
+        display: none;
+    }
+
+    .watch-details {
+        grid-template-columns: 85px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .watch-information h1 {
+        font-size: 19px;
+    }
+
+    .watch-meta span {
+        font-size: 8px;
+    }
+
+    .watch-information-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .movie-part-card {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .movie-part-number {
+        width: 37px;
+        height: 37px;
+    }
+
+    .movie-part-info h3 {
+        font-size: 12px;
+    }
+
+    .movie-part-actions {
+        gap: 5px;
+    }
+
+    .part-watch-btn,
+    .part-download-btn {
+        padding: 0 8px;
+        font-size: 9px;
+    }
+
+    .episode-card {
         padding: 13px;
     }
+
+    .watch-footer-inner {
+        gap: 25px 13px;
+    }
+
+}
+
+
+/* =========================================================
+   18. ACCESSIBILITY
+========================================================= */
+
+.watch-page-body button:focus-visible,
+.watch-page-body a:focus-visible,
+.watch-page-body input:focus-visible,
+.watch-page-body textarea:focus-visible,
+.watch-page-body select:focus-visible {
+    outline: 2px solid var(--watch-primary-light);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .watch-page-body *,
+    .watch-page-body *::before,
+    .watch-page-body *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
 }
