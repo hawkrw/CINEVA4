@@ -261,46 +261,235 @@
 
                 </section>
 
-                <!-- FUTURE MANAGEMENT PAGES -->
-                <section class="dashboard-page" id="moviesPage">
-                    <div class="page-placeholder">
-                        <div>▣</div>
-                        <h2>Movies Management</h2>
-                        <p>Movie management will be built in the next step.</p>
-                    </div>
-                </section>
+              
+<!-- =========================================
+     MOVIES MANAGEMENT
+========================================= -->
+<section class="dashboard-page" id="moviesPage">
 
-                <section class="dashboard-page" id="seriesPage">
-                    <div class="page-placeholder">
-                        <div>▤</div>
-                        <h2>Series Management</h2>
-                        <p>Series management will be built separately.</p>
-                    </div>
-                </section>
+    <div class="management-heading">
+        <div>
+            <h2>Movies Management</h2>
+            <p>Add, edit, organize and manage your movie library.</p>
+        </div>
 
-                <section class="dashboard-page" id="categoriesPage">
-                    <div class="page-placeholder">
-                        <div>▦</div>
-                        <h2>Categories Management</h2>
-                        <p>Category management will be built separately.</p>
-                    </div>
-                </section>
+        <button type="button" id="addMovieBtn" class="primary-btn">
+            + Add New Movie
+        </button>
+    </div>
 
-                <section class="dashboard-page" id="analyticsPage">
-                    <div class="page-placeholder">
-                        <div>◷</div>
-                        <h2>Analytics</h2>
-                        <p>Platform analytics will be added later.</p>
-                    </div>
-                </section>
+    <div class="management-toolbar">
+        <input
+            type="search"
+            id="movieSearch"
+            placeholder="Search movies by title..."
+        >
 
-                <section class="dashboard-page" id="settingsPage">
-                    <div class="page-placeholder">
-                        <div>⚙</div>
-                        <h2>Settings</h2>
-                        <p>Admin settings will be added later.</p>
-                    </div>
-                </section>
+        <select id="movieCategoryFilter">
+            <option value="">All Categories</option>
+        </select>
+
+        <select id="movieStatusFilter">
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+        </select>
+
+        <button type="button" id="refreshMoviesBtn">
+            Refresh
+        </button>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <div>
+                <h3>All Movies</h3>
+                <p id="movieResultsCount">Loading movies...</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Movie</th>
+                        <th>Category</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Featured</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="moviesTable">
+                    <tr>
+                        <td colspan="6" class="table-loading">
+                            Loading movies...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     SERIES MANAGEMENT
+========================================= -->
+<section class="dashboard-page" id="seriesPage">
+
+    <div class="management-heading">
+        <div>
+            <h2>Series Management</h2>
+            <p>Manage your series, seasons and episodes.</p>
+        </div>
+
+        <button type="button" id="addSeriesBtn" class="primary-btn">
+            + Add New Series
+        </button>
+    </div>
+
+    <div class="management-toolbar">
+        <input
+            type="search"
+            id="seriesSearch"
+            placeholder="Search series by title..."
+        >
+
+        <select id="seriesStatusFilter">
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+        </select>
+
+        <button type="button" id="refreshSeriesBtn">
+            Refresh
+        </button>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <div>
+                <h3>All Series</h3>
+                <p id="seriesResultsCount">Loading series...</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Series</th>
+                        <th>Category</th>
+                        <th>Year</th>
+                        <th>Seasons</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="seriesTable">
+                    <tr>
+                        <td colspan="6" class="table-loading">
+                            Loading series...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- EPISODE MANAGEMENT -->
+    <div class="dashboard-panel" id="episodeManagementPanel" hidden>
+
+        <div class="panel-header">
+            <div>
+                <h3 id="selectedSeriesTitle">Series Episodes</h3>
+                <p>Manage seasons and episodes for this series.</p>
+            </div>
+
+            <button type="button" id="closeEpisodeManager">
+                Back to Series
+            </button>
+        </div>
+
+        <div class="management-toolbar">
+            <select id="episodeSeasonFilter">
+                <option value="">All Seasons</option>
+            </select>
+
+            <button type="button" id="addEpisodeBtn" class="primary-btn">
+                + Add Episode
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Episode</th>
+                        <th>Season</th>
+                        <th>Title</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Final</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="episodesTable">
+                    <tr>
+                        <td colspan="7" class="table-loading">
+                            Select a series to manage episodes.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     CATEGORIES
+========================================= -->
+<section class="dashboard-page" id="categoriesPage">
+    <div class="page-placeholder">
+        <div>▦</div>
+        <h2>Categories Management</h2>
+        <p>Category management will be added in a later stage.</p>
+    </div>
+</section>
+
+
+<!-- =========================================
+     ANALYTICS
+========================================= -->
+<section class="dashboard-page" id="analyticsPage">
+    <div class="page-placeholder">
+        <div>◷</div>
+        <h2>Analytics</h2>
+        <p>Platform analytics will be added later.</p>
+    </div>
+</section>
+
+
+<!-- =========================================
+     SETTINGS
+========================================= -->
+<section class="dashboard-page" id="settingsPage">
+    <div class="page-placeholder">
+        <div>⚙</div>
+        <h2>Settings</h2>
+        <p>Admin settings will be added later.</p>
+    </div>
+</section>
+
 
                 <footer class="dashboard-footer">
                     <span>© <span id="currentYear"></span> CINEVA PRO</span>
