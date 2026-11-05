@@ -28,38 +28,111 @@
 </head>
 
 </body>
-    <!-- =================================
-         HEADER
-    ================================== -->
+   <!-- =========================================
+     CINEVA MAIN NAVIGATION
+========================================== -->
 
-    <header class="watch-header">
+<header class="main-header" id="mainHeader">
 
-        <div class="watch-header-inner">
+    <div class="navbar container">
 
-            <a href="index.html" class="watch-logo">
-                CINE<span>VA</span>
+        <!-- LOGO -->
+        <a href="index.html" class="logo">
+
+            <div class="logo-icon">
+                <i class="fa-solid fa-clapperboard"></i>
+            </div>
+
+            <div class="logo-text">
+                <h2>CINE<span>VA</span></h2>
+                <small>Unlimited Entertainment</small>
+            </div>
+
+        </a>
+
+        <!-- DESKTOP NAVIGATION -->
+        <nav class="nav-menu" id="navMenu">
+
+            <a href="index.html" class="nav-link">
+                <i class="fa-solid fa-house"></i>
+                Home
             </a>
 
-            <nav class="watch-navigation">
-                <a href="index.html">
-                    <i class="fa-solid fa-house"></i>
-                    Home
-                </a>
-
-                <a href="index.html#latestAdded">
-                    <i class="fa-solid fa-film"></i>
-                    Discover
-                </a>
-            </nav>
-
-            <a href="index.html" class="back-home">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Back Home</span>
+            <a href="genre.html?type=movie" class="nav-link">
+                <i class="fa-solid fa-film"></i>
+                Movies
             </a>
+
+            <a href="genre.html?type=series" class="nav-link">
+                <i class="fa-solid fa-tv"></i>
+                Series
+            </a>
+
+            <a href="genre.html?genre=animation" class="nav-link">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                Animation
+            </a>
+
+            <a href="index.html#categories" class="nav-link">
+                <i class="fa-solid fa-layer-group"></i>
+                Categories
+            </a>
+
+        </nav>
+
+        <!-- NAVIGATION ACTIONS -->
+        <div class="nav-actions">
+
+            <a href="profile.html#favorites"
+               class="nav-icon"
+               aria-label="Favorites">
+
+                <i class="fa-regular fa-heart"></i>
+
+            </a>
+
+            <button class="nav-icon notification-btn"
+                    id="notificationBtn"
+                    type="button"
+                    aria-label="Notifications">
+
+                <i class="fa-regular fa-bell"></i>
+                <span class="notification-dot"></span>
+
+            </button>
+
+            <button class="nav-icon theme-toggle"
+                    id="themeToggle"
+                    type="button"
+                    aria-label="Toggle theme">
+
+                <i class="fa-solid fa-sun"></i>
+
+            </button>
+
+            <a href="login.html"
+               class="sign-in-btn"
+               id="authButton">
+
+                <i class="fa-regular fa-user"></i>
+                <span>Sign In</span>
+
+            </a>
+
+            <button class="mobile-menu-btn"
+                    id="mobileMenuBtn"
+                    type="button"
+                    aria-label="Toggle navigation">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
 
         </div>
 
-    </header>
+    </div>
+
+</header>
 
 
     <!-- =================================
@@ -591,97 +664,130 @@
 
 </section>
 
-    <!-- =================================
-         FOOTER
-    ================================== -->
+    <!-- =========================================
+     CINEVA MAIN FOOTER
+========================================== -->
 
-    <footer class="watch-footer">
+<footer class="main-footer">
 
-        <div class="watch-footer-inner">
+    <div class="footer-container container">
 
-            <div class="footer-brand">
+        <!-- BRAND -->
+        <div class="footer-column footer-brand">
 
-                <a href="index.html" class="watch-logo">
-                    CINE<span>VA</span>
-                </a>
+            <a href="index.html" class="logo">
 
-                <p>
-                    Your world of movies and series.
-                    Discover, watch and enjoy entertainment
-                    all in one place.
-                </p>
-
-            </div>
-
-
-            <div class="footer-links">
-
-                <h3>Explore</h3>
-
-                <a href="index.html">Home</a>
-
-                <a href="index.html#latestAdded">Latest Movies</a>
-
-                <a href="index.html#allSeries">TV Series</a>
-
-                <a href="index.html#categories">Categories</a>
-
-            </div>
-
-
-            <div class="footer-links">
-
-                <h3>Discover</h3>
-
-                <a href="index.html#trending">Trending</a>
-
-                <a href="index.html#topRated">Top Rated</a>
-
-                <a href="index.html#allMovies">All Movies</a>
-
-            </div>
-
-
-            <div class="footer-social">
-
-                <h3>Follow CINEVA</h3>
-
-                <div class="footer-social-links">
-
-                    <a href="#" aria-label="Facebook">
-                        <i class="fa-brands fa-facebook-f"></i>
-                    </a>
-
-                    <a href="#" aria-label="Instagram">
-                        <i class="fa-brands fa-instagram"></i>
-                    </a>
-
-                    <a href="#" aria-label="Telegram">
-                        <i class="fa-brands fa-telegram"></i>
-                    </a>
-
+                <div class="logo-icon">
+                    <i class="fa-solid fa-clapperboard"></i>
                 </div>
 
+                <div class="logo-text">
+                    <h2>CINE<span>VA</span></h2>
+                    <small>Unlimited Entertainment</small>
+                </div>
+
+            </a>
+
+            <p>
+                Your destination for movies and series.
+                Discover amazing stories, explore new worlds
+                and enjoy entertainment in one place.
+            </p>
+
+            <div class="social-links">
+
+                <a href="#" aria-label="Facebook">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+
+                <a href="#" aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#" aria-label="YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+
+                <a href="#" aria-label="TikTok">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+
             </div>
 
         </div>
 
+        <!-- EXPLORE -->
+        <div class="footer-column">
 
-        <div class="watch-footer-bottom">
+            <h3>Explore</h3>
 
-            <p>
-                © <span id="footer-year"></span> CINEVA.
-                All rights reserved.
-            </p>
-
-            <span>
-                Made for entertainment
-                <i class="fa-solid fa-heart"></i>
-            </span>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="genre.html?type=movie">Movies</a></li>
+                <li><a href="genre.html?type=series">TV Series</a></li>
+                <li><a href="index.html#categories">Categories</a></li>
+                <li><a href="index.html#latestAdded">Latest Added</a></li>
+            </ul>
 
         </div>
 
-    </footer>
+        <!-- CATEGORIES -->
+        <div class="footer-column">
+
+            <h3>Categories</h3>
+
+            <ul>
+                <li><a href="genre.html?genre=action">Action</a></li>
+                <li><a href="genre.html?genre=horror">Horror</a></li>
+                <li><a href="genre.html?genre=drama">Drama</a></li>
+                <li><a href="genre.html?genre=comedy">Comedy</a></li>
+                <li><a href="genre.html?genre=animation">Animation</a></li>
+            </ul>
+
+        </div>
+
+        <!-- INFORMATION -->
+        <div class="footer-column">
+
+            <h3>Information</h3>
+
+            <ul>
+                <li><a href="#">About CINEVA</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Service</a></li>
+                <li><a href="#">Help Center</a></li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <!-- COPYRIGHT -->
+    <div class="footer-bottom">
+
+        <div class="container footer-bottom-content">
+
+            <p>
+                © <span id="footer-year">2026</span>
+                <strong>CINEVA</strong>.
+                All Rights Reserved.
+            </p>
+
+            <div class="footer-bottom-links">
+
+                <span>
+                    Made for entertainment
+                    <i class="fa-solid fa-heart"></i>
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
 
 
     <!-- BACK TO TOP -->
@@ -699,7 +805,8 @@
 
     <!-- WATCH PAGE JAVASCRIPT -->
 
-    <script type="module" src="js/watch.js"></script>
-    <script src="js/contact-widget.js"></script>
+  <script type="module" src="js/watch.js"></script>
+<script src="js/contact-widget.js"></script>
+
 </body>
 </html>
