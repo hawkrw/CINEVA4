@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>CINEVA PRO | Dashboard</title>
+
+    <link rel="icon" href="./assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+
+<body>
+
+    <!-- SECURITY VERIFICATION SCREEN -->
+    <div id="adminBootScreen" class="boot-screen">
+        <div class="boot-content">
+            <div class="boot-logo">C</div>
+            <h2>CINEVA PRO</h2>
+            <p id="bootMessage">Verifying administrator access...</p>
+            <div class="boot-spinner"></div>
+        </div>
+    </div>
+
+    <!-- SECURITY ERROR SCREEN -->
+    <div id="adminErrorScreen" class="error-screen" hidden>
+        <div class="error-card">
+            <div class="error-icon">!</div>
+            <h2>Access Verification Failed</h2>
+            <p id="adminErrorMessage">
+                Unable to verify administrator permissions.
+            </p>
+            <button id="retryVerification" type="button">
+                Try Again
+            </button>
+            <a href="./index.html">Return to Login</a>
+        </div>
+    </div>
+
+    <!-- PROTECTED DASHBOARD -->
+    <div id="adminApp" class="admin-app" hidden>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+
+            <div class="sidebar-brand">
+                <div class="brand-icon">C</div>
+                <div>
+                    <h2>CINEVA</h2>
+                    <span>PRO ADMIN</span>
+                </div>
+            </div>
+
+            <div class="sidebar-label">MAIN MENU</div>
+
+            <nav class="sidebar-navigation">
+
+                <a href="#overview" class="nav-link active" data-page="overview">
+                    <span class="nav-icon">⌂</span>
+                    <span>Overview</span>
+                </a>
+
+                <a href="#movies" class="nav-link" data-page="movies">
+                    <span class="nav-icon">▣</span>
+                    <span>Movies</span>
+                </a>
+
+                <a href="#series" class="nav-link" data-page="series">
+                    <span class="nav-icon">▤</span>
+                    <span>Series</span>
+                </a>
+
+                <a href="#categories" class="nav-link" data-page="categories">
+                    <span class="nav-icon">▦</span>
+                    <span>Categories</span>
+                </a>
+
+                <div class="sidebar-label">SYSTEM</div>
+
+                <a href="#analytics" class="nav-link" data-page="analytics">
+                    <span class="nav-icon">◷</span>
+                    <span>Analytics</span>
+                </a>
+
+                <a href="#settings" class="nav-link" data-page="settings">
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="admin-profile">
+                    <div class="admin-avatar" id="adminAvatar">A</div>
+
+                    <div class="admin-profile-info">
+                        <strong id="adminName">Administrator</strong>
+                        <span id="adminEmail">Loading...</span>
+                    </div>
+                </div>
+
+                <button type="button" id="logoutButton" class="logout-button">
+                    <span>↪</span>
+                    Sign Out
+                </button>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <header class="topbar">
+
+                <div class="topbar-left">
+                    <button id="sidebarToggle" class="sidebar-toggle" type="button">
+                        ☰
+                    </button>
+
+                    <div>
+                        <span class="topbar-subtitle">CINEVA MANAGEMENT</span>
+                        <h1 id="pageTitle">Overview</h1>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="system-status">
+                        <span class="status-dot"></span>
+                        System Online
+                    </div>
+
+                    <a href="../index.html" target="_blank" rel="noopener noreferrer" class="website-link">
+                        View Website ↗
+                    </a>
+                </div>
+
+            </header>
+
+            <div class="dashboard-content">
+
+                <!-- OVERVIEW PAGE -->
+                <section class="dashboard-page active" id="overviewPage">
+
+                    <div class="welcome-section">
+                        <div>
+                            <h2>Welcome to CINEVA PRO</h2>
+                            <p>Manage your streaming platform from one place.</p>
+                        </div>
+
+                        <span class="welcome-date" id="dashboardDate"></span>
+                    </div>
+
+                    <div class="stats-grid">
+
+                        <article class="stat-card">
+                            <div class="stat-icon purple">▣</div>
+                            <div>
+                                <span>Total Movies</span>
+                                <h3 id="totalMovies">--</h3>
+                            </div>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon pink">▤</div>
+                            <div>
+                                <span>Total Series</span>
+                                <h3 id="totalSeries">--</h3>
+                            </div>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon blue">▦</div>
+                            <div>
+                                <span>Categories</span>
+                                <h3 id="totalCategories">--</h3>
+                            </div>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon green">★</div>
+                            <div>
+                                <span>Featured Movies</span>
+                                <h3 id="totalFeatured">--</h3>
+                            </div>
+                        </article>
+
+                    </div>
+
+                    <div class="dashboard-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h3>Quick Actions</h3>
+                                <p>Manage your platform content.</p>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+
+                            <button type="button" class="action-card" data-page="movies">
+                                <span class="action-icon">＋</span>
+                                <strong>Manage Movies</strong>
+                                <small>Add, edit and organize movies</small>
+                            </button>
+
+                            <button type="button" class="action-card" data-page="series">
+                                <span class="action-icon">＋</span>
+                                <strong>Manage Series</strong>
+                                <small>Add and organize series</small>
+                            </button>
+
+                            <button type="button" class="action-card" data-page="categories">
+                                <span class="action-icon">▦</span>
+                                <strong>Categories</strong>
+                                <small>Manage content categories</small>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h3>Recently Added Movies</h3>
+                                <p>Your latest content from Supabase.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Movie</th>
+                                        <th>Category</th>
+                                        <th>Added</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="recentMoviesTable">
+                                    <tr>
+                                        <td colspan="4" class="table-loading">
+                                            Loading movies...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- FUTURE MANAGEMENT PAGES -->
+                <section class="dashboard-page" id="moviesPage">
+                    <div class="page-placeholder">
+                        <div>▣</div>
+                        <h2>Movies Management</h2>
+                        <p>Movie management will be built in the next step.</p>
+                    </div>
+                </section>
+
+                <section class="dashboard-page" id="seriesPage">
+                    <div class="page-placeholder">
+                        <div>▤</div>
+                        <h2>Series Management</h2>
+                        <p>Series management will be built separately.</p>
+                    </div>
+                </section>
+
+                <section class="dashboard-page" id="categoriesPage">
+                    <div class="page-placeholder">
+                        <div>▦</div>
+                        <h2>Categories Management</h2>
+                        <p>Category management will be built separately.</p>
+                    </div>
+                </section>
+
+                <section class="dashboard-page" id="analyticsPage">
+                    <div class="page-placeholder">
+                        <div>◷</div>
+                        <h2>Analytics</h2>
+                        <p>Platform analytics will be added later.</p>
+                    </div>
+                </section>
+
+                <section class="dashboard-page" id="settingsPage">
+                    <div class="page-placeholder">
+                        <div>⚙</div>
+                        <h2>Settings</h2>
+                        <p>Admin settings will be added later.</p>
+                    </div>
+                </section>
+
+                <footer class="dashboard-footer">
+                    <span>© <span id="currentYear"></span> CINEVA PRO</span>
+                    <span>Secure Administration Panel</span>
+                </footer>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script type="module" src="./js/dashboard.js"></script>
+
+</body>
+</html>
