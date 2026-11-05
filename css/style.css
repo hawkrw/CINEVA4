@@ -2063,4 +2063,65 @@ body.light-theme {
         gap: 13px;
     }
 }
+/* =====================================================
+   CINEVA — PREMIUM SOCIAL MEDIA LINKS
+===================================================== */
 
+.social-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-top: 23px;
+}
+
+.social-links a {
+    position: relative;
+    width: 40px;
+    height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #171725;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 11px;
+
+    color: #b9b6c8;
+    font-size: 16px;
+
+    text-decoration: none;
+
+    transition: all .3s ease;
+}
+
+.social-links a:hover {
+    color: #fff;
+    background: var(--gradient-primary);
+    border-color: transparent;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 22px rgba(139,53,245,.3);
+}
+
+.social-links a:active {
+    transform: scale(.94);
+}
+
+.social-links a:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 4px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .social-links {
+        gap: 9px;
+    }
+
+    .social-links a {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+    }
+}
