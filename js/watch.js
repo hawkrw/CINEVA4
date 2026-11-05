@@ -745,14 +745,6 @@ function getMediaDownloadUrl(item = {}) {
     return links.length ? links[0].url : "";
 }
 
-
-/* =====================================================
-   CURRENTLY SELECTED MEDIA
-===================================================== */
-
-let selectedMedia = null;
-
-
 /* =====================================================
    UPDATE MAIN WATCH AND DOWNLOAD BUTTONS
 ===================================================== */
