@@ -2478,3 +2478,44 @@
 .movie-part-card button:disabled {
     pointer-events: auto;
 }
+/* CINEVA — Episode part layout */
+
+.episode-part-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.episode-part-title {
+    color: #fff;
+    font-weight: 600;
+}
+
+.episode-part-item .episode-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.episode-part-item button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .episode-part-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .episode-part-item .episode-actions {
+        width: 100%;
+    }
+}
