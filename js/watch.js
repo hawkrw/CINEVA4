@@ -565,38 +565,6 @@ function scrollToPlayer() {
    - Never use a download link as a video source
 ===================================================== */
 
-
-/* =====================================================
-   CINEVA PRO — STRICT WATCH / DOWNLOAD URL DETECTION
-===================================================== */
-
-function getMediaVideoUrl(item = {}) {
-    if (!item || typeof item !== "object") return "";
-
-    const fields = [
-        "video_url",
-        "watch_url",
-        "watch_link",
-        "video_link",
-        "stream_url",
-        "videoUrl",
-        "watchUrl",
-        "playback_url"
-    ];
-
-    for (const field of fields) {
-        const value = item[field];
-
-        if (
-            typeof value === "string" &&
-            isSafeHttpUrl(value.trim())
-        ) {
-            return value.trim();
-        }
-    }
-
-    return "";
-}
 /* =====================================================
    CINEVA PRO — STRICT WATCH / DOWNLOAD URL DETECTION
 ===================================================== */
