@@ -736,6 +736,9 @@ async function fetchParts(item) {
 /* =====================================================
    CINEVA PRO — RENDER MOVIE PARTS
 ===================================================== */
+/* =====================================================
+   CINEVA PRO — RENDER MOVIE PARTS
+===================================================== */
 
 function renderParts(parts) {
     if (!el.partsContainer) return;
@@ -749,7 +752,7 @@ function renderParts(parts) {
     el.partsContainer.hidden = !hasParts;
     el.partsContainer.style.display = hasParts ? "" : "none";
 
-    // Find the shared main action bar.
+    // Hide the main action bar when separate movie parts exist.
     if (el.mainWatch && el.mainDownload) {
         let actionBar = el.mainWatch.parentElement;
 
@@ -766,10 +769,10 @@ function renderParts(parts) {
         }
     }
 
-    if (!hasParts || !el.partsGrid) {
-        if (el.partsGrid) {
-            el.partsGrid.innerHTML = "";
-        }
+    if (!el.partsGrid) return;
+
+    if (!hasParts) {
+        el.partsGrid.innerHTML = "";
         return;
     }
 
@@ -777,103 +780,84 @@ function renderParts(parts) {
         const partNumber = part.part_number || index + 1;
         const title = part.title || `Part ${partNumber}`;
 
-        const hasWatch = Boolean(
-            part.video_url &&
-            isSafeHttpUrl(part.video_url)
-        );
-
-        const hasDownload = Boolean(
-            getMediaDownloadUrl(part)
-        );
+        const watchUrl = getMediaVideoUrl(part);
+        const downloadUrl = getMediaDownloadUrl(part);
 
         return `
             <article class="movie-part-card">
 
-                <div class="episode-top">
-                    <span class="episode-number">
-                        PART ${escapeHTML(partNumber)}
-                    </span>
+                <div class="movie-part-number">
+                    ${escapeHTML(partNumber)}
                 </div>
 
-                <h3>${escapeHTML(title)}</h3>
+                <div class="movie-part-info">
+                    <h3>${escapeHTML(title)}</h3>
+                    <p>Movie Part ${escapeHTML(partNumber)}</p>
+                </div>
 
-                ${
-                    part.description
-                        ? `<p>${escapeHTML(part.description)}</p>`
-                        : ""
-                }
+                <div class="movie-part-actions">
 
-               ${
-    !hasParts
-        ? `
-            <div class="episode-actions">
+                    <button
+                        class="part-watch-btn"
+                        type="button"
+                        data-action="watch-part"
+                        data-index="${index}"
+                        ${watchUrl ? "" : "disabled"}
+                    >
+                        <i class="fa-solid fa-play"></i>
+                        Watch
+                    </button>
 
-                <button
-                    class="episode-watch-btn"
-                    type="button"
-                    data-action="play-episode"
-                    data-id="${escapeHTML(episode.id)}"
-                    ${hasSingleWatch ? "" : "disabled"}
-                >
-                    <i class="fa-solid fa-play"></i>
-                    <span>Watch</span>
-                </button>
+                    <button
+                        class="part-download-btn"
+                        type="button"
+                        data-action="download-part"
+                        data-index="${index}"
+                        ${downloadUrl ? "" : "disabled"}
+                    >
+                        <i class="fa-solid fa-download"></i>
+                        Download
+                    </button>
 
-                <button
-                    class="episode-download-btn"
-                    type="button"
-                    data-action="download-episode"
-                    data-id="${escapeHTML(episode.id)}"
-                    ${hasSingleDownload ? "" : "disabled"}
-                >
-                    <i class="fa-solid fa-download"></i>
-                    <span>Download</span>
-                </button>
+                </div>
 
-            </div>
-        `
-        : ""
-}
+            </article>
+        `;
+    }).join("");
 
-    // Handle each part's buttons.
-    el.partsGrid.querySelectorAll("button[data-index]")
-        .forEach(button => {
-            button.addEventListener("click", () => {
-                const index = Number(button.dataset.index);
-                const part = currentParts[index];
+    // Attach separate Watch and Download actions.
+    el.partsGrid.querySelectorAll("button[data-index]").forEach(button => {
+        button.addEventListener("click", () => {
+            const index = Number(button.dataset.index);
+            const part = currentParts[index];
 
-                if (!part) return;
+            if (!part) return;
 
-                if (button.dataset.action === "watch-part") {
-                    const watchUrl = getMediaVideoUrl(part);
+            if (button.dataset.action === "watch-part") {
+                const url = getMediaVideoUrl(part);
 
-                    if (!watchUrl) {
-                        alert(
-                            "No valid Watch URL has been added for this part."
-                        );
-                        return;
-                    }
-
-                    setSelectedMedia(part, true);
+                if (!url) {
+                    alert("No valid Watch URL has been added for this part.");
                     return;
                 }
 
-                if (button.dataset.action === "download-part") {
-                    const downloadUrl =
-                        getMediaDownloadUrl(part);
+                setSelectedMedia(part, true);
+                return;
+            }
 
-                    if (!downloadUrl) {
-                        alert(
-                            "No valid Download URL has been added for this part."
-                        );
-                        return;
-                    }
+            if (button.dataset.action === "download-part") {
+                const url = getMediaDownloadUrl(part);
 
-                    setSelectedMedia(part);
-                    openDownload(downloadUrl);
+                if (!url) {
+                    alert("No valid Download URL has been added for this part.");
+                    return;
                 }
-            });
+
+                setSelectedMedia(part);
+                openDownload(url);
+            }
         });
+    });
 }
 /* =====================================================
    SET SELECTED MEDIA
@@ -1232,6 +1216,10 @@ function getEpisodeDownloadLinks(episode) {
    RENDER SELECTED SEASON — EPISODE PARTS
 ===================================================== */
 
+/* =====================================================
+   RENDER SELECTED SEASON — EPISODE PARTS
+===================================================== */
+
 function renderSeason(seasonNumber) {
     if (!el.episodesGrid) return;
 
@@ -1260,173 +1248,421 @@ function renderSeason(seasonNumber) {
             episode.episode_number ?? episode.episode ?? "—";
 
         const parts = parseParts(episode);
-
-       const hasSingleWatch = Boolean(
-    getMediaVideoUrl(episode)
-);
-
-const hasSingleDownload = Boolean(
-    getMediaDownloadUrl(episode)
-);
-
         const hasParts = parts.length > 0;
 
+        const episodeWatchUrl = getMediaVideoUrl(episode);
+        const episodeDownloadUrl = getMediaDownloadUrl(episode);
+
         const partButtons = parts.map((part, index) => {
-    const watchUrl = getMediaVideoUrl(part);
-    const downloadUrl = getMediaDownloadUrl(part);
+            const watchUrl = getMediaVideoUrl(part);
+            const downloadUrl = getMediaDownloadUrl(part);
 
-    return `
-        <div class="episode-part-item">
+            return `
+                <div class="episode-part-item">
 
-            <span class="episode-part-title">
-                ${escapeHTML(
-                    part.title ||
-                    `Part ${part.part_number ?? index + 1}`
-                )}
-            </span>
+                    <span class="episode-part-title">
+                        ${escapeHTML(
+                            part.title || `Part ${part.part_number ?? index + 1}`
+                        )}
+                    </span>
 
-            <div class="episode-actions">
+                    <div class="episode-actions">
 
-                <button
-                    class="episode-watch-btn"
-                    type="button"
-                    data-action="watch-episode-part"
-                    data-episode-id="${escapeHTML(episode.id)}"
-                    data-part-index="${index}"
-                    ${watchUrl ? "" : "disabled"}
-                >
-                    <i class="fa-solid fa-play"></i>
-                    <span>Watch</span>
-                </button>
+                        <button
+                            class="episode-watch-btn"
+                            type="button"
+                            data-action="watch-episode-part"
+                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-part-index="${index}"
+                            ${watchUrl ? "" : "disabled"}
+                        >
+                            <i class="fa-solid fa-play"></i>
+                            <span>Watch</span>
+                        </button>
 
-                <button
-                    class="episode-download-btn"
-                    type="button"
-                    data-action="download-episode-part"
-                    data-episode-id="${escapeHTML(episode.id)}"
-                    data-part-index="${index}"
-                    ${downloadUrl ? "" : "disabled"}
-                >
-                    <i class="fa-solid fa-download"></i>
-                    <span>Download</span>
-                </button>
+                        <button
+                            class="episode-download-btn"
+                            type="button"
+                            data-action="download-episode-part"
+                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-part-index="${index}"
+                            ${downloadUrl ? "" : "disabled"}
+                        >
+                            <i class="fa-solid fa-download"></i>
+                            <span>Download</span>
+                        </button>
 
-            </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
 
-        </div>
-    `;
-}).join("");
+        return `
+            <article class="episode-card">
 
-    el.episodesGrid.querySelectorAll("button").forEach(button => {
+                <div class="episode-top">
+
+                    <span class="episode-number">
+                        ${escapeHTML(episodeNumber)}
+                    </span>
+
+                    <div class="episode-information">
+                        <h3>
+                            ${escapeHTML(
+                                episode.title || `Episode ${episodeNumber}`
+                            )}
+                        </h3>
+
+                        <p>
+                            Season ${escapeHTML(selectedSeason)}
+                            • Episode ${escapeHTML(episodeNumber)}
+                        </p>
+                    </div>
+
+                </div>
+
+                ${
+                    episode.description
+                        ? `<p class="episode-description">${escapeHTML(episode.description)}</p>`
+                        : ""
+                }
+
+                ${
+                    hasParts
+                        ? `<div class="episode-parts">${partButtons}</div>`
+                        : `
+                            <div class="episode-actions">
+
+                                <button
+                                    class="episode-watch-btn"
+                                    type="button"
+                                    data-action="play-episode"
+                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    ${episodeWatchUrl ? "" : "disabled"}
+                                >
+                                    <i class="fa-solid fa-play"></i>
+                                    <span>Watch</span>
+                                </button>
+
+                                <button
+                                    class="episode-download-btn"
+                                    type="button"
+                                    data-action="download-episode"
+                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    ${episodeDownloadUrl ? "" : "disabled"}
+                                >
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Download</span>
+                                </button>
+
+                            </div>
+                        `
+                }
+
+            </article>
+        `;
+    }).join("");
+
+    // Attach one click handler to each episode action.
+    el.episodesGrid.querySelectorAll("button[data-action]").forEach(button => {
         button.addEventListener("click", () => {
             const episode = currentEpisodes.find(
-                item => String(item.id) === button.dataset.id ||
-                    String(item.id) === button.dataset.episodeId
+                item => String(item.id) === button.dataset.episodeId
             );
 
             if (!episode) return;
 
             const parts = parseParts(episode);
+            const action = button.dataset.action;
 
-            if (button.dataset.action === "select-episode-part") {
-                const part = parts[
-                    Number(button.dataset.partIndex)
-                ];
+            // Watch an individual episode part.
+            if (action === "watch-episode-part") {
+                const part = parts[Number(button.dataset.partIndex)];
 
                 if (!part) return;
 
+                const url = getMediaVideoUrl(part);
+
+                if (!url) {
+                    alert("No Watch URL is available for this part.");
+                    return;
+                }
+
+                setSelectedMedia(part, true);
+                scrollToPlayer();
+                return;
+            }
+
+            // Download an individual episode part.
+            if (action === "download-episode-part") {
+                const part = parts[Number(button.dataset.partIndex)];
+
+                if (!part) return;
+
+                const url = getMediaDownloadUrl(part);
+
+                if (!url) {
+                    alert("No Download URL is available for this part.");
+                    return;
+                }
+
                 setSelectedMedia(part);
+                openDownload(url);
+                return;
+            }
 
-               el.episodesGrid.querySelectorAll("button").forEach(button => {
-    button.addEventListener("click", () => {
+            // Watch an episode without parts.
+            if (action === "play-episode") {
+                const url = getMediaVideoUrl(episode);
 
-        const episode = currentEpisodes.find(
-            item => String(item.id) === button.dataset.id ||
-                String(item.id) === button.dataset.episodeId
+                if (!url) {
+                    alert("No Watch URL is available for this episode.");
+                    return;
+                }
+
+                setSelectedMedia(episode, true);
+                scrollToPlayer();
+                return;
+            }
+
+            // Download an episode without parts.
+            if (action === "download-episode") {
+                const url = getMediaDownloadUrl(episode);
+
+                if (!url) {
+                    alert("No Download URL is available for this episode.");
+                    return;
+                }
+
+                setSelectedMedia(episode);
+                openDownload(url);
+            }
+        });
+    });
+}/* =====================================================
+   RENDER SELECTED SEASON — EPISODE PARTS
+===================================================== */
+
+function renderSeason(seasonNumber) {
+    if (!el.episodesGrid) return;
+
+    const selectedSeason = Number(seasonNumber);
+
+    const episodes = currentEpisodes
+        .filter(episode =>
+            (Number(episode.season_number) || 1) === selectedSeason
+        )
+        .sort((a, b) =>
+            (Number(a.episode_number) || 0) -
+            (Number(b.episode_number) || 0)
         );
 
-        if (!episode) return;
+    if (!episodes.length) {
+        el.episodesGrid.innerHTML = `
+            <p class="episodes-empty">
+                No episodes found in this season.
+            </p>
+        `;
+        return;
+    }
+
+    el.episodesGrid.innerHTML = episodes.map(episode => {
+        const episodeNumber =
+            episode.episode_number ?? episode.episode ?? "—";
 
         const parts = parseParts(episode);
+        const hasParts = parts.length > 0;
 
-        const action = button.dataset.action;
+        const episodeWatchUrl = getMediaVideoUrl(episode);
+        const episodeDownloadUrl = getMediaDownloadUrl(episode);
 
-        // WATCH AN INDIVIDUAL EPISODE PART
-        if (action === "watch-episode-part") {
+        const partButtons = parts.map((part, index) => {
+            const watchUrl = getMediaVideoUrl(part);
+            const downloadUrl = getMediaDownloadUrl(part);
 
-            const part = parts[
-                Number(button.dataset.partIndex)
-            ];
+            return `
+                <div class="episode-part-item">
 
-            if (!part) return;
+                    <span class="episode-part-title">
+                        ${escapeHTML(
+                            part.title || `Part ${part.part_number ?? index + 1}`
+                        )}
+                    </span>
 
-            const url = getMediaVideoUrl(part);
+                    <div class="episode-actions">
 
-            if (!url) {
-                alert("No Watch URL is available for this part.");
+                        <button
+                            class="episode-watch-btn"
+                            type="button"
+                            data-action="watch-episode-part"
+                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-part-index="${index}"
+                            ${watchUrl ? "" : "disabled"}
+                        >
+                            <i class="fa-solid fa-play"></i>
+                            <span>Watch</span>
+                        </button>
+
+                        <button
+                            class="episode-download-btn"
+                            type="button"
+                            data-action="download-episode-part"
+                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-part-index="${index}"
+                            ${downloadUrl ? "" : "disabled"}
+                        >
+                            <i class="fa-solid fa-download"></i>
+                            <span>Download</span>
+                        </button>
+
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        return `
+            <article class="episode-card">
+
+                <div class="episode-top">
+
+                    <span class="episode-number">
+                        ${escapeHTML(episodeNumber)}
+                    </span>
+
+                    <div class="episode-information">
+                        <h3>
+                            ${escapeHTML(
+                                episode.title || `Episode ${episodeNumber}`
+                            )}
+                        </h3>
+
+                        <p>
+                            Season ${escapeHTML(selectedSeason)}
+                            • Episode ${escapeHTML(episodeNumber)}
+                        </p>
+                    </div>
+
+                </div>
+
+                ${
+                    episode.description
+                        ? `<p class="episode-description">${escapeHTML(episode.description)}</p>`
+                        : ""
+                }
+
+                ${
+                    hasParts
+                        ? `<div class="episode-parts">${partButtons}</div>`
+                        : `
+                            <div class="episode-actions">
+
+                                <button
+                                    class="episode-watch-btn"
+                                    type="button"
+                                    data-action="play-episode"
+                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    ${episodeWatchUrl ? "" : "disabled"}
+                                >
+                                    <i class="fa-solid fa-play"></i>
+                                    <span>Watch</span>
+                                </button>
+
+                                <button
+                                    class="episode-download-btn"
+                                    type="button"
+                                    data-action="download-episode"
+                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    ${episodeDownloadUrl ? "" : "disabled"}
+                                >
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Download</span>
+                                </button>
+
+                            </div>
+                        `
+                }
+
+            </article>
+        `;
+    }).join("");
+
+    // Attach one click handler to each episode action.
+    el.episodesGrid.querySelectorAll("button[data-action]").forEach(button => {
+        button.addEventListener("click", () => {
+            const episode = currentEpisodes.find(
+                item => String(item.id) === button.dataset.episodeId
+            );
+
+            if (!episode) return;
+
+            const parts = parseParts(episode);
+            const action = button.dataset.action;
+
+            // Watch an individual episode part.
+            if (action === "watch-episode-part") {
+                const part = parts[Number(button.dataset.partIndex)];
+
+                if (!part) return;
+
+                const url = getMediaVideoUrl(part);
+
+                if (!url) {
+                    alert("No Watch URL is available for this part.");
+                    return;
+                }
+
+                setSelectedMedia(part, true);
+                scrollToPlayer();
                 return;
             }
 
-            setSelectedMedia(part, true);
-            scrollToPlayer();
+            // Download an individual episode part.
+            if (action === "download-episode-part") {
+                const part = parts[Number(button.dataset.partIndex)];
 
-            return;
-        }
+                if (!part) return;
 
-        // DOWNLOAD AN INDIVIDUAL EPISODE PART
-        if (action === "download-episode-part") {
+                const url = getMediaDownloadUrl(part);
 
-            const part = parts[
-                Number(button.dataset.partIndex)
-            ];
+                if (!url) {
+                    alert("No Download URL is available for this part.");
+                    return;
+                }
 
-            if (!part) return;
-
-            const url = getMediaDownloadUrl(part);
-
-            if (!url) {
-                alert("No Download URL is available for this part.");
+                setSelectedMedia(part);
+                openDownload(url);
                 return;
             }
 
-            setSelectedMedia(part);
-            openDownload(url);
+            // Watch an episode without parts.
+            if (action === "play-episode") {
+                const url = getMediaVideoUrl(episode);
 
-            return;
-        }
+                if (!url) {
+                    alert("No Watch URL is available for this episode.");
+                    return;
+                }
 
-        // WATCH AN EPISODE WITHOUT PARTS
-        if (action === "play-episode") {
-
-            const url = getMediaVideoUrl(episode);
-
-            if (!url) {
-                alert("No Watch URL is available for this episode.");
+                setSelectedMedia(episode, true);
+                scrollToPlayer();
                 return;
             }
 
-            setSelectedMedia(episode, true);
-            scrollToPlayer();
+            // Download an episode without parts.
+            if (action === "download-episode") {
+                const url = getMediaDownloadUrl(episode);
 
-            return;
-        }
+                if (!url) {
+                    alert("No Download URL is available for this episode.");
+                    return;
+                }
 
-        // DOWNLOAD AN EPISODE WITHOUT PARTS
-        if (action === "download-episode") {
-
-            const url = getMediaDownloadUrl(episode);
-
-            if (!url) {
-                alert("No Download URL is available for this episode.");
-                return;
+                setSelectedMedia(episode);
+                openDownload(url);
             }
-
-            setSelectedMedia(episode);
-            openDownload(url);
-        }
-
+        });
     });
-});
+}
 /* =====================================================
    COMMENTS
 ===================================================== */
