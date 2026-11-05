@@ -733,17 +733,6 @@ function scrollToPlayer() {
    Supports direct and JSON download fields
 ===================================================== */
 
-function getMediaDownloadUrl(item = {}) {
-    // Prefer the explicitly supplied download URL.
-    const directUrl =
-        item.download_url ||
-        item.download_link ||
-        "";
-
-    if (directUrl && isSafeHttpUrl(directUrl)) {
-        return directUrl.trim();
-    }
-
     // Fall back to existing supported download formats.
     const links = normalizeLinks(item);
 
