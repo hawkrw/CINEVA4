@@ -15,9 +15,10 @@
 
 import {
     getLatestContent,
-    getMoviesByCategory
+    getMoviesByCategory,
+    getTrendingContent,
+    getOurTranslators
 } from "./supabase.js";
-
 
 /* =========================================================
    01. HOMEPAGE SETTINGS
@@ -26,6 +27,7 @@ const HOME_CONFIG = {
     latestLimit: 10,
     heroLimit: 5,
     categoryLimit: 6,
+   trendingLimit: 12,
 
     // Automatically change hero every 3 seconds
     sliderInterval: 3000,
@@ -53,10 +55,10 @@ const CATEGORIES = [
 /* =========================================================
    02. DOM ELEMENTS
 ========================================================= */
-
 const elements = {
     hero: document.querySelector("#hero-section"),
     latest: document.querySelector("#latest-movies"),
+    trending: document.querySelector("#trendingMovies"),
     categorySections: document.querySelector("#category-sections")
 };
 
@@ -1098,6 +1100,53 @@ async function loadLatest() {
 
 }
 
+/* =========================================================
+   CINEVA — LOAD TRENDING MOVIES AND SERIES
+   Ranked by actual Supabase views
+========================================================= */
+
+async function loadTrending() {
+    if (!elements.trending) return;
+
+    showLoading(
+        elements.trending,
+        "Finding the most watched content..."
+    );
+
+    try {
+        const trending = await withTimeout(
+            getTrendingContent(HOME_CONFIG.trendingLimit),
+            "Trending content request timed out."
+        );
+
+        if (!Array.isArray(trending) || !trending.length) {
+            showEmpty(
+                elements.trending,
+                "Trending content will appear here as viewers watch movies and series."
+            );
+            return;
+        }
+
+        renderMovieGrid(
+            elements.trending,
+            trending
+        );
+
+        console.log(
+            `CINEVA: Loaded ${trending.length} trending titles.`,
+            trending
+        );
+
+    } catch (error) {
+        console.error("CINEVA trending error:", error);
+
+        showEmpty(
+            elements.trending,
+            "Unable to load trending content. Please try again."
+        );
+    }
+}
+
 
 /* =========================================================
    28. CATEGORY SECTION MARKUP
@@ -1281,24 +1330,18 @@ function hidePageLoader() {
     }, 550);
 
 }
-
-
 /* =========================================================
-   31. HOMEPAGE INITIALIZATION
+   CINEVA — HOMEPAGE INITIALIZATION
 ========================================================= */
 
 async function initializeHome() {
-
     try {
-
         await Promise.allSettled([
-
             loadFeatured(),
-
             loadLatest(),
-
-            loadCategories()
-   
+            loadTrending(),
+            loadCategories(),
+            loadOurTranslators()
         ]);
 
         console.log(
@@ -1306,22 +1349,17 @@ async function initializeHome() {
         );
 
     } catch (error) {
-
         console.error(
             "CINEVA homepage initialization failed:",
             error
         );
 
     } finally {
-
         hidePageLoader();
-
     }
-
 }
-
 /* =========================================================
-   CINEVA — OUR TRANSLATORS FROM SUPABASE
+   CINEVA — OUR TRANSLATORS
 ========================================================= */
 
 async function loadOurTranslators() {
@@ -1330,56 +1368,31 @@ async function loadOurTranslators() {
     if (!track) return;
 
     try {
-        const [movies, series] = await Promise.all([
-            supabase
-                .from("movies")
-                .select("translator")
-                .eq("is_active", true)
-                .not("translator", "is", null),
-
-            supabase
-                .from("series")
-                .select("translator")
-                .eq("is_active", true)
-                .not("translator", "is", null)
-        ]);
-
-        if (movies.error) throw movies.error;
-        if (series.error) throw series.error;
-
-        const names = [
-            ...(movies.data || []),
-            ...(series.data || [])
-        ]
-            .map(item => item.translator?.trim())
-            .filter(Boolean);
-
-        const uniqueNames = [
-            ...new Set(names)
-        ].sort((a, b) => a.localeCompare(b));
+        const uniqueNames = await getOurTranslators();
 
         if (!uniqueNames.length) {
-            track.innerHTML =
-                '<div class="translator-loading">No translators available yet.</div>';
+            track.innerHTML = `
+                <div class="translator-loading">
+                    No translators available yet.
+                </div>
+            `;
 
             track.style.animation = "none";
             return;
         }
 
         const cards = uniqueNames.map(name => {
-            const initial = name.charAt(0).toUpperCase();
-
-            const safeName = name.replace(/[&<>"']/g, char => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
-            })[char]);
+            const safeName = escapeHTML(name);
+            const initial = escapeHTML(
+                name.charAt(0).toUpperCase()
+            );
 
             return `
                 <div class="translator-card">
-                    <div class="translator-avatar">${initial}</div>
+                    <div class="translator-avatar">
+                        ${initial}
+                    </div>
+
                     <div class="translator-details">
                         <h3>${safeName}</h3>
                         <span>CINEVA Translator</span>
@@ -1388,7 +1401,6 @@ async function loadOurTranslators() {
             `;
         }).join("");
 
-        // Duplicate cards for continuous scrolling
         track.innerHTML = cards + cards;
 
         if (uniqueNames.length < 2) {
@@ -1396,14 +1408,18 @@ async function loadOurTranslators() {
         }
 
     } catch (error) {
-        console.error("OUR TRANSLATORS:", error);
+        console.error("CINEVA translators error:", error);
 
-        track.innerHTML =
-            '<div class="translator-loading">Unable to load translators.</div>';
+        track.innerHTML = `
+            <div class="translator-loading">
+                Unable to load translators.
+            </div>
+        `;
 
         track.style.animation = "none";
     }
 }
+
 /* =========================================================
    32. START HOMEPAGE
 ========================================================= */
