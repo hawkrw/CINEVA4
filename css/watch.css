@@ -2462,7 +2462,19 @@
         height: 42px;
     }
 }
-/* Hide main actions when a movie has grouped parts */
-.player-action-bar.has-parts {
+/* Hide the main action bar when grouped parts exist */
+.has-parts {
     display: none !important;
+}
+
+/* Keep grouped part buttons clickable */
+.movie-part-card button {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.movie-part-card button:disabled {
+    pointer-events: auto;
 }
