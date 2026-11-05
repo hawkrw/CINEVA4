@@ -310,6 +310,7 @@ async function loadMovies() {
     backdrop_path,
     video_url,
     download_url,
+    download_links,
     parts
 `)
             .order("created_at", { ascending: false });
@@ -889,7 +890,169 @@ async function deleteEpisode(id) {
     await loadEpisodes();
 }
 
+/* =========================================
+   CINEVA — MULTIPLE MOVIE DOWNLOAD LINKS
+   Stored in movies.download_links (JSONB)
+========================================= */
 
+function normalizeDownloadLinks(value) {
+    if (!value) return [];
+
+    let links = value;
+
+    if (typeof links === "string") {
+        try {
+            links = JSON.parse(links);
+        } catch {
+            return [];
+        }
+    }
+
+    if (!Array.isArray(links)) return [];
+
+    return links
+        .map(link => {
+            if (typeof link === "string") {
+                return {
+                    label: "Download",
+                    url: link
+                };
+            }
+
+            return {
+                label: String(
+                    link?.label || link?.name || "Download"
+                ).trim(),
+
+                url: String(
+                    link?.url || link?.link || link?.download_url || ""
+                ).trim()
+            };
+        })
+        .filter(link => link.url);
+}
+
+
+function createDownloadLinkRow(label = "", url = "") {
+    const row = document.createElement("div");
+
+    row.className = "cineva-download-row";
+
+    const labelField = document.createElement("div");
+    labelField.className = "cineva-field";
+
+    const labelTitle = document.createElement("label");
+    labelTitle.textContent = "Button Name";
+
+    const labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.className = "download-link-label";
+    labelInput.placeholder = "Download 720p";
+    labelInput.maxLength = 60;
+    labelInput.value = label;
+
+    labelField.append(labelTitle, labelInput);
+
+    const urlField = document.createElement("div");
+    urlField.className = "cineva-field";
+
+    const urlTitle = document.createElement("label");
+    urlTitle.textContent = "Download URL";
+
+    const urlInput = document.createElement("input");
+    urlInput.type = "url";
+    urlInput.className = "download-link-url";
+    urlInput.placeholder = "https://example.com/movie";
+    urlInput.value = url;
+
+    urlField.append(urlTitle, urlInput);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "cineva-remove-link";
+    removeButton.textContent = "Remove";
+    removeButton.dataset.removeDownloadLink = "true";
+
+    row.append(labelField, urlField, removeButton);
+
+    return row;
+}
+
+
+function renderDownloadLinks(links = []) {
+    const container = $("downloadLinksContainer");
+    const emptyMessage = $("downloadLinksEmpty");
+
+    if (!container) return;
+
+    container.replaceChildren();
+
+    normalizeDownloadLinks(links).forEach(link => {
+        container.appendChild(
+            createDownloadLinkRow(link.label, link.url)
+        );
+    });
+
+    if (emptyMessage) {
+        emptyMessage.hidden = container.children.length > 0;
+    }
+}
+
+
+function collectDownloadLinks() {
+    const container = $("downloadLinksContainer");
+
+    if (!container) return [];
+
+    const rows = [
+        ...container.querySelectorAll(".cineva-download-row")
+    ];
+
+    const links = [];
+
+    for (const row of rows) {
+        const label = row
+            .querySelector(".download-link-label")
+            ?.value.trim() || "";
+
+        const url = row
+            .querySelector(".download-link-url")
+            ?.value.trim() || "";
+
+        // Ignore completely empty rows.
+        if (!label && !url) continue;
+
+        // Both fields are required for a usable button.
+        if (!label || !url) {
+            throw new Error(
+                "Every download button needs both a name and a URL."
+            );
+        }
+
+        let parsedURL;
+
+        try {
+            parsedURL = new URL(url);
+        } catch {
+            throw new Error(
+                `Invalid download URL: ${url}`
+            );
+        }
+
+        if (!["http:", "https:"].includes(parsedURL.protocol)) {
+            throw new Error(
+                "Download links must use HTTP or HTTPS."
+            );
+        }
+
+        links.push({
+            label,
+            url
+        });
+    }
+
+    return links;
+}
 /* =========================================
    CINEVA PRO — MOVIE ADD / EDIT FORM
 ========================================= */
@@ -1196,6 +1359,38 @@ function createMovieModal() {
     `;
 
     document.body.appendChild(movieModal);
+   const downloadContainer = $("downloadLinksContainer");
+
+movieModal.querySelector("#addDownloadLink")
+    .addEventListener("click", () => {
+        const row = createDownloadLinkRow();
+
+        downloadContainer.appendChild(row);
+
+        const emptyMessage = $("downloadLinksEmpty");
+
+        if (emptyMessage) {
+            emptyMessage.hidden = true;
+        }
+
+        row.querySelector(".download-link-label").focus();
+    });
+
+downloadContainer.addEventListener("click", event => {
+    const removeButton = event.target.closest(
+        "[data-remove-download-link]"
+    );
+
+    if (!removeButton) return;
+
+    removeButton.closest(".cineva-download-row")?.remove();
+
+    const emptyMessage = $("downloadLinksEmpty");
+
+    if (emptyMessage) {
+        emptyMessage.hidden = downloadContainer.children.length > 0;
+    }
+});
 
     movieModal.querySelector("#closeMovieForm")
         .addEventListener("click", closeMovieForm);
@@ -1268,7 +1463,9 @@ function openMovieForm(movie = null) {
 
     form.elements.namedItem("title").focus();
 }
-
+renderDownloadLinks(
+    normalizeDownloadLinks(movie?.download_links)
+);
 
 function closeMovieForm() {
     if (movieModal) {
@@ -1296,7 +1493,14 @@ async function saveMovie(event) {
         const value = form.elements.namedItem(name).value.trim();
         return value || null;
     };
+let downloadLinks = [];
 
+try {
+    downloadLinks = collectDownloadLinks();
+} catch (error) {
+    alert(error.message);
+    return;
+}
     const payload = {
         title: textValue("title"),
         category: textValue("category"),
@@ -1310,6 +1514,7 @@ async function saveMovie(event) {
         overview: textValue("overview"),
         poster_path: textValue("poster_path"),
         backdrop_path: textValue("backdrop_path"),
+       download_links: downloadLinks,
 
         // These two links are intentionally independent.
         video_url: textValue("video_url"),
