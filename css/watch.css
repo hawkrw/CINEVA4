@@ -2193,3 +2193,45 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+/* CINEVA — Episode Part Selector */
+
+.episode-parts {
+    margin: 14px 0;
+}
+
+.episode-parts-label {
+    display: block;
+    margin-bottom: 9px;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.episode-parts-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.episode-part-select {
+    padding: 8px 13px;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 8px;
+    background: #121221;
+    color: #ddd;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.episode-part-select:hover,
+.episode-part-select.active {
+    background: #8b35f5;
+    border-color: #8b35f5;
+    color: #fff;
+}
+
+.movie-part-card button:disabled,
+.episode-card button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
