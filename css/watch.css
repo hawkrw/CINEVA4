@@ -1603,47 +1603,41 @@
 
 
 /* =========================================================
-   14. BACK TO TOP
+   14. HOMEPAGE-STYLE SCROLL TO TOP
 ========================================================= */
 
-.back-to-top {
+.scroll-top {
     position: fixed;
     right: 25px;
     bottom: 25px;
     z-index: 900;
-
     width: 46px;
     height: 46px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     color: white;
-    background: var(--watch-primary-dark);
-
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 13px;
-
     opacity: 0;
     visibility: hidden;
     transform: translateY(12px);
-
-    transition: var(--watch-transition);
+    transition: 0.3s ease;
+    cursor: pointer;
 }
 
-.back-to-top.visible {
+.scroll-top.show,
+.scroll-top.visible {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
 
-.back-to-top:hover {
-    background: var(--watch-primary);
+.scroll-top:hover {
     transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(124,58,237,0.3);
 }
-
-
 /* =========================================================
    15. RESPONSIVE — TABLETS
 ========================================================= */
@@ -2309,4 +2303,162 @@
 .episode-card button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+/* =========================================================
+   19. HOMEPAGE NAVIGATION & FOOTER RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .main-header .navbar {
+        gap: 15px;
+    }
+
+    .main-header .nav-menu {
+        gap: 13px;
+    }
+
+    .main-header .nav-link {
+        font-size: 11px;
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 35px;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .main-header .navbar {
+        width: calc(100% - 28px);
+        min-height: 68px;
+    }
+
+    .main-header .mobile-menu-btn {
+        display: flex;
+    }
+
+    .main-header .nav-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 12px 20px 18px;
+        background: #0d0d19;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .main-header .nav-menu.active {
+        display: flex;
+    }
+
+    .main-header .nav-link {
+        padding: 13px 5px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 13px;
+    }
+
+    .main-header .nav-actions {
+        gap: 6px;
+    }
+
+    .main-header .nav-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .main-header .sign-in-btn {
+        min-height: 34px;
+        padding: 0 10px;
+        font-size: 10px;
+    }
+
+    .main-header .logo-icon {
+        width: 37px;
+        height: 37px;
+    }
+
+    .main-header .logo-text h2 {
+        font-size: 21px;
+    }
+
+    .main-header .logo-text small {
+        font-size: 8px;
+    }
+
+    .footer-container {
+        width: calc(100% - 36px);
+        gap: 30px 20px;
+    }
+
+    .footer-bottom-content {
+        width: calc(100% - 36px);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .main-header .navbar {
+        gap: 8px;
+    }
+
+    .main-header .nav-actions {
+        gap: 5px;
+    }
+
+    .main-header .nav-actions .nav-icon {
+        width: 31px;
+        height: 31px;
+    }
+
+    .main-header .sign-in-btn {
+        padding: 0 8px;
+    }
+
+    .main-header .sign-in-btn span {
+        display: none;
+    }
+
+    .main-header .logo {
+        gap: 7px;
+    }
+
+    .main-header .logo-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+
+    .main-header .logo-text h2 {
+        font-size: 19px;
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 27px 15px;
+        padding: 40px 0 30px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .footer-bottom-content {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        padding: 17px 0;
+    }
+
+    .scroll-top {
+        right: 15px;
+        bottom: 15px;
+        width: 42px;
+        height: 42px;
+    }
 }
