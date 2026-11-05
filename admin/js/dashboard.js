@@ -1,7 +1,14 @@
 
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
+const LOGIN_HANDOFF_KEY = "cineva_admin_login_handoff";
 
+// Consume the one-time login permission immediately.
+// A page refresh will not have this permission again.
+const hasLoginHandoff =
+    sessionStorage.getItem(LOGIN_HANDOFF_KEY) === "authorized";
+
+sessionStorage.removeItem(LOGIN_HANDOFF_KEY);
 const bootScreen = document.getElementById("adminBootScreen");
 const errorScreen = document.getElementById("adminErrorScreen");
 const adminApp = document.getElementById("adminApp");
@@ -239,7 +246,11 @@ async function logout() {
 
 async function initializeDashboard() {
     showBoot();
-
+if (!hasLoginHandoff) {
+    await supabase.auth.signOut();
+    window.location.replace("./index.html");
+    return;
+}
     const result = await verifyAdmin();
 
     if (!result.authorized) {
