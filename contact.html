@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact the CINEVA support team.">
+    <title>Contact Us | CINEVA</title>
+    <link rel="stylesheet" href="css/info-pages.css">
+</head>
+<body>
+
+<header class="info-header">
+    <a href="index.html" class="info-logo">CINEVA</a>
+    <nav class="info-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" class="active">Contact</a>
+        <a href="help.html">Help Center</a>
+        <a href="vip.html">VIP Room</a>
+    </nav>
+</header>
+
+<main class="info-main">
+    <section class="info-hero">
+        <span class="info-label">We're Here to Help</span>
+        <h1>Contact <span>CINEVA</span></h1>
+        <p>Questions, feedback or technical issues? Choose the appropriate way to reach us.</p>
+    </section>
+
+    <div class="info-content">
+        <div class="info-grid">
+            <section class="info-card">
+                <h2>General Support</h2>
+                <p>
+                    Contact us about website features, account access, browsing problems
+                    or general questions.
+                </p>
+                <a class="info-contact-link" href="mailto:YOUR_SUPPORT_EMAIL">
+                    Email Support
+                </a>
+            </section>
+
+            <section class="info-card">
+                <h2>VIP Assistance</h2>
+                <p>
+                    Need help with a VIP subscription, payment status or a content request?
+                    Contact support and include your account email and payment reference.
+                </p>
+                <a class="info-contact-link" href="mailto:YOUR_SUPPORT_EMAIL?subject=CINEVA%20VIP%20Support">
+                    VIP Support
+                </a>
+            </section>
+
+            <section class="info-card">
+                <h2>Report a Problem</h2>
+                <p>
+                    Tell us if a page is not loading, a link is not working or information
+                    appears incorrect. Include the page name and a short description.
+                </p>
+                <a class="info-contact-link" href="mailto:YOUR_SUPPORT_EMAIL?subject=CINEVA%20Website%20Problem">
+                    Report an Issue
+                </a>
+            </section>
+
+            <section class="info-card">
+                <h2>Content and Rights Enquiries</h2>
+                <p>
+                    For copyright or content-related enquiries, provide the relevant
+                    title, page address and details of your request.
+                </p>
+                <a class="info-contact-link" href="mailto:YOUR_SUPPORT_EMAIL?subject=CINEVA%20Content%20Enquiry">
+                    Send an Enquiry
+                </a>
+            </section>
+        </div>
+
+        <section class="info-card">
+            <h2>Before You Contact Us</h2>
+            <ul>
+                <li>Describe the issue clearly.</li>
+                <li>Include the page or movie/series title involved.</li>
+                <li>For payment questions, include the payment reference. Never send your PIN or password.</li>
+                <li>Do not send sensitive account credentials.</li>
+            </ul>
+        </section>
+    </div>
+</main>
+
+<footer class="info-footer">
+    <nav class="info-footer-links">
+        <a href="about.html">About CINEVA</a>
+        <a href="contact.html">Contact Us</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="help.html">Help Center</a>
+    </nav>
+    <p>© <span class="year"></span> CINEVA. All rights reserved.</p>
+</footer>
+
+<script>
+    document.querySelectorAll(".year").forEach(el => {
+        el.textContent = new Date().getFullYear();
+    });
+</script>
+</body>
+</html>
