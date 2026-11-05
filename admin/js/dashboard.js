@@ -310,7 +310,8 @@ async function loadMovies() {
     backdrop_path,
     video_url,
     download_url,
-    download_links
+    download_links,
+    parts
 `)
             .order("created_at", { ascending: false });
 
@@ -1423,10 +1424,491 @@ function initializeDownloadLinkEvents() {
     });
 }
 /* =========================================
+   CINEVA PRO — MOVIE PARTS
+========================================= */
+
+function createMoviePartRow(part = {}) {
+    const row = document.createElement("div");
+    row.className = "cineva-part-row";
+
+    function createField(labelText, className, type, placeholder, value) {
+        const field = document.createElement("div");
+        field.className = "cineva-field";
+
+        const label = document.createElement("label");
+        label.textContent = labelText;
+
+        const input = document.createElement("input");
+        input.type = type;
+        input.className = className;
+        input.placeholder = placeholder;
+        input.value = value || "";
+
+        if (type === "text") {
+            input.maxLength = 100;
+        }
+
+        field.append(label, input);
+        return field;
+    }
+
+    const title = createField(
+        "Part Title",
+        "movie-part-title",
+        "text",
+        "Part A",
+        part.title
+    );
+
+    const watch = createField(
+        "Watch URL",
+        "movie-part-watch",
+        "url",
+        "https://example.com/watch",
+        part.watch_url || part.video_url
+    );
+
+    const download = createField(
+        "Download URL",
+        "movie-part-download",
+        "url",
+        "https://example.com/download",
+        part.download_url
+    );
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "cineva-remove-part";
+    remove.dataset.removeMoviePart = "true";
+    remove.textContent = "Remove";
+
+    row.append(title, watch, download, remove);
+
+    return row;
+}
+
+
+function renderMovieParts(parts = []) {
+    const container = movieModal?.querySelector(
+        "#moviePartsContainer"
+    );
+
+    const emptyMessage = movieModal?.querySelector(
+        "#moviePartsEmpty"
+    );
+
+    if (!container) return;
+
+    if (typeof parts === "string") {
+        try {
+            parts = JSON.parse(parts);
+        } catch {
+            parts = [];
+        }
+    }
+
+    if (!Array.isArray(parts)) parts = [];
+
+    container.replaceChildren();
+
+    parts.slice(0, 5).forEach(part => {
+        container.appendChild(createMoviePartRow(part));
+    });
+
+    if (emptyMessage) {
+        emptyMessage.hidden = container.children.length > 0;
+    }
+}
+
+
+function collectMovieParts() {
+    const container = movieModal?.querySelector(
+        "#moviePartsContainer"
+    );
+
+    if (!container) return [];
+
+    const rows = [
+        ...container.querySelectorAll(".cineva-part-row")
+    ];
+
+    if (rows.length > 5) {
+        throw new Error("A movie can have a maximum of 5 parts.");
+    }
+
+    const parts = [];
+
+    for (const [index, row] of rows.entries()) {
+        const title = row.querySelector(
+            ".movie-part-title"
+        )?.value.trim() || "";
+
+        const watchUrl = row.querySelector(
+            ".movie-part-watch"
+        )?.value.trim() || "";
+
+        const downloadUrl = row.querySelector(
+            ".movie-part-download"
+        )?.value.trim() || "";
+
+        // Ignore completely empty rows.
+        if (!title && !watchUrl && !downloadUrl) continue;
+
+        if (!title || !watchUrl || !downloadUrl) {
+            throw new Error(
+                `Part ${index + 1}: enter its title, watch URL and download URL.`
+            );
+        }
+
+        for (const url of [watchUrl, downloadUrl]) {
+            let parsed;
+
+            try {
+                parsed = new URL(url);
+            } catch {
+                throw new Error(
+                    `Part ${index + 1} has an invalid URL.`
+                );
+            }
+
+            if (!["http:", "https:"].includes(parsed.protocol)) {
+                throw new Error(
+                    `Part ${index + 1} URLs must use HTTP or HTTPS.`
+                );
+            }
+        }
+
+        parts.push({
+            part_number: parts.length + 1,
+            title,
+            watch_url: watchUrl,
+            download_url: downloadUrl
+        });
+    }
+
+    return parts;
+}
+
+
+function initializeMoviePartEvents() {
+    if (!movieModal) return;
+
+    const container = movieModal.querySelector(
+        "#moviePartsContainer"
+    );
+
+    const addButton = movieModal.querySelector(
+        "#addMoviePart"
+    );
+
+    const emptyMessage = movieModal.querySelector(
+        "#moviePartsEmpty"
+    );
+
+    if (!container || !addButton || !emptyMessage) {
+        console.error("CINEVA: Movie parts elements are missing.");
+        return;
+    }
+
+    addButton.addEventListener("click", () => {
+        if (container.children.length >= 5) {
+            alert("You can add a maximum of 5 movie parts.");
+            return;
+        }
+
+        const row = createMoviePartRow();
+
+        container.appendChild(row);
+        emptyMessage.hidden = true;
+
+        row.querySelector(".movie-part-title")?.focus();
+    });
+
+    container.addEventListener("click", event => {
+        const removeButton = event.target.closest(
+            "[data-remove-movie-part]"
+        );
+
+        if (!removeButton) return;
+
+        removeButton.closest(".cineva-part-row")?.remove();
+
+        emptyMessage.hidden = container.children.length > 0;
+    });
+}
+/* =========================================
    CINEVA PRO — MOVIE ADD / EDIT MODAL
+   Includes:
+   - Main watch and download URLs
+   - Additional download links
+   - Up to 5 independent movie parts
 ========================================= */
 
 let movieModal = null;
+
+/* =========================================
+   MOVIE PART HELPERS
+========================================= */
+
+function normalizeMovieParts(parts) {
+    if (typeof parts === "string") {
+        try {
+            parts = JSON.parse(parts);
+        } catch {
+            parts = [];
+        }
+    }
+
+    if (!Array.isArray(parts)) return [];
+
+    return parts
+        .filter(part => part && typeof part === "object")
+        .slice(0, 5)
+        .map((part, index) => ({
+            part_number: Number(part.part_number) || index + 1,
+            title: String(part.title || ""),
+            watch_url: String(part.watch_url || ""),
+            download_url: String(part.download_url || "")
+        }));
+}
+
+function createMoviePartRow(part = {}, index = 0) {
+    const row = document.createElement("div");
+    row.className = "cineva-part-row";
+
+    const heading = document.createElement("div");
+    heading.className = "cineva-part-row-heading";
+
+    const title = document.createElement("strong");
+    title.className = "cineva-part-number";
+    title.textContent = `Part ${index + 1}`;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "cineva-remove-part";
+    removeButton.textContent = "Remove";
+    removeButton.setAttribute("aria-label", `Remove part ${index + 1}`);
+
+    heading.append(title, removeButton);
+
+    const fields = [
+        {
+            name: "title",
+            label: "Part Title *",
+            placeholder: "Example: Part A",
+            value: part.title || "",
+            type: "text",
+            required: true
+        },
+        {
+            name: "watch_url",
+            label: "Part Watch URL *",
+            placeholder: "https://your-watch-link.com",
+            value: part.watch_url || "",
+            type: "url",
+            required: true
+        },
+        {
+            name: "download_url",
+            label: "Part Download URL *",
+            placeholder: "https://your-download-link.com",
+            value: part.download_url || "",
+            type: "url",
+            required: true
+        }
+    ];
+
+    row.appendChild(heading);
+
+    fields.forEach(field => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "cineva-part-field";
+
+        const label = document.createElement("label");
+        label.textContent = field.label;
+
+        const input = document.createElement("input");
+        input.type = field.type;
+        input.name = `part_${field.name}`;
+        input.value = field.value;
+        input.placeholder = field.placeholder;
+        input.required = field.required;
+        input.autocomplete = "off";
+
+        if (field.type === "url") {
+            input.inputMode = "url";
+        }
+
+        wrapper.append(label, input);
+        row.appendChild(wrapper);
+    });
+
+    return row;
+}
+
+function updateMoviePartRows() {
+    const container = movieModal?.querySelector(
+        "#moviePartsContainer"
+    );
+
+    if (!container) return;
+
+    const rows = [...container.querySelectorAll(".cineva-part-row")];
+
+    rows.forEach((row, index) => {
+        const heading = row.querySelector(".cineva-part-number");
+        const removeButton = row.querySelector(".cineva-remove-part");
+
+        if (heading) {
+            heading.textContent = `Part ${index + 1}`;
+        }
+
+        if (removeButton) {
+            removeButton.setAttribute(
+                "aria-label",
+                `Remove part ${index + 1}`
+            );
+        }
+    });
+
+    const emptyMessage = movieModal.querySelector("#moviePartsEmpty");
+    const addButton = movieModal.querySelector("#addMoviePart");
+    const count = rows.length;
+
+    if (emptyMessage) {
+        emptyMessage.hidden = count > 0;
+    }
+
+    if (addButton) {
+        addButton.disabled = count >= 5;
+        addButton.textContent = count >= 5
+            ? "Maximum 5 Parts"
+            : "+ Add Part";
+    }
+}
+
+function renderMovieParts(parts = []) {
+    const container = movieModal.querySelector("#moviePartsContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    normalizeMovieParts(parts).forEach((part, index) => {
+        container.appendChild(createMoviePartRow(part, index));
+    });
+
+    updateMoviePartRows();
+}
+
+function collectMovieParts() {
+    const container = movieModal.querySelector("#moviePartsContainer");
+
+    if (!container) return [];
+
+    const rows = [
+        ...container.querySelectorAll(".cineva-part-row")
+    ];
+
+    if (rows.length > 5) {
+        throw new Error("A movie can have a maximum of 5 parts.");
+    }
+
+    const parts = [];
+
+    rows.forEach((row, index) => {
+        const title = row.querySelector('[name="part_title"]')
+            ?.value.trim() || "";
+
+        const watchUrl = row.querySelector('[name="part_watch_url"]')
+            ?.value.trim() || "";
+
+        const downloadUrl = row.querySelector('[name="part_download_url"]')
+            ?.value.trim() || "";
+
+        // Ignore a completely empty row.
+        if (!title && !watchUrl && !downloadUrl) return;
+
+        // Do not save incomplete parts.
+        if (!title || !watchUrl || !downloadUrl) {
+            throw new Error(
+                `Please complete the title, Watch URL and Download URL for Part ${index + 1}.`
+            );
+        }
+
+        const validateUrl = (value, label) => {
+            try {
+                const parsed = new URL(value);
+
+                if (!["http:", "https:"].includes(parsed.protocol)) {
+                    throw new Error();
+                }
+            } catch {
+                throw new Error(
+                    `Please enter a valid ${label} for Part ${index + 1}.`
+                );
+            }
+        };
+
+        validateUrl(watchUrl, "Watch URL");
+        validateUrl(downloadUrl, "Download URL");
+
+        parts.push({
+            part_number: parts.length + 1,
+            title,
+            watch_url: watchUrl,
+            download_url: downloadUrl
+        });
+    });
+
+    return parts;
+}
+
+function initializeMoviePartEvents() {
+    const addButton = movieModal.querySelector("#addMoviePart");
+    const container = movieModal.querySelector("#moviePartsContainer");
+
+    if (!addButton || !container) return;
+
+    addButton.addEventListener("click", () => {
+        const count = container.querySelectorAll(
+            ".cineva-part-row"
+        ).length;
+
+        if (count >= 5) {
+            alert("You can add a maximum of 5 movie parts.");
+            return;
+        }
+
+        container.appendChild(
+            createMoviePartRow({}, count)
+        );
+
+        updateMoviePartRows();
+
+        const newRow = container.lastElementChild;
+        newRow?.querySelector('[name="part_title"]')?.focus();
+    });
+
+    container.addEventListener("click", event => {
+        const removeButton = event.target.closest(
+            ".cineva-remove-part"
+        );
+
+        if (!removeButton) return;
+
+        const row = removeButton.closest(".cineva-part-row");
+
+        if (row) {
+            row.remove();
+            updateMoviePartRows();
+        }
+    });
+}
+
+/* =========================================
+   CREATE MOVIE MODAL
+========================================= */
 
 function createMovieModal() {
     if (movieModal) return movieModal;
@@ -1547,7 +2029,7 @@ function createMovieModal() {
             font-size: 14px;
         }
 
-        /* MULTIPLE DOWNLOAD LINKS */
+        /* ADDITIONAL DOWNLOAD LINKS */
 
         .cineva-download-section {
             grid-column: 1 / -1;
@@ -1623,6 +2105,137 @@ function createMovieModal() {
             margin: 12px 0 0;
         }
 
+        /* MOVIE PARTS */
+
+        .cineva-parts-section {
+            grid-column: 1 / -1;
+            background: #0b0b17;
+            border: 1px solid rgba(139,53,245,.35);
+            border-radius: 12px;
+            padding: 17px;
+            margin-top: 5px;
+        }
+
+        .cineva-parts-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .cineva-parts-heading h3 {
+            margin: 0 0 5px;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .cineva-parts-heading p {
+            margin: 0;
+            color: #9999ad;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .cineva-parts-note {
+            color: #b8a1dc;
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 12px 0;
+        }
+
+        .cineva-add-part {
+            flex-shrink: 0;
+            border: 0;
+            background: #8b35f5;
+            color: #fff;
+            border-radius: 7px;
+            padding: 10px 13px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .cineva-add-part:hover {
+            background: #a855f7;
+        }
+
+        .cineva-add-part:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .cineva-part-row {
+            background: #121221;
+            border: 1px solid #303047;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 13px;
+        }
+
+        .cineva-part-row-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .cineva-part-number {
+            color: #c9a7ff;
+            font-size: 14px;
+        }
+
+        .cineva-remove-part {
+            border: 0;
+            background: rgba(239,49,94,.15);
+            color: #ff718f;
+            border-radius: 7px;
+            padding: 7px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cineva-remove-part:hover {
+            background: #ef315e;
+            color: #fff;
+        }
+
+        .cineva-part-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-top: 11px;
+        }
+
+        .cineva-part-field label {
+            color: #c6c6d7;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .cineva-part-field input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            background: #0b0b17;
+            color: #fff;
+            border: 1px solid #303047;
+            border-radius: 8px;
+            outline: none;
+            font: inherit;
+        }
+
+        .cineva-part-field input:focus {
+            border-color: #8b35f5;
+        }
+
+        .cineva-parts-empty {
+            color: #9999ad;
+            font-size: 13px;
+            margin: 12px 0 0;
+        }
+
         .cineva-form-actions {
             display: flex;
             justify-content: flex-end;
@@ -1662,7 +2275,8 @@ function createMovieModal() {
                 padding: 18px;
             }
 
-            .cineva-download-heading {
+            .cineva-download-heading,
+            .cineva-parts-heading {
                 align-items: flex-start;
                 flex-direction: column;
             }
@@ -1672,6 +2286,14 @@ function createMovieModal() {
             }
 
             .cineva-download-row button {
+                width: 100%;
+            }
+
+            .cineva-form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .cineva-form-actions button {
                 width: 100%;
             }
         }
@@ -1787,31 +2409,31 @@ function createMovieModal() {
                     </div>
 
                     <div class="cineva-field full">
-                        <label>Watch URL</label>
+                        <label>Main Movie Watch URL</label>
                         <input
                             name="video_url"
                             type="url"
-                            placeholder="Your movie streaming link">
+                            placeholder="Your main movie streaming link">
                     </div>
 
                     <div class="cineva-field full">
-                        <label>Primary Download URL</label>
+                        <label>Main Movie Download URL</label>
                         <input
                             name="download_url"
                             type="url"
-                            placeholder="Your primary movie download link">
+                            placeholder="Your main movie download link">
                     </div>
 
-                    <!-- MULTIPLE DOWNLOAD LINKS -->
+                    <!-- ADDITIONAL DOWNLOAD LINKS -->
 
                     <div class="cineva-download-section">
 
                         <div class="cineva-download-heading">
-
                             <div>
                                 <h3>Additional Download Links</h3>
                                 <p>
-                                    Add multiple download buttons for this movie.
+                                    Add extra download buttons for this movie.
+                                    These are separate from movie parts.
                                 </p>
                             </div>
 
@@ -1821,7 +2443,6 @@ function createMovieModal() {
                                 id="addDownloadLink">
                                 + Add Download
                             </button>
-
                         </div>
 
                         <p
@@ -1831,6 +2452,43 @@ function createMovieModal() {
                         </p>
 
                         <div id="downloadLinksContainer"></div>
+
+                    </div>
+
+                    <!-- MOVIE PARTS -->
+
+                    <div class="cineva-parts-section">
+
+                        <div class="cineva-parts-heading">
+                            <div>
+                                <h3>Movie Parts</h3>
+                                <p>
+                                    Split movies into a maximum of 5 parts.
+                                    Every part has its own Watch and Download URL.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="cineva-add-part"
+                                id="addMoviePart">
+                                + Add Part
+                            </button>
+                        </div>
+
+                        <p class="cineva-parts-note">
+                            Important: A part's Watch URL is used for playback.
+                            Its Download URL is used only for downloading.
+                            Never put a download link in the Watch URL field.
+                        </p>
+
+                        <p
+                            class="cineva-parts-empty"
+                            id="moviePartsEmpty">
+                            No movie parts added. You can save this as a normal movie.
+                        </p>
+
+                        <div id="moviePartsContainer"></div>
 
                     </div>
 
@@ -1879,8 +2537,11 @@ function createMovieModal() {
 
     document.body.appendChild(movieModal);
 
-    // Initialize only after the modal HTML exists.
+    // Initialize existing additional-download controls.
     initializeDownloadLinkEvents();
+
+    // Initialize the new movie-parts controls.
+    initializeMoviePartEvents();
 
     movieModal.querySelector("#closeMovieForm")
         .addEventListener("click", closeMovieForm);
@@ -1899,6 +2560,11 @@ function createMovieModal() {
 
     return movieModal;
 }
+
+/* =========================================
+   OPEN MOVIE FORM
+========================================= */
+
 function openMovieForm(movie = null) {
     createMovieModal();
 
@@ -1940,8 +2606,11 @@ function openMovieForm(movie = null) {
     form.elements.namedItem("is_featured").checked =
         movie?.is_featured === true;
 
-    // Load previously saved additional download buttons.
+    // Restore existing additional download links.
     renderDownloadLinks(movie?.download_links || []);
+
+    // Restore saved movie parts.
+    renderMovieParts(movie?.parts || []);
 
     movieModal.querySelector("#saveMovieButton").textContent =
         movie ? "Update Movie" : "Save Movie";
@@ -1950,6 +2619,11 @@ function openMovieForm(movie = null) {
 
     form.elements.namedItem("title").focus();
 }
+
+/* =========================================
+   SAVE MOVIE
+========================================= */
+
 async function saveMovie(event) {
     event.preventDefault();
 
@@ -1974,9 +2648,12 @@ async function saveMovie(event) {
     };
 
     let downloadLinks = [];
+    let movieParts = [];
 
     try {
         downloadLinks = collectDownloadLinks();
+        movieParts = collectMovieParts();
+
     } catch (error) {
         alert(error.message);
         return;
@@ -1996,12 +2673,15 @@ async function saveMovie(event) {
         poster_path: textValue("poster_path"),
         backdrop_path: textValue("backdrop_path"),
 
-        // Additional download buttons are saved separately.
+        // Additional download buttons.
         download_links: downloadLinks,
 
-        // Never mix the watch link with download links.
+        // Main movie links remain independent.
         video_url: textValue("video_url"),
         download_url: textValue("download_url"),
+
+        // Each part has its own title, watch URL and download URL.
+        parts: movieParts,
 
         is_active: form.elements.namedItem("is_active").checked,
         is_featured: form.elements.namedItem("is_featured").checked,
@@ -2077,7 +2757,6 @@ async function saveMovie(event) {
             : "Save Movie";
     }
 }
-
 /* =========================================
    START DASHBOARD
 ========================================= */
