@@ -53,7 +53,7 @@ body {
         radial-gradient(ellipse at 50% -20%, rgba(104, 65, 190, .10), transparent 48%),
         var(--genre-bg);
     color: var(--genre-text);
-    font-family: 'Inter', sans-serif;
+    font-family:;
     -webkit-font-smoothing: antialiased;
 }
 
