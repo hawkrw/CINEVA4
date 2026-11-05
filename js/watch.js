@@ -1465,6 +1465,10 @@ function renderParts(parts) {
 
     currentParts = Array.isArray(parts) ? parts : [];
    console.log("CINEVA GROUPED PARTS DATA:", currentParts);
+   console.log(
+    "CINEVA PART DETAILS:",
+    JSON.stringify(currentParts, null, 2)
+);
 
     // Hide parts section for non-movies or movies without parts.
     if (contentType !== "movie" || !currentParts.length) {
