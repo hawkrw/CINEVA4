@@ -1,4 +1,3 @@
-
 /* =====================================================
    CINEVA — PROFESSIONAL WATCH PAGE CONTROLLER
    Supabase JS v2
@@ -77,11 +76,13 @@ const el = {
 /* =====================================================
    CURRENT CONTENT
 ===================================================== */
+
 let currentContent = null;
 let currentEpisodes = [];
 let currentParts = [];
 let currentHls = null;
 let selectedMedia = null;
+
 /* =====================================================
    HELPERS
 ===================================================== */
@@ -134,24 +135,12 @@ function getDescription(item) {
     );
 }
 
-
-
 /* =====================================================
    CINEVA — SMART DOWNLOAD LINK DETECTION
-   Supports:
-   - Direct Supabase URL columns
-   - MediaFire links stored in part.url
-   - JSON strings
-   - Arrays and objects
-   - Multiple download qualities
 ===================================================== */
 
 function normalizeLinks(item = {}) {
     const links = [];
-
-    /* ---------------------------------------------
-       ADD AND VALIDATE DOWNLOAD URL
-    --------------------------------------------- */
 
     const addLink = (value, title = "Download") => {
         if (typeof value !== "string") return;
@@ -168,14 +157,9 @@ function normalizeLinks(item = {}) {
         });
     };
 
-    /* ---------------------------------------------
-       EXTRACT LINKS FROM DIFFERENT FORMATS
-    --------------------------------------------- */
-
     function extractLinks(value, label = "Download") {
         if (value === null || value === undefined) return;
 
-        // FORMAT 1: STRING OR JSON STRING
         if (typeof value === "string") {
             const trimmed = value.trim();
 
@@ -197,7 +181,6 @@ function normalizeLinks(item = {}) {
             return;
         }
 
-        // FORMAT 2: ARRAY
         if (Array.isArray(value)) {
             value.forEach((entry, index) => {
                 extractLinks(entry, `${label} ${index + 1}`);
@@ -206,7 +189,6 @@ function normalizeLinks(item = {}) {
             return;
         }
 
-        // FORMAT 3: OBJECT
         if (typeof value === "object") {
             const urlFields = [
                 "url",
@@ -238,16 +220,11 @@ function normalizeLinks(item = {}) {
 
             if (foundDirectUrl) return;
 
-            // FORMAT 4: QUALITY-BASED OBJECT
             Object.entries(value).forEach(([key, entry]) => {
                 extractLinks(entry, key);
             });
         }
     }
-
-    /* ---------------------------------------------
-       DIRECT DOWNLOAD COLUMNS
-    --------------------------------------------- */
 
     [
         "download_url",
@@ -261,10 +238,6 @@ function normalizeLinks(item = {}) {
         extractLinks(item[field], field);
     });
 
-    /* ---------------------------------------------
-       JSON DOWNLOAD COLUMNS
-    --------------------------------------------- */
-
     [
         "download_links",
         "download_options",
@@ -273,152 +246,10 @@ function normalizeLinks(item = {}) {
         extractLinks(item[field], field);
     });
 
-    /* ---------------------------------------------
-       RETURN UNIQUE LINKS
-    --------------------------------------------- */
-
     return links.filter((link, index, array) =>
         array.findIndex(item => item.url === link.url) === index
     );
 }
-
-
-/* =====================================================
-   CINEVA — GROUPED MOVIE / EPISODE PARTS
-===================================================== */
-
-function parseParts(record = {}) {
-    let parts = record.parts ?? [];
-
-    if (typeof parts === "string") {
-        try {
-            parts = JSON.parse(parts);
-        } catch (error) {
-            console.error("CINEVA: Invalid parts JSON", error);
-            return [];
-        }
-    }
-
-    if (!Array.isArray(parts)) return [];
-
-    return parts
-        .filter(part => part && typeof part === "object")
-        .map((part, index) => ({
-            ...part,
-            part_number: Number(part.part_number || index + 1),
-            title: part.title || `Part ${part.part_number || index + 1}`,
-            video_url: part.video_url || "",
-            download_url: part.download_url || "",
-            download_link: part.download_link || ""
-        }))
-        .sort((a, b) =>
-            Number(a.part_number) - Number(b.part_number)
-        );
-}
-
-
-/* =====================================================
-   CINEVA — GET DOWNLOAD URL
-   IMPORTANT:
-   part.url is a DOWNLOAD fallback only.
-   Never use it as a video URL.
-===================================================== */
-
-function getMediaDownloadUrl(media = {}) {
-    const directUrl =
-        media.download_url ||
-        media.download_link ||
-        "";
-
-    if (directUrl && isSafeHttpUrl(directUrl)) {
-        return directUrl.trim();
-    }
-
-    const links = normalizeLinks(media);
-
-    return links.length ? links[0].url : "";
-}
-
-
-/* =====================================================
-   CINEVA — SELECTED MEDIA CONTROLLER
-   Supports normal movies and grouped parts.
-===================================================== */
-
-function setSelectedMedia(media, autoplay = false) {
-    if (!media) return;
-
-    selectedMedia = media;
-
-    // Watch URL is independent of the download URL.
-    const videoUrl = media.video_url || "";
-
-    // Download URL supports part.url.
-    const downloadUrl = getMediaDownloadUrl(media);
-
-    /* ---------------------------------------------
-       MAIN WATCH BUTTON
-    --------------------------------------------- */
-
-    if (el.mainWatch) {
-        el.mainWatch.disabled = !(
-            videoUrl && isSafeHttpUrl(videoUrl)
-        );
-
-        el.mainWatch.onclick = () => {
-            if (!videoUrl || !isSafeHttpUrl(videoUrl)) {
-                showPlayerMessage(
-                    "Video unavailable",
-                    "No valid watch link is available for this selection."
-                );
-                return;
-            }
-
-            playVideo(videoUrl, true);
-
-            document.querySelector(".video-player-wrapper")
-                ?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-        };
-    }
-
-    /* ---------------------------------------------
-       MAIN DOWNLOAD BUTTON
-    --------------------------------------------- */
-
-    if (el.mainDownload) {
-        el.mainDownload.disabled = !(
-            downloadUrl && isSafeHttpUrl(downloadUrl)
-        );
-
-        el.mainDownload.onclick = () => {
-            if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
-                alert("No download link is available for this selection.");
-                return;
-            }
-
-            openDownload(downloadUrl);
-        };
-    }
-
-    /* ---------------------------------------------
-       OPTIONAL AUTOPLAY
-    --------------------------------------------- */
-
-    if (autoplay) {
-        if (videoUrl && isSafeHttpUrl(videoUrl)) {
-            playVideo(videoUrl, true);
-        } else {
-            showPlayerMessage(
-                "Video unavailable",
-                "No valid watch link has been added for this part."
-            );
-        }
-    }
-}
-
 
 /* =====================================================
    CINEVA — SAFE HTTP / HTTPS VALIDATION
@@ -446,63 +277,43 @@ function isSafeHttpUrl(value) {
 ===================================================== */
 
 function showLoading(show) {
-
     if (el.loading) {
-
         el.loading.hidden = !show;
-
     }
-
 }
-
 
 /* =====================================================
    ERROR STATE
 ===================================================== */
 
 function showError(message) {
-
     showLoading(false);
 
     if (el.error) {
-
         el.error.hidden = false;
-
         el.error.textContent = message;
-
     }
 
     if (el.content) {
-
         el.content.hidden = true;
-
     }
-
 }
-
 
 /* =====================================================
    CONTENT DISPLAY STATE
 ===================================================== */
 
 function showContent() {
-
     showLoading(false);
 
     if (el.error) {
-
         el.error.hidden = true;
-
     }
 
     if (el.content) {
-
         el.content.hidden = false;
-
     }
-
 }
-
 
 /* =====================================================
    FETCH MAIN CONTENT
@@ -698,11 +509,6 @@ function attachHls(videoUrl, autoplay) {
 
 /* =====================================================
    CINEVA — MAIN WATCH & DOWNLOAD CONTROLLER
-   Supports Movies, Episodes and Multiple Parts
-===================================================== */
-
-/* =====================================================
-   OPEN DOWNLOAD LINK
 ===================================================== */
 
 function openDownload(url) {
@@ -714,84 +520,83 @@ function openDownload(url) {
     window.open(url, "_blank", "noopener,noreferrer");
 }
 
-
-/* =====================================================
-   SCROLL TO VIDEO PLAYER
-===================================================== */
-
 function scrollToPlayer() {
     document.querySelector(".video-player-wrapper")
-        ?.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+/* part.url is a download fallback only.
+   It is NEVER used as a video playback source. */
 
-/* =====================================================
-   GET MEDIA DOWNLOAD URL
-   Supports direct and JSON download fields
-===================================================== */
+function getMediaDownloadUrl(item = {}) {
+    if (!item || typeof item !== "object") return "";
 
-    // Fall back to existing supported download formats.
-    const links = normalizeLinks(item);
+    const directFields = [
+        "download_url",
+        "download_link",
+        "downloadUrl",
+        "download",
+        "file_url",
+        "direct_link",
+        "link"
+    ];
 
-    return links.length ? links[0].url : "";
+    for (const field of directFields) {
+        const value = item[field];
+
+        if (typeof value === "string" && isSafeHttpUrl(value.trim())) {
+            return value.trim();
+        }
+    }
+
+    const links = normalizeLinks({
+        download_links: item.download_links,
+        download_options: item.download_options,
+        downloads: item.downloads
+    });
+
+    if (links.length) return links[0].url;
+
+    // Legacy grouped-part schema stores its download URL in `url`.
+    if (typeof item.url === "string" && isSafeHttpUrl(item.url.trim())) {
+        return item.url.trim();
+    }
+
+    return "";
 }
-
-/* =====================================================
-   UPDATE MAIN WATCH AND DOWNLOAD BUTTONS
-===================================================== */
 
 function setSelectedMedia(media, autoplay = false) {
-    if (!media) return;
+    selectedMedia = media || null;
 
-    selectedMedia = media;
+    const videoUrl = typeof media?.video_url === "string"
+        ? media.video_url.trim()
+        : "";
 
-    const videoUrl = media.video_url || "";
     const downloadUrl = getMediaDownloadUrl(media);
 
-    /* ---------------------------------------------
-       MAIN WATCH BUTTON
-    --------------------------------------------- */
-
     if (el.mainWatch) {
-        el.mainWatch.disabled = !(
-            videoUrl && isSafeHttpUrl(videoUrl)
-        );
+        el.mainWatch.disabled = !isSafeHttpUrl(videoUrl);
 
         el.mainWatch.onclick = () => {
-            if (!videoUrl || !isSafeHttpUrl(videoUrl)) {
+            if (!isSafeHttpUrl(videoUrl)) {
                 showPlayerMessage(
                     "Video unavailable",
                     "No valid watch link is available for this selection."
                 );
-
                 return;
             }
 
             playVideo(videoUrl, true);
-
             scrollToPlayer();
         };
     }
 
-
-    /* ---------------------------------------------
-       MAIN DOWNLOAD BUTTON
-    --------------------------------------------- */
-
     if (el.mainDownload) {
-        el.mainDownload.disabled = !(
-            downloadUrl && isSafeHttpUrl(downloadUrl)
-        );
+        el.mainDownload.disabled = !isSafeHttpUrl(downloadUrl);
 
         el.mainDownload.onclick = () => {
-            if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
-                alert(
-                    "No download link is available for this selection."
-                );
-
+            if (!isSafeHttpUrl(downloadUrl)) {
+                alert("No download link is available for this selection.");
                 return;
             }
 
@@ -799,153 +604,71 @@ function setSelectedMedia(media, autoplay = false) {
         };
     }
 
-
-    /* ---------------------------------------------
-       OPTIONAL AUTOPLAY
-    --------------------------------------------- */
-
-    if (
-        autoplay &&
-        videoUrl &&
-        isSafeHttpUrl(videoUrl)
-    ) {
-        playVideo(videoUrl, true);
-
-        scrollToPlayer();
+    if (el.playerTitle && media) {
+        el.playerTitle.textContent =
+            media.title || media.name || currentContent?.title || "Now Playing";
     }
+
+    if (autoplay) {
+        if (isSafeHttpUrl(videoUrl)) {
+            playVideo(videoUrl, true);
+            scrollToPlayer();
+        } else {
+            showPlayerMessage(
+                "Video unavailable",
+                "This selection has no valid watch link. You can still use its download link if one is available."
+            );
+        }
+    }
+
+    return { videoUrl, downloadUrl };
 }
-
-
-/* =====================================================
-   INITIALIZE MAIN BUTTONS
-   Supports normal single-link content
-===================================================== */
 
 function setupMainActions(item) {
     setSelectedMedia(item);
 }
 
-
-/* =====================================================
-   BACKWARD-COMPATIBLE MAIN WATCH BUTTON
-===================================================== */
-
 function setupMainWatchButton(item) {
     if (!el.mainWatch) return;
-
     setSelectedMedia(item);
 }
-
-
-/* =====================================================
-   BACKWARD-COMPATIBLE MAIN DOWNLOAD BUTTON
-===================================================== */
 
 function setupMainDownloadButton(item) {
     if (!el.mainDownload) return;
-
     setSelectedMedia(item);
 }
 
-
-/* =====================================================
-   PLAY SELECTED MOVIE PART
-===================================================== */
-
 function watchSelectedPart(part) {
-    if (!part || !part.video_url) {
+    if (!part?.video_url || !isSafeHttpUrl(part.video_url)) {
         showPlayerMessage(
             "Video unavailable",
             "This part does not have a valid watch link."
         );
-
         return;
     }
 
     setSelectedMedia(part, true);
 }
 
-
-/* =====================================================
-   DOWNLOAD SELECTED MOVIE PART
-===================================================== */
-
-function downloadSelectedPart(part) {
-    if (!part) {
-        alert("Part not found.");
-        return;
-    }
-
-    const downloadUrl = getMediaDownloadUrl(part);
-
-    if (!downloadUrl) {
-        alert("No download link is available for this part.");
-        return;
-    }
-
-    setSelectedMedia(part);
-
-    openDownload(downloadUrl);
-}
-
-
-/* =====================================================
-   PLAY SELECTED EPISODE
-===================================================== */
-
 function watchSelectedEpisode(episode) {
     if (!episode) return;
 
     const parts = parseParts(episode);
 
-    // If the episode contains parts, play its first part.
     if (parts.length) {
         watchSelectedPart(parts[0]);
         return;
     }
 
-    // Otherwise play the normal episode video.
-    if (!episode.video_url) {
+    if (!episode.video_url || !isSafeHttpUrl(episode.video_url)) {
         showPlayerMessage(
             "Episode unavailable",
             "No watch link has been added for this episode."
         );
-
         return;
     }
 
     setSelectedMedia(episode, true);
-}
-
-
-/* =====================================================
-   DOWNLOAD SELECTED EPISODE
-===================================================== */
-
-function downloadSelectedEpisode(episode) {
-    if (!episode) {
-        alert("Episode not found.");
-        return;
-    }
-
-    const parts = parseParts(episode);
-
-    // If the episode contains parts, download its first part.
-    if (parts.length) {
-        downloadSelectedPart(parts[0]);
-        return;
-    }
-
-    const downloadUrl = getMediaDownloadUrl(episode);
-
-    if (!downloadUrl) {
-        alert("No download link is available for this episode.");
-        return;
-    }
-
-    setSelectedMedia(episode);
-
-    openDownload(downloadUrl);
 }
 
 /* =====================================================
@@ -968,7 +691,6 @@ async function fetchEpisodes(seriesId) {
 
     return data || [];
 }
-
 
 /* =====================================================
    RENDER SERIES EPISODES — CINEVA PRO
@@ -1007,7 +729,6 @@ function renderEpisodes(episodes) {
         return;
     }
 
-    // Get actual season numbers from Supabase
     const seasons = [
         ...new Set(
             currentEpisodes.map(episode =>
@@ -1016,7 +737,6 @@ function renderEpisodes(episodes) {
         )
     ].sort((a, b) => a - b);
 
-    // Build season selector
     if (el.seasonSelector) {
         el.seasonSelector.innerHTML = seasons.map(season => `
             <option value="${season}">
@@ -1029,14 +749,11 @@ function renderEpisodes(episodes) {
         };
     }
 
-    // Display first available season
     renderSeason(seasons[0]);
 }
 
-
 /* =====================================================
    EXTRACT EPISODE DOWNLOAD LINKS
-   Supports Supabase JSON, arrays and direct URLs
 ===================================================== */
 
 function getEpisodeDownloadLinks(episode) {
@@ -1070,11 +787,9 @@ function getEpisodeDownloadLinks(episode) {
     const readValue = (value, label = "Download") => {
         if (value === null || value === undefined) return;
 
-        // Direct URL
         if (typeof value === "string") {
             const trimmed = value.trim();
 
-            // Try parsing JSON stored as text
             if (
                 (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
                 (trimmed.startsWith("{") && trimmed.endsWith("}"))
@@ -1091,7 +806,6 @@ function getEpisodeDownloadLinks(episode) {
             return;
         }
 
-        // Array of download links
         if (Array.isArray(value)) {
             value.forEach((item, index) => {
                 readValue(item, `Download ${index + 1}`);
@@ -1099,7 +813,6 @@ function getEpisodeDownloadLinks(episode) {
             return;
         }
 
-        // Object containing URL fields or quality options
         if (typeof value === "object") {
             const urlFields = [
                 "url",
@@ -1121,8 +834,6 @@ function getEpisodeDownloadLinks(episode) {
                 }
             }
 
-            // Support objects such as:
-            // { "480p": "https://...", "720p": "https://..." }
             if (!urlFields.some(field => value[field])) {
                 Object.entries(value).forEach(([key, item]) => {
                     readValue(item, key);
@@ -1131,7 +842,6 @@ function getEpisodeDownloadLinks(episode) {
         }
     };
 
-    // Check possible Supabase download columns
     [
         "download_url",
         "download_link",
@@ -1143,7 +853,6 @@ function getEpisodeDownloadLinks(episode) {
         readValue(episode[field], field);
     });
 
-    // Check JSON download columns
     [
         "download_links",
         "download_options",
@@ -1154,7 +863,6 @@ function getEpisodeDownloadLinks(episode) {
 
     return links;
 }
-
 
 /* =====================================================
    RENDER SELECTED SEASON — EPISODE PARTS
@@ -1294,10 +1002,6 @@ function renderSeason(seasonNumber) {
         `;
     }).join("");
 
-    /* ---------------------------------------------
-       EPISODE BUTTON ACTIONS
-    --------------------------------------------- */
-
     el.episodesGrid.querySelectorAll("button").forEach(button => {
         button.addEventListener("click", () => {
             const episode = currentEpisodes.find(
@@ -1309,8 +1013,6 @@ function renderSeason(seasonNumber) {
 
             const parts = parseParts(episode);
 
-            /* Select a specific episode part */
-
             if (button.dataset.action === "select-episode-part") {
                 const part = parts[
                     Number(button.dataset.partIndex)
@@ -1320,7 +1022,6 @@ function renderSeason(seasonNumber) {
 
                 setSelectedMedia(part);
 
-                // Highlight the selected part.
                 el.episodesGrid
                     .querySelectorAll(".episode-part-select")
                     .forEach(button => {
@@ -1331,8 +1032,6 @@ function renderSeason(seasonNumber) {
 
                 return;
             }
-
-            /* Watch selected episode */
 
             if (button.dataset.action === "play-episode") {
                 if (parts.length) {
@@ -1351,15 +1050,11 @@ function renderSeason(seasonNumber) {
                 return;
             }
 
-            /* Download selected episode */
-
             if (button.dataset.action === "download-episode") {
                 if (parts.length) {
                     const firstPart = parts[0];
 
-                    const url = firstPart.download_url ||
-                        firstPart.download_link ||
-                        normalizeLinks(firstPart)[0]?.url;
+                    const url = getMediaDownloadUrl(firstPart);
 
                     if (url) {
                         setSelectedMedia(firstPart);
@@ -1371,9 +1066,7 @@ function renderSeason(seasonNumber) {
                     return;
                 }
 
-                const url = episode.download_url ||
-                    episode.download_link ||
-                    normalizeLinks(episode)[0]?.url;
+                const url = getMediaDownloadUrl(episode);
 
                 if (url) {
                     setSelectedMedia(episode);
@@ -1385,12 +1078,10 @@ function renderSeason(seasonNumber) {
         });
     });
 }
+
 /* =====================================================
    FETCH MOVIE PARTS
 ===================================================== */
-/* =========================================
-   CINEVA — GROUPED MEDIA PARTS
-========================================= */
 
 function parseParts(record) {
     if (!record || !record.parts) {
@@ -1399,7 +1090,6 @@ function parseParts(record) {
 
     let parts = record.parts;
 
-    // Handle JSON stored as a string
     if (typeof parts === "string") {
         try {
             parts = JSON.parse(parts);
@@ -1419,19 +1109,18 @@ function parseParts(record) {
             ...part,
             part_number: Number(part.part_number || index + 1),
             title: part.title || `Part ${index + 1}`,
-            video_url: part.video_url || "",
-            download_url: part.download_url || ""
+            video_url: typeof part.video_url === "string" ? part.video_url.trim() : "",
+            download_url: getMediaDownloadUrl(part) || ""
         }));
 }
+
 async function fetchParts(item) {
-    // Preferred format: JSONB parts stored on the movie.
     const storedParts = parseParts(item);
 
     if (storedParts.length) {
         return storedParts;
     }
 
-    // Backward compatibility with an existing content_parts table.
     const { data, error } = await supabase
         .from("content_parts")
         .select("*")
@@ -1441,14 +1130,12 @@ async function fetchParts(item) {
         .order("part_number", { ascending: true });
 
     if (error) {
-        // The table may not exist. This does not prevent normal playback.
         console.warn("Optional movie parts table unavailable:", error.message);
         return [];
     }
 
     return data || [];
 }
-
 
 /* =====================================================
    RENDER GROUPED MOVIE PARTS
@@ -1458,18 +1145,17 @@ function renderParts(parts) {
     if (!el.partsContainer) return;
 
     currentParts = Array.isArray(parts) ? parts : [];
-   console.log("CINEVA GROUPED PARTS DATA:", currentParts);
-   console.log(
-    "CINEVA PART DETAILS:",
-    JSON.stringify(currentParts, null, 2)
-);
 
-    // Hide parts section for non-movies or movies without parts.
+    console.log("CINEVA GROUPED PARTS DATA:", currentParts);
+    console.log(
+        "CINEVA PART DETAILS:",
+        JSON.stringify(currentParts, null, 2)
+    );
+
     if (contentType !== "movie" || !currentParts.length) {
         el.partsContainer.hidden = true;
         el.partsContainer.style.display = "none";
 
-        // Restore the main action bar.
         const mainActionBar = document.getElementById("main-watch-btn")
             ?.parentElement?.parentElement;
 
@@ -1484,7 +1170,6 @@ function renderParts(parts) {
     el.partsContainer.hidden = false;
     el.partsContainer.style.display = "";
 
-    // Hide the main Watch / Download / Like / Share action bar.
     const mainWatchButton = document.getElementById("main-watch-btn");
     const mainDownloadButton = document.getElementById("main-download-btn");
 
@@ -1510,6 +1195,9 @@ function renderParts(parts) {
         const partNumber = part.part_number ?? index + 1;
         const label = part.title || `Part ${partNumber}`;
 
+        const hasWatch = Boolean(part.video_url && isSafeHttpUrl(part.video_url));
+        const hasDownload = Boolean(getMediaDownloadUrl(part));
+
         return `
             <article class="movie-part-card">
                 <div class="episode-top">
@@ -1526,6 +1214,7 @@ function renderParts(parts) {
                         type="button"
                         data-action="select-part"
                         data-index="${index}"
+                        ${hasWatch ? "" : "disabled"}
                     >
                         <i class="fa-solid fa-play"></i>
                         Watch
@@ -1536,6 +1225,7 @@ function renderParts(parts) {
                         type="button"
                         data-action="download-part"
                         data-index="${index}"
+                        ${hasDownload ? "" : "disabled"}
                     >
                         <i class="fa-solid fa-download"></i>
                         Download
@@ -1545,7 +1235,6 @@ function renderParts(parts) {
         `;
     }).join("");
 
-    // Make each part button functional.
     el.partsGrid.querySelectorAll("button[data-index]").forEach(button => {
         button.addEventListener("click", () => {
             const index = Number(button.dataset.index);
@@ -1565,26 +1254,25 @@ function renderParts(parts) {
                 }
 
                 setSelectedMedia(part, true);
-
                 return;
             }
 
             if (button.dataset.action === "download-part") {
                 console.log("SELECTED PART:", part);
-console.log("DOWNLOAD FIELDS:", {
-    download_url: part.download_url,
-    download_link: part.download_link,
-    download_links: part.download_links,
-    all_fields: Object.keys(part)
-});
+                console.log("DOWNLOAD FIELDS:", {
+                    download_url: part.download_url,
+                    download_link: part.download_link,
+                    download_links: part.download_links,
+                    all_fields: Object.keys(part)
+                });
 
-const downloadUrl =
-    part.download_url ||
-    part.download_link ||
-    part.download_links?.[0]?.url ||
-    part.download_links?.[0]?.link ||
-    normalizeLinks(part)[0]?.url ||
-    "";
+                const downloadUrl =
+                    part.download_url ||
+                    part.download_link ||
+                    part.download_links?.[0]?.url ||
+                    part.download_links?.[0]?.link ||
+                    normalizeLinks(part)[0]?.url ||
+                    "";
 
                 if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
                     alert("No valid download link has been added for this part.");
@@ -1597,7 +1285,6 @@ const downloadUrl =
         });
     });
 }
-
 
 /* =====================================================
    COMMENTS
@@ -1746,7 +1433,6 @@ function setupLikes(item) {
         el.likeButton.disabled = true;
 
         try {
-            // Read current value before updating.
             const { data, error: readError } = await supabase
                 .from(table)
                 .select("likes")
@@ -1877,28 +1563,16 @@ function renderRelated(items) {
     }).join("");
 }
 
-
 /* =====================================================
    CINEVA — FOOTER, BACK TO TOP & RELATED NAVIGATION
 ===================================================== */
 
 function setupPageExtras() {
-
-    /* ---------------------------------------------
-       FOOTER YEAR
-    --------------------------------------------- */
-
     if (el.footerYear) {
         el.footerYear.textContent = new Date().getFullYear();
     }
 
-
-    /* ---------------------------------------------
-       BACK TO TOP
-    --------------------------------------------- */
-
     if (el.backToTop) {
-
         const updateBackToTop = () => {
             el.backToTop.classList.toggle(
                 "visible",
@@ -1911,21 +1585,14 @@ function setupPageExtras() {
         });
 
         el.backToTop.addEventListener("click", () => {
-
             window.scrollTo({
                 top: 0,
                 behavior: "smooth"
             });
-
         });
 
         updateBackToTop();
     }
-
-
-    /* ---------------------------------------------
-       RELATED CONTENT HORIZONTAL SLIDER
-    --------------------------------------------- */
 
     const relatedGrid = document.querySelector("#related-content");
     const relatedPrev = document.querySelector("#related-prev");
@@ -1935,17 +1602,13 @@ function setupPageExtras() {
 
     const SCROLL_AMOUNT = 320;
 
-    /* Update arrow states */
-
     function updateRelatedArrows() {
-
         const maxScroll =
             relatedGrid.scrollWidth - relatedGrid.clientWidth;
 
         const canScroll = maxScroll > 5;
 
         if (relatedPrev) {
-
             relatedPrev.disabled =
                 !canScroll || relatedGrid.scrollLeft <= 5;
 
@@ -1956,7 +1619,6 @@ function setupPageExtras() {
         }
 
         if (relatedNext) {
-
             relatedNext.disabled =
                 !canScroll ||
                 relatedGrid.scrollLeft >= maxScroll - 5;
@@ -1968,32 +1630,19 @@ function setupPageExtras() {
         }
     }
 
-
-    /* Previous cards */
-
     relatedPrev?.addEventListener("click", () => {
-
         relatedGrid.scrollBy({
             left: -SCROLL_AMOUNT,
             behavior: "smooth"
         });
-
     });
 
-
-    /* Next cards */
-
     relatedNext?.addEventListener("click", () => {
-
         relatedGrid.scrollBy({
             left: SCROLL_AMOUNT,
             behavior: "smooth"
         });
-
     });
-
-
-    /* Update arrows while scrolling */
 
     relatedGrid.addEventListener(
         "scroll",
@@ -2001,23 +1650,15 @@ function setupPageExtras() {
         { passive: true }
     );
 
-
-    /* Update arrows when browser resizes */
-
     window.addEventListener(
         "resize",
         updateRelatedArrows
     );
 
-
-    /* Detect when related cards are added */
-
     const relatedObserver = new MutationObserver(() => {
-
         requestAnimationFrame(() => {
             updateRelatedArrows();
         });
-
     });
 
     relatedObserver.observe(relatedGrid, {
@@ -2025,116 +1666,60 @@ function setupPageExtras() {
         subtree: true
     });
 
-
-    /* Recheck after images load */
-
     relatedGrid.addEventListener("load", event => {
-
         if (event.target.tagName === "IMG") {
             updateRelatedArrows();
         }
-
     }, true);
-
-
-    /* Initial arrow state */
 
     updateRelatedArrows();
 }
-
 
 /* =====================================================
    CINEVA — INITIALIZE WATCH PAGE
 ===================================================== */
 
 async function initializeWatchPage() {
-
-    /* Initialize footer and page controls */
-
     setupPageExtras();
 
-
-    /* Validate content ID */
-
     if (!contentId) {
-
         showError(
             "No content selected. Please select a movie or series."
         );
-
         return;
     }
 
-
-    /* Display loading state */
-
     showLoading(true);
 
-
     try {
-
-        /* ---------------------------------------------
-           FETCH MAIN CONTENT
-        --------------------------------------------- */
-
         const item = await fetchContent();
 
         if (!item) {
-
             showError(
                 "Content not found or unavailable."
             );
-
             return;
         }
 
-
-        /* ---------------------------------------------
-           STORE CURRENT CONTENT
-        --------------------------------------------- */
-
         currentContent = item;
-
-
-        /* ---------------------------------------------
-           DISPLAY CONTENT DETAILS
-        --------------------------------------------- */
 
         displayContent(item);
 
         showContent();
 
-
-        /* ---------------------------------------------
-           INITIALIZE MAIN ACTIONS
-        --------------------------------------------- */
-
         setupMainActions(item);
-
         setupLikes(item);
-
         setupShare(item);
-
         setupCommentForm(item);
 
-
-        /* ---------------------------------------------
-           INITIALIZE VIDEO PLAYER
-        --------------------------------------------- */
-
-      if (item.video_url) {
-    playVideo(item.video_url);
-} else {
-    showPlayerMessage(
-        "Ready to watch",
-        "Select an available episode or part to begin."
-    );
-}
-
-
-        /* ---------------------------------------------
-           LOAD SUPPORTING CONTENT
-        --------------------------------------------- */
+        if (item.video_url) {
+            playVideo(item.video_url);
+        } else {
+            showPlayerMessage(
+                "Ready to watch",
+                "Select an available episode or part to begin."
+            );
+        }
 
         const [
             episodes,
@@ -2142,7 +1727,6 @@ async function initializeWatchPage() {
             comments,
             related
         ] = await Promise.all([
-
             contentType === "series"
                 ? fetchEpisodes(item.id)
                 : Promise.resolve([]),
@@ -2152,66 +1736,30 @@ async function initializeWatchPage() {
             fetchComments(item),
 
             fetchRelated(item)
-
         ]);
 
-
-        /* ---------------------------------------------
-           RENDER EPISODES
-        --------------------------------------------- */
-
         renderEpisodes(episodes);
-
-
-        /* ---------------------------------------------
-           RENDER MOVIE PARTS
-        --------------------------------------------- */
-
         renderParts(parts);
-
-
-        /* ---------------------------------------------
-           RENDER COMMENTS
-        --------------------------------------------- */
-
         renderComments(comments);
-
-
-        /* ---------------------------------------------
-           RENDER RELATED CONTENT
-        --------------------------------------------- */
-
         renderRelated(related);
 
-
-        /* ---------------------------------------------
-           REFRESH RELATED SLIDER ARROWS
-        --------------------------------------------- */
-
         requestAnimationFrame(() => {
-
             const relatedGrid =
                 document.querySelector("#related-content");
 
             if (relatedGrid) {
-
                 relatedGrid.dispatchEvent(
                     new Event("scroll")
                 );
-
             }
-
         });
-
 
         console.log(
             `CINEVA: ${contentType} loaded successfully.`,
             item.title
         );
 
-
     } catch (error) {
-
         console.error(
             "CINEVA watch initialization error:",
             error
@@ -2221,28 +1769,21 @@ async function initializeWatchPage() {
             error.message ||
             "Unable to load this content. Please try again."
         );
-
     }
-
 }
-
 
 /* =====================================================
    START CINEVA WATCH APPLICATION
 ===================================================== */
 
 if (document.readyState === "loading") {
-
     document.addEventListener(
         "DOMContentLoaded",
         initializeWatchPage,
         { once: true }
     );
-
 } else {
-
     initializeWatchPage();
-
 }
 
 console.log("CINEVA Watch System Ready.");
