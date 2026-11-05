@@ -565,27 +565,23 @@ function scrollToPlayer() {
    - Never use a download link as a video source
 ===================================================== */
 
+
 /* =====================================================
-   GET DOWNLOAD URL
+   CINEVA PRO — STRICT WATCH / DOWNLOAD URL DETECTION
 ===================================================== */
 
 function getMediaDownloadUrl(item = {}) {
-    if (!item || typeof item !== "object") {
-        return "";
-    }
+    if (!item || typeof item !== "object") return "";
 
-    // 1. Direct download fields
-  const directFields = [
-    "download_url",
-    "download_link",
-    "downloadUrl",
-    "downloadLink",
-    "download",
-    "file_url",
-    "direct_link"
-];
+    const fields = [
+        "download_url",
+        "download_link",
+        "downloadUrl",
+        "downloadLink",
+        "download"
+    ];
 
-    for (const field of directFields) {
+    for (const field of fields) {
         const value = item[field];
 
         if (
@@ -596,47 +592,31 @@ function getMediaDownloadUrl(item = {}) {
         }
     }
 
-    // 2. Structured download options
+    // Additional download links only.
     const links = normalizeLinks({
         download_links: item.download_links,
         download_options: item.download_options,
         downloads: item.downloads
     });
 
-    if (links.length) {
-        return links[0].url;
-    }
-
-    // 3. Legacy grouped-part schema.
-    // NEVER use this field for video playback.
-    if (
-        typeof item.url === "string" &&
-        isSafeHttpUrl(item.url.trim())
-    ) {
-        return item.url.trim();
-    }
-
-    return "";
+    return links[0]?.url || "";
 }
 
-
-/* =====================================================
-   GET VIDEO / WATCH URL
-===================================================== */
-
 function getMediaVideoUrl(item = {}) {
-    if (!item || typeof item !== "object") {
-        return "";
-    }
+    if (!item || typeof item !== "object") return "";
 
-    const videoFields = [
+    const fields = [
         "video_url",
         "watch_url",
+        "watch_link",
         "video_link",
-        "stream_url"
+        "stream_url",
+        "videoUrl",
+        "watchUrl",
+        "playback_url"
     ];
 
-    for (const field of videoFields) {
+    for (const field of fields) {
         const value = item[field];
 
         if (
@@ -649,8 +629,283 @@ function getMediaVideoUrl(item = {}) {
 
     return "";
 }
+/* =====================================================
+   CINEVA PRO — STRICT WATCH / DOWNLOAD URL DETECTION
+===================================================== */
 
+function getMediaDownloadUrl(item = {}) {
+    if (!item || typeof item !== "object") return "";
 
+    const fields = [
+        "download_url",
+        "download_link",
+        "downloadUrl",
+        "downloadLink",
+        "download"
+    ];
+
+    for (const field of fields) {
+        const value = item[field];
+
+        if (
+            typeof value === "string" &&
+            isSafeHttpUrl(value.trim())
+        ) {
+            return value.trim();
+        }
+    }
+
+    // Additional download links only.
+    const links = normalizeLinks({
+        download_links: item.download_links,
+        download_options: item.download_options,
+        downloads: item.downloads
+    });
+
+    return links[0]?.url || "";
+}
+
+function getMediaVideoUrl(item = {}) {
+    if (!item || typeof item !== "object") return "";
+
+    const fields = [
+        "video_url",
+        "watch_url",
+        "watch_link",
+        "video_link",
+        "stream_url",
+        "videoUrl",
+        "watchUrl",
+        "playback_url"
+    ];
+
+    for (const field of fields) {
+        const value = item[field];
+
+        if (
+            typeof value === "string" &&
+            isSafeHttpUrl(value.trim())
+        ) {
+            return value.trim();
+        }
+    }
+
+    return "";
+}
+/* =====================================================
+   CINEVA PRO — NORMALIZE MOVIE PARTS
+===================================================== */
+
+function parseParts(record) {
+    if (!record || record.parts == null) {
+        return [];
+    }
+
+    let rawParts = record.parts;
+
+    if (typeof rawParts === "string") {
+        try {
+            rawParts = JSON.parse(rawParts);
+        } catch (error) {
+            console.error("Invalid movie parts JSON:", error);
+            return [];
+        }
+    }
+
+    if (!Array.isArray(rawParts)) {
+        if (Array.isArray(rawParts.parts)) {
+            rawParts = rawParts.parts;
+        } else if (Array.isArray(rawParts.items)) {
+            rawParts = rawParts.items;
+        } else {
+            return [];
+        }
+    }
+
+    return rawParts
+        .filter(part =>
+            part &&
+            typeof part === "object" &&
+            !Array.isArray(part)
+        )
+        .slice(0, 5)
+        .map((part, index) => {
+            const watchUrl = getMediaVideoUrl(part);
+            const downloadUrl = getMediaDownloadUrl(part);
+
+            return {
+                ...part,
+
+                part_number:
+                    Number(part.part_number ?? part.partNumber) ||
+                    index + 1,
+
+                title: String(
+                    part.title ||
+                    part.part_title ||
+                    part.name ||
+                    `Part ${index + 1}`
+                ).trim(),
+
+                // Playback URL is exclusively for watching.
+                video_url: watchUrl,
+
+                // Download URL is exclusively for downloading.
+                download_url: downloadUrl
+            };
+        });
+}
+
+/* =====================================================
+   FETCH MOVIE PARTS
+===================================================== */
+
+async function fetchParts(item) {
+    if (contentType !== "movie") return [];
+
+    // The movies.parts JSONB column is the source of truth.
+    return parseParts(item);
+}
+/* =====================================================
+   CINEVA PRO — RENDER MOVIE PARTS
+===================================================== */
+
+function renderParts(parts) {
+    if (!el.partsContainer) return;
+
+    currentParts = Array.isArray(parts) ? parts : [];
+
+    const hasParts =
+        contentType === "movie" &&
+        currentParts.length > 0;
+
+    el.partsContainer.hidden = !hasParts;
+    el.partsContainer.style.display = hasParts ? "" : "none";
+
+    // Find the shared main action bar.
+    if (el.mainWatch && el.mainDownload) {
+        let actionBar = el.mainWatch.parentElement;
+
+        while (
+            actionBar &&
+            !actionBar.contains(el.mainDownload)
+        ) {
+            actionBar = actionBar.parentElement;
+        }
+
+        if (actionBar) {
+            actionBar.classList.toggle("has-parts", hasParts);
+            actionBar.style.display = hasParts ? "none" : "";
+        }
+    }
+
+    if (!hasParts || !el.partsGrid) {
+        if (el.partsGrid) {
+            el.partsGrid.innerHTML = "";
+        }
+        return;
+    }
+
+    el.partsGrid.innerHTML = currentParts.map((part, index) => {
+        const partNumber = part.part_number || index + 1;
+        const title = part.title || `Part ${partNumber}`;
+
+        const hasWatch = Boolean(
+            part.video_url &&
+            isSafeHttpUrl(part.video_url)
+        );
+
+        const hasDownload = Boolean(
+            getMediaDownloadUrl(part)
+        );
+
+        return `
+            <article class="movie-part-card">
+
+                <div class="episode-top">
+                    <span class="episode-number">
+                        PART ${escapeHTML(partNumber)}
+                    </span>
+                </div>
+
+                <h3>${escapeHTML(title)}</h3>
+
+                ${
+                    part.description
+                        ? `<p>${escapeHTML(part.description)}</p>`
+                        : ""
+                }
+
+                <div class="episode-actions">
+
+                    <button
+                        class="part-watch-btn"
+                        type="button"
+                        data-action="watch-part"
+                        data-index="${index}"
+                        ${hasWatch ? "" : "disabled"}
+                    >
+                        <i class="fa-solid fa-play"></i>
+                        <span>Watch Part</span>
+                    </button>
+
+                    <button
+                        class="part-download-btn"
+                        type="button"
+                        data-action="download-part"
+                        data-index="${index}"
+                        ${hasDownload ? "" : "disabled"}
+                    >
+                        <i class="fa-solid fa-download"></i>
+                        <span>Download Part</span>
+                    </button>
+
+                </div>
+
+            </article>
+        `;
+    }).join("");
+
+    // Handle each part's buttons.
+    el.partsGrid.querySelectorAll("button[data-index]")
+        .forEach(button => {
+            button.addEventListener("click", () => {
+                const index = Number(button.dataset.index);
+                const part = currentParts[index];
+
+                if (!part) return;
+
+                if (button.dataset.action === "watch-part") {
+                    const watchUrl = getMediaVideoUrl(part);
+
+                    if (!watchUrl) {
+                        alert(
+                            "No valid Watch URL has been added for this part."
+                        );
+                        return;
+                    }
+
+                    setSelectedMedia(part, true);
+                    return;
+                }
+
+                if (button.dataset.action === "download-part") {
+                    const downloadUrl =
+                        getMediaDownloadUrl(part);
+
+                    if (!downloadUrl) {
+                        alert(
+                            "No valid Download URL has been added for this part."
+                        );
+                        return;
+                    }
+
+                    setSelectedMedia(part);
+                    openDownload(downloadUrl);
+                }
+            });
+        });
+}
 /* =====================================================
    SET SELECTED MEDIA
 ===================================================== */
@@ -661,28 +916,66 @@ function setSelectedMedia(media, autoplay = false) {
     const videoUrl = getMediaVideoUrl(media);
     const downloadUrl = getMediaDownloadUrl(media);
 
-    // -------------------------------
-    // MAIN WATCH BUTTON
-    // -------------------------------
-
     if (el.mainWatch) {
         el.mainWatch.disabled = !videoUrl;
 
         el.mainWatch.onclick = () => {
-            if (!videoUrl) {
+            const selectedUrl = getMediaVideoUrl(selectedMedia);
+
+            if (!selectedUrl) {
                 showPlayerMessage(
                     "Video unavailable",
-                    "No valid watch link is available for this selection."
+                    "No valid Watch URL is available for this selection."
                 );
-
                 return;
             }
 
-            playVideo(videoUrl, true);
+            playVideo(selectedUrl, true);
             scrollToPlayer();
         };
     }
 
+    if (el.mainDownload) {
+        el.mainDownload.disabled = !downloadUrl;
+
+        el.mainDownload.onclick = () => {
+            const selectedUrl =
+                getMediaDownloadUrl(selectedMedia);
+
+            if (!selectedUrl) {
+                alert("No Download URL is available for this selection.");
+                return;
+            }
+
+            openDownload(selectedUrl);
+        };
+    }
+
+    if (el.playerTitle && media) {
+        el.playerTitle.textContent =
+            media.title ||
+            media.name ||
+            currentContent?.title ||
+            "Now Playing";
+    }
+
+    if (autoplay) {
+        if (videoUrl) {
+            playVideo(videoUrl, true);
+            scrollToPlayer();
+        } else {
+            showPlayerMessage(
+                "Video unavailable",
+                "This selection does not have a valid Watch URL."
+            );
+        }
+    }
+
+    return {
+        videoUrl,
+        downloadUrl
+    };
+}
     // -------------------------------
     // MAIN DOWNLOAD BUTTON
     // -------------------------------
@@ -1053,16 +1346,13 @@ function renderSeason(seasonNumber) {
 
         const parts = parseParts(episode);
 
-        const hasSingleWatch = Boolean(
-            episode.video_url &&
-            isSafeHttpUrl(episode.video_url)
-        );
+       const hasSingleWatch = Boolean(
+    getMediaVideoUrl(episode)
+);
 
-        const hasSingleDownload = Boolean(
-            episode.download_url ||
-            episode.download_link ||
-            normalizeLinks(episode).length
-        );
+const hasSingleDownload = Boolean(
+    getMediaDownloadUrl(episode)
+);
 
         const hasParts = parts.length > 0;
 
@@ -1197,12 +1487,12 @@ function renderSeason(seasonNumber) {
                     return;
                 }
 
-                if (!episode.video_url) {
-                    alert("No watch link is available for this episode.");
-                    return;
-                }
+                if (!getMediaVideoUrl(episode)) {
+    alert("No watch link is available for this episode.");
+    return;
+}
 
-                setSelectedMedia(episode, true);
+setSelectedMedia(episode, true);
                 return;
             }
 
@@ -1235,281 +1525,6 @@ function renderSeason(seasonNumber) {
     });
 }
 
-/* =====================================================
-   FETCH MOVIE PARTS
-===================================================== */
-
-function parseParts(record) {
-    if (!record || !record.parts) {
-        return [];
-    }
-
-    let parts = record.parts;
-
-    // Parse JSON strings if necessary
-    if (typeof parts === "string") {
-        try {
-            parts = JSON.parse(parts);
-        } catch (error) {
-            console.error("Invalid parts JSON:", error);
-            return [];
-        }
-    }
-
-    // Support arrays and objects containing arrays
-    if (!Array.isArray(parts)) {
-        if (Array.isArray(parts.parts)) {
-            parts = parts.parts;
-        } else if (Array.isArray(parts.items)) {
-            parts = parts.items;
-        } else if (typeof parts === "object") {
-            parts = Object.values(parts).filter(
-                value => value && typeof value === "object"
-            );
-        } else {
-            return [];
-        }
-    }
-
-    return parts
-        .filter(part => part && typeof part === "object")
-        .slice(0, 5)
-        .map((part, index) => {
-
-            // WATCH URL: never use a download URL here
-            const watchCandidates = [
-                part.video_url,
-                part.watch_url,
-                part.watch_link,
-                part.video_link,
-                part.stream_url,
-                part.videoUrl,
-                part.watchUrl,
-                part.playback_url
-            ];
-
-            const watchUrl = watchCandidates.find(value =>
-                typeof value === "string" &&
-                isSafeHttpUrl(value.trim())
-            ) || "";
-
-            // DOWNLOAD URL: independently identify download fields
-            const downloadCandidates = [
-                part.download_url,
-                part.download_link,
-                part.downloadUrl,
-                part.downloadLink,
-                part.download
-            ];
-
-            let downloadUrl = downloadCandidates.find(value =>
-                typeof value === "string" &&
-                isSafeHttpUrl(value.trim())
-            ) || "";
-
-            if (!downloadUrl) {
-                downloadUrl = getMediaDownloadUrl(part);
-            }
-
-            return {
-                ...part,
-
-                part_number:
-                    Number(part.part_number ?? part.partNumber) ||
-                    index + 1,
-
-                title:
-                    String(
-                        part.title ||
-                        part.part_title ||
-                        part.name ||
-                        `Part ${index + 1}`
-                    ).trim(),
-
-                video_url: watchUrl.trim(),
-
-                download_url: downloadUrl
-                    ? downloadUrl.trim()
-                    : ""
-            };
-        });
-}
-async function fetchParts(item) {
-    const storedParts = parseParts(item);
-
-    if (storedParts.length) {
-        return storedParts;
-    }
-
-    const { data, error } = await supabase
-        .from("content_parts")
-        .select("*")
-        .eq("content_id", String(item.id))
-        .eq("content_type", "movie")
-        .eq("is_active", true)
-        .order("part_number", { ascending: true });
-
-    if (error) {
-        console.warn(
-            "Optional movie parts table unavailable:",
-            error.message
-        );
-
-        return [];
-    }
-
-    return parseParts({
-        parts: data || []
-    });
-}
-/* =====================================================
-   RENDER GROUPED MOVIE PARTS
-===================================================== */
-
-function renderParts(parts) {
-    if (!el.partsContainer) return;
-
-    currentParts = Array.isArray(parts) ? parts : [];
-
-    console.log("CINEVA GROUPED PARTS DATA:", currentParts);
-    console.log(
-        "CINEVA PART DETAILS:",
-        JSON.stringify(currentParts, null, 2)
-    );
-
-    if (contentType !== "movie" || !currentParts.length) {
-        el.partsContainer.hidden = true;
-        el.partsContainer.style.display = "none";
-
-        const mainActionBar = document.getElementById("main-watch-btn")
-            ?.parentElement?.parentElement;
-
-        if (mainActionBar) {
-            mainActionBar.classList.remove("has-parts");
-            mainActionBar.style.display = "";
-        }
-
-        return;
-    }
-
-    el.partsContainer.hidden = false;
-    el.partsContainer.style.display = "";
-
-    const mainWatchButton = document.getElementById("main-watch-btn");
-    const mainDownloadButton = document.getElementById("main-download-btn");
-
-    if (mainWatchButton && mainDownloadButton) {
-        let actionBar = mainWatchButton.parentElement;
-
-        while (
-            actionBar &&
-            !actionBar.contains(mainDownloadButton)
-        ) {
-            actionBar = actionBar.parentElement;
-        }
-
-        if (actionBar) {
-            actionBar.classList.add("has-parts");
-            actionBar.style.display = "none";
-        }
-    }
-
-    if (!el.partsGrid) return;
-
-    el.partsGrid.innerHTML = currentParts.map((part, index) => {
-        const partNumber = part.part_number ?? index + 1;
-        const label = part.title || `Part ${partNumber}`;
-
-        const hasWatch = Boolean(part.video_url && isSafeHttpUrl(part.video_url));
-        const hasDownload = Boolean(getMediaDownloadUrl(part));
-
-        return `
-            <article class="movie-part-card">
-                <div class="episode-top">
-                    <span>PART ${escapeHTML(partNumber)}</span>
-                </div>
-
-                <h3>${escapeHTML(label)}</h3>
-
-                <p>${escapeHTML(part.description || "")}</p>
-
-                <div class="episode-actions">
-                    <button
-                        class="part-watch-btn"
-                        type="button"
-                        data-action="select-part"
-                        data-index="${index}"
-                        ${hasWatch ? "" : "disabled"}
-                    >
-                        <i class="fa-solid fa-play"></i>
-                        Watch
-                    </button>
-
-                    <button
-                        class="part-download-btn"
-                        type="button"
-                        data-action="download-part"
-                        data-index="${index}"
-                        ${hasDownload ? "" : "disabled"}
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Download
-                    </button>
-                </div>
-            </article>
-        `;
-    }).join("");
-
-    el.partsGrid.querySelectorAll("button[data-index]").forEach(button => {
-        button.addEventListener("click", () => {
-            const index = Number(button.dataset.index);
-            const part = currentParts[index];
-
-            if (!part) {
-                alert("This part could not be found.");
-                return;
-            }
-
-            if (button.dataset.action === "select-part") {
-                const videoUrl = part.video_url;
-
-                if (!videoUrl || !isSafeHttpUrl(videoUrl)) {
-                    alert("No valid watch link has been added for this part.");
-                    return;
-                }
-
-                setSelectedMedia(part, true);
-                return;
-            }
-
-            if (button.dataset.action === "download-part") {
-                console.log("SELECTED PART:", part);
-                console.log("DOWNLOAD FIELDS:", {
-                    download_url: part.download_url,
-                    download_link: part.download_link,
-                    download_links: part.download_links,
-                    all_fields: Object.keys(part)
-                });
-
-                const downloadUrl =
-                    part.download_url ||
-                    part.download_link ||
-                    part.download_links?.[0]?.url ||
-                    part.download_links?.[0]?.link ||
-                    normalizeLinks(part)[0]?.url ||
-                    "";
-
-                if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
-                    alert("No valid download link has been added for this part.");
-                    return;
-                }
-
-                setSelectedMedia(part);
-                openDownload(downloadUrl);
-            }
-        });
-    });
-}
 
 /* =====================================================
    COMMENTS
