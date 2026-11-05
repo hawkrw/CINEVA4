@@ -28,6 +28,7 @@ export async function getLatestMovies(
     const { data, error } = await supabase
         .from(APP_CONFIG.moviesTable)
         .select("*")
+        .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -44,6 +45,7 @@ export async function getAllMovies() {
     const { data, error } = await supabase
         .from(APP_CONFIG.moviesTable)
         .select("*")
+        .eq("is_active", true)
         .order("created_at", { ascending: false });
 
     if (handleError("Movies error", error)) return [];
@@ -61,6 +63,7 @@ export async function getFeaturedMovies(
     const { data, error } = await supabase
         .from(APP_CONFIG.moviesTable)
         .select("*")
+        .eq("is_active", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -81,6 +84,7 @@ export async function getMoviesByCategory(
     const { data, error } = await supabase
         .from(APP_CONFIG.moviesTable)
         .select("*")
+        .eq("is_active", true)
         .ilike("category", category)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -98,6 +102,7 @@ export async function getAllSeries() {
     const { data, error } = await supabase
         .from(APP_CONFIG.seriesTable)
         .select("*")
+        .eq("is_active", true)
         .order("created_at", { ascending: false });
 
     if (handleError("Series error", error)) return [];
@@ -113,6 +118,7 @@ export async function getLatestSeries(limit = 20) {
     const { data, error } = await supabase
         .from(APP_CONFIG.seriesTable)
         .select("*")
+        .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -132,6 +138,7 @@ export async function getSeriesByCategory(
     const { data, error } = await supabase
         .from(APP_CONFIG.seriesTable)
         .select("*")
+        .eq("is_active", true)
         .ilike("category", category)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -203,6 +210,7 @@ export async function searchContent(searchTerm) {
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("*")
+            .eq("is_active", true)
             .ilike("title", pattern)
             .order("created_at", { ascending: false })
             .limit(20),
@@ -210,6 +218,7 @@ export async function searchContent(searchTerm) {
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
+            .eq("is_active", true)
             .ilike("title", pattern)
             .order("created_at", { ascending: false })
             .limit(20)
@@ -245,12 +254,14 @@ export async function getLatestContent(
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("*")
+            .eq("is_active", true)
             .order("created_at", { ascending: false })
             .limit(limit),
 
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
+            .eq("is_active", true)
             .order("created_at", { ascending: false })
             .limit(limit)
     ]);
@@ -277,6 +288,64 @@ export async function getLatestContent(
 }
 
 // =========================================
+// FETCH TRENDING MOVIES AND SERIES
+// RANKED BY REAL VIEW COUNTS
+// =========================================
+
+export async function getTrendingContent(limit = 12) {
+    const safeLimit = Math.max(
+        1,
+        Math.min(Number(limit) || 12, 50)
+    );
+
+    const [moviesResult, seriesResult] = await Promise.all([
+        supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("views", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(safeLimit),
+
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("views", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(safeLimit)
+    ]);
+
+    handleError("Trending movies error", moviesResult.error);
+    handleError("Trending series error", seriesResult.error);
+
+    const movies = (moviesResult.data || []).map(item => ({
+        ...item,
+        content_type: "movie",
+        views: Number(item.views) || 0
+    }));
+
+    const series = (seriesResult.data || []).map(item => ({
+        ...item,
+        content_type: "series",
+        views: Number(item.views) || 0
+    }));
+
+    return [...movies, ...series]
+        .sort((a, b) => {
+            const viewDifference = b.views - a.views;
+
+            if (viewDifference !== 0) {
+                return viewDifference;
+            }
+
+            return new Date(b.created_at || 0) -
+                new Date(a.created_at || 0);
+        })
+        .slice(0, safeLimit);
+}
+
+// =========================================
 // FETCH ALL CONTENT
 // =========================================
 
@@ -300,6 +369,44 @@ export async function getAllContent() {
         new Date(b.created_at || 0) -
         new Date(a.created_at || 0)
     );
+}
+
+// =========================================
+// FETCH UNIQUE TRANSLATORS
+// =========================================
+
+export async function getOurTranslators() {
+    const [moviesResult, seriesResult] = await Promise.all([
+        supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("translator")
+            .eq("is_active", true)
+            .not("translator", "is", null),
+
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select("translator")
+            .eq("is_active", true)
+            .not("translator", "is", null)
+    ]);
+
+    if (handleError("Movie translators error", moviesResult.error)) {
+        return [];
+    }
+
+    if (handleError("Series translators error", seriesResult.error)) {
+        return [];
+    }
+
+    const names = [
+        ...(moviesResult.data || []),
+        ...(seriesResult.data || [])
+    ]
+        .map(item => String(item.translator || "").trim())
+        .filter(Boolean);
+
+    return [...new Set(names)]
+        .sort((a, b) => a.localeCompare(b));
 }
 
 console.log("CINEVA database functions loaded.");
