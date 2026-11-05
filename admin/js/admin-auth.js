@@ -76,40 +76,30 @@ function initializePasswordToggle() {
    CHECK EXISTING SESSION
 ========================================= */
 
+
 async function checkExistingSession() {
     try {
         const { data, error } = await supabase.auth.getSession();
 
         if (error) throw error;
 
-        if (!data.session) return;
-
-        const result = await verifyAdmin();
-
-        if (result.authorized) {
-            window.location.replace(DASHBOARD_URL);
-            return;
+        // Never automatically restore an old admin session.
+        if (data.session) {
+            await supabase.auth.signOut();
+            showMessage(
+                "Your previous session has ended. Please sign in again.",
+                "error"
+            );
         }
-
-        // Do not destroy a session because of a temporary
-        // database or network verification failure.
-        if (result.error) {
-            showMessage(result.reason, "error");
-            return;
-        }
-
-        // Authenticated, but not registered as an administrator.
-        await supabase.auth.signOut();
-
     } catch (error) {
-        console.error("Existing session check failed:", error);
-
+        console.error("Session check failed:", error);
         showMessage(
             "Unable to verify your session. Please try again.",
             "error"
         );
     }
 }
+
 
 /* =========================================
    ADMIN LOGIN
@@ -156,12 +146,14 @@ async function handleLogin(event) {
 
         // Step 3: Redirect verified administrators.
         showMessage(
-            "Access granted. Opening CINEVA PRO...",
-            "success"
-        );
+    "Access granted. Opening CINEVA PRO...",
+    "success"
+);
 
-        window.location.replace(DASHBOARD_URL);
+// One-time permission to enter the dashboard.
+sessionStorage.setItem("cineva_admin_login_handoff", "authorized");
 
+window.location.replace(DASHBOARD_URL);
     } catch (error) {
         console.error("CINEVA login error:", error);
 
