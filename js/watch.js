@@ -555,17 +555,33 @@ function scrollToPlayer() {
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-/* part.url is a download fallback only.
-   It is NEVER used as a video playback source. */
+
+/* =====================================================
+   CINEVA PRO — SMART WATCH & DOWNLOAD CONTROLLER
+   IMPORTANT:
+   - video_url / watch_url = playback only
+   - download_url / download_link = download only
+   - part.url = legacy download fallback only
+   - Never use a download link as a video source
+===================================================== */
+
+/* =====================================================
+   GET DOWNLOAD URL
+===================================================== */
 
 function getMediaDownloadUrl(item = {}) {
-    if (!item || typeof item !== "object") return "";
+    if (!item || typeof item !== "object") {
+        return "";
+    }
 
+    // 1. Direct download fields
     const directFields = [
         "download_url",
         "download_link",
         "downloadUrl",
-        "download"
+        "download",
+        "file_url",
+        "direct_link"
     ];
 
     for (const field of directFields) {
@@ -579,48 +595,85 @@ function getMediaDownloadUrl(item = {}) {
         }
     }
 
+    // 2. Structured download options
     const links = normalizeLinks({
         download_links: item.download_links,
         download_options: item.download_options,
         downloads: item.downloads
     });
 
-    return links[0]?.url || "";
-}
-    const links = normalizeLinks({
-        download_links: item.download_links,
-        download_options: item.download_options,
-        downloads: item.downloads
-    });
+    if (links.length) {
+        return links[0].url;
+    }
 
-    if (links.length) return links[0].url;
-
-    // Legacy grouped-part schema stores its download URL in `url`.
-    if (typeof item.url === "string" && isSafeHttpUrl(item.url.trim())) {
+    // 3. Legacy grouped-part schema.
+    // NEVER use this field for video playback.
+    if (
+        typeof item.url === "string" &&
+        isSafeHttpUrl(item.url.trim())
+    ) {
         return item.url.trim();
     }
 
     return "";
 }
 
+
+/* =====================================================
+   GET VIDEO / WATCH URL
+===================================================== */
+
+function getMediaVideoUrl(item = {}) {
+    if (!item || typeof item !== "object") {
+        return "";
+    }
+
+    const videoFields = [
+        "video_url",
+        "watch_url",
+        "video_link",
+        "stream_url"
+    ];
+
+    for (const field of videoFields) {
+        const value = item[field];
+
+        if (
+            typeof value === "string" &&
+            isSafeHttpUrl(value.trim())
+        ) {
+            return value.trim();
+        }
+    }
+
+    return "";
+}
+
+
+/* =====================================================
+   SET SELECTED MEDIA
+===================================================== */
+
 function setSelectedMedia(media, autoplay = false) {
     selectedMedia = media || null;
 
-    const videoUrl = typeof media?.video_url === "string"
-        ? media.video_url.trim()
-        : "";
-
+    const videoUrl = getMediaVideoUrl(media);
     const downloadUrl = getMediaDownloadUrl(media);
 
+    // -------------------------------
+    // MAIN WATCH BUTTON
+    // -------------------------------
+
     if (el.mainWatch) {
-        el.mainWatch.disabled = !isSafeHttpUrl(videoUrl);
+        el.mainWatch.disabled = !videoUrl;
 
         el.mainWatch.onclick = () => {
-            if (!isSafeHttpUrl(videoUrl)) {
+            if (!videoUrl) {
                 showPlayerMessage(
                     "Video unavailable",
                     "No valid watch link is available for this selection."
                 );
+
                 return;
             }
 
@@ -629,12 +682,19 @@ function setSelectedMedia(media, autoplay = false) {
         };
     }
 
+    // -------------------------------
+    // MAIN DOWNLOAD BUTTON
+    // -------------------------------
+
     if (el.mainDownload) {
-        el.mainDownload.disabled = !isSafeHttpUrl(downloadUrl);
+        el.mainDownload.disabled = !downloadUrl;
 
         el.mainDownload.onclick = () => {
-            if (!isSafeHttpUrl(downloadUrl)) {
-                alert("No download link is available for this selection.");
+            if (!downloadUrl) {
+                alert(
+                    "No download link is available for this selection."
+                );
+
                 return;
             }
 
@@ -642,13 +702,24 @@ function setSelectedMedia(media, autoplay = false) {
         };
     }
 
+    // -------------------------------
+    // PLAYER TITLE
+    // -------------------------------
+
     if (el.playerTitle && media) {
         el.playerTitle.textContent =
-            media.title || media.name || currentContent?.title || "Now Playing";
+            media.title ||
+            media.name ||
+            currentContent?.title ||
+            "Now Playing";
     }
 
+    // -------------------------------
+    // OPTIONAL AUTOPLAY
+    // -------------------------------
+
     if (autoplay) {
-        if (isSafeHttpUrl(videoUrl)) {
+        if (videoUrl) {
             playVideo(videoUrl, true);
             scrollToPlayer();
         } else {
@@ -659,50 +730,96 @@ function setSelectedMedia(media, autoplay = false) {
         }
     }
 
-    return { videoUrl, downloadUrl };
+    return {
+        videoUrl,
+        downloadUrl
+    };
 }
+
+
+/* =====================================================
+   SET MAIN CONTENT ACTIONS
+===================================================== */
 
 function setupMainActions(item) {
     setSelectedMedia(item);
 }
 
+
+/* =====================================================
+   MAIN WATCH BUTTON
+===================================================== */
+
 function setupMainWatchButton(item) {
     if (!el.mainWatch) return;
+
     setSelectedMedia(item);
 }
+
+
+/* =====================================================
+   MAIN DOWNLOAD BUTTON
+===================================================== */
 
 function setupMainDownloadButton(item) {
     if (!el.mainDownload) return;
+
     setSelectedMedia(item);
 }
 
+
+/* =====================================================
+   WATCH SELECTED MOVIE PART
+===================================================== */
+
 function watchSelectedPart(part) {
-    if (!part?.video_url || !isSafeHttpUrl(part.video_url)) {
+    if (!part) {
+        showPlayerMessage(
+            "Part unavailable",
+            "This movie part could not be found."
+        );
+
+        return;
+    }
+
+    const videoUrl = getMediaVideoUrl(part);
+
+    if (!videoUrl) {
         showPlayerMessage(
             "Video unavailable",
             "This part does not have a valid watch link."
         );
+
         return;
     }
 
     setSelectedMedia(part, true);
 }
 
+
+/* =====================================================
+   WATCH SELECTED EPISODE
+===================================================== */
+
 function watchSelectedEpisode(episode) {
     if (!episode) return;
 
     const parts = parseParts(episode);
 
+    // Play the first part when the episode has multiple parts.
     if (parts.length) {
         watchSelectedPart(parts[0]);
         return;
     }
 
-    if (!episode.video_url || !isSafeHttpUrl(episode.video_url)) {
+    const videoUrl = getMediaVideoUrl(episode);
+
+    if (!videoUrl) {
         showPlayerMessage(
             "Episode unavailable",
             "No watch link has been added for this episode."
         );
+
         return;
     }
 
