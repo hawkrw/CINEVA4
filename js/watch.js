@@ -1572,11 +1572,21 @@ function renderParts(parts) {
             }
 
             if (button.dataset.action === "download-part") {
-                const downloadUrl =
-                    part.download_url ||
-                    part.download_link ||
-                    normalizeLinks(part)[0]?.url ||
-                    "";
+                console.log("SELECTED PART:", part);
+console.log("DOWNLOAD FIELDS:", {
+    download_url: part.download_url,
+    download_link: part.download_link,
+    download_links: part.download_links,
+    all_fields: Object.keys(part)
+});
+
+const downloadUrl =
+    part.download_url ||
+    part.download_link ||
+    part.download_links?.[0]?.url ||
+    part.download_links?.[0]?.link ||
+    normalizeLinks(part)[0]?.url ||
+    "";
 
                 if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
                     alert("No valid download link has been added for this part.");
