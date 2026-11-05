@@ -1919,3 +1919,92 @@ body.light-theme {
     --border-color: rgba(0, 0, 0, .1);
 }
 
+/* =====================================================
+   CINEVA — FOOTER NAVIGATION RESTORE
+   Explore CINEVA links
+===================================================== */
+
+.footer-navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+}
+
+.footer-nav-heading {
+    margin-bottom: 2px;
+}
+
+.footer-nav-heading h3 {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.footer-nav-heading p {
+    color: #a5a5b8;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 11px;
+    width: 100%;
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    color: #b8b8ca;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+
+    text-decoration: none;
+    transition: color .25s ease, transform .25s ease;
+}
+
+.footer-link i {
+    width: 16px;
+    text-align: center;
+    color: #a855f7;
+    font-size: 14px;
+}
+
+.footer-link:hover {
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.footer-link:hover i {
+    color: #ef315e;
+}
+
+/* Footer column protection */
+.footer-navigation,
+.footer-navigation * {
+    box-sizing: border-box;
+}
+
+.footer-navigation a {
+    text-decoration: none;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+    .footer-navigation {
+        margin-top: 20px;
+    }
+
+    .footer-links {
+        gap: 13px;
+    }
+}
+
