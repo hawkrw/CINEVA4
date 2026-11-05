@@ -22,14 +22,15 @@ import {
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
-
 const HOME_CONFIG = {
-    latestLimit: 6,
+    latestLimit: 10,
     heroLimit: 5,
     categoryLimit: 6,
 
-    sliderInterval: 6500,
-    requestTimeout: 12000,
+    // Automatically change hero every 3 seconds
+    sliderInterval: 3000,
+
+    requestTimeout: 6000,
 
     tmdbImageBase: "https://image.tmdb.org/t/p/",
 
@@ -794,15 +795,11 @@ function createHeroSlide(item, index) {
 
 
 /* =========================================================
-   21. HERO CONTROLS
+   21. PREMIUM HERO NAVIGATION
 ========================================================= */
 
 function renderHeroControls() {
-
-    if (
-        !elements.hero ||
-        heroSlides.length <= 1
-    ) {
+    if (!elements.hero || heroSlides.length <= 1) {
         return "";
     }
 
@@ -813,45 +810,35 @@ function renderHeroControls() {
                 class="hero-arrow hero-prev"
                 type="button"
                 aria-label="Previous slide"
+                title="Previous"
             >
-
                 <i class="fa-solid fa-chevron-left"></i>
-
             </button>
 
-
             <div class="hero-indicators">
-
                 ${heroSlides.map((_, index) => `
-
                     <button
                         class="indicator ${index === 0 ? "active" : ""}"
                         type="button"
                         data-index="${index}"
                         aria-label="Go to slide ${index + 1}"
+                        aria-current="${index === 0 ? "true" : "false"}"
                     ></button>
-
                 `).join("")}
-
             </div>
-
 
             <button
                 class="hero-arrow hero-next"
                 type="button"
                 aria-label="Next slide"
+                title="Next"
             >
-
                 <i class="fa-solid fa-chevron-right"></i>
-
             </button>
 
         </div>
     `;
-
 }
-
-
 /* =========================================================
    22. DISPLAY HERO
 ========================================================= */
@@ -928,147 +915,103 @@ function renderHero() {
 ========================================================= */
 
 function showHeroSlide(index) {
+    if (!elements.hero || !heroSlides.length) return;
+
+    currentSlide =
+        (index + heroSlides.length) % heroSlides.length;
+
+    elements.hero.querySelectorAll(".hero-slide").forEach(
+        (slide, i) => {
+            const active = i === currentSlide;
+
+            slide.classList.toggle("active", active);
+            slide.setAttribute("aria-hidden", String(!active));
+        }
+    );
+
+    elements.hero.querySelectorAll(".indicator").forEach(
+        (indicator, i) => {
+            const active = i === currentSlide;
+
+            indicator.classList.toggle("active", active);
+            indicator.setAttribute(
+                "aria-current",
+                active ? "true" : "false"
+            );
+        }
+    );
+}
+/* =========================================================
+   24. HERO NAVIGATION EVENTS
+========================================================= */
+
+function bindHeroControls() {
+    if (!elements.hero) return;
+
+    const previous = elements.hero.querySelector(".hero-prev");
+    const next = elements.hero.querySelector(".hero-next");
+
+    previous?.addEventListener("click", () => {
+        showHeroSlide(currentSlide - 1);
+        restartHeroSlider();
+    });
+
+    next?.addEventListener("click", () => {
+        showHeroSlide(currentSlide + 1);
+        restartHeroSlider();
+    });
+
+    elements.hero.querySelectorAll(".indicator").forEach(button => {
+        button.addEventListener("click", () => {
+            showHeroSlide(Number(button.dataset.index));
+            restartHeroSlider();
+        });
+    });
+
+    elements.hero.addEventListener("mouseenter", stopHeroSlider);
+    elements.hero.addEventListener("mouseleave", startHeroSlider);
+
+    // Pause autoplay when the browser tab is hidden
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            stopHeroSlider();
+        } else {
+            startHeroSlider();
+        }
+    });
+}
+
+
+/* =========================================================
+   25. AUTOMATIC HERO SLIDER
+========================================================= */
+
+function stopHeroSlider() {
+    if (sliderTimer !== null) {
+        clearInterval(sliderTimer);
+        sliderTimer = null;
+    }
+}
+
+function startHeroSlider() {
+    stopHeroSlider();
 
     if (
-        !elements.hero ||
-        !heroSlides.length
+        heroSlides.length <= 1 ||
+        document.hidden
     ) {
         return;
     }
 
-    currentSlide =
-        (index + heroSlides.length) %
-        heroSlides.length;
-
-    elements.hero
-        .querySelectorAll(".hero-slide")
-        .forEach((slide, i) => {
-
-            slide.classList.toggle(
-                "active",
-                i === currentSlide
-            );
-
-        });
-
-    elements.hero
-        .querySelectorAll(".indicator")
-        .forEach((indicator, i) => {
-
-            indicator.classList.toggle(
-                "active",
-                i === currentSlide
-            );
-
-        });
-
-}
-
-
-/* =========================================================
-   24. HERO EVENTS
-========================================================= */
-
-function bindHeroControls() {
-
-    if (!elements.hero) return;
-
-    const previous =
-        elements.hero.querySelector(".hero-prev");
-
-    const next =
-        elements.hero.querySelector(".hero-next");
-
-
-    previous?.addEventListener("click", () => {
-
-        showHeroSlide(currentSlide - 1);
-
-        restartHeroSlider();
-
-    });
-
-
-    next?.addEventListener("click", () => {
-
-        showHeroSlide(currentSlide + 1);
-
-        restartHeroSlider();
-
-    });
-
-
-    elements.hero
-        .querySelectorAll(".indicator")
-        .forEach(button => {
-
-            button.addEventListener("click", () => {
-
-                showHeroSlide(
-                    Number(button.dataset.index)
-                );
-
-                restartHeroSlider();
-
-            });
-
-        });
-
-
-    elements.hero.addEventListener(
-        "mouseenter",
-        stopHeroSlider
-    );
-
-    elements.hero.addEventListener(
-        "mouseleave",
-        startHeroSlider
-    );
-
-}
-
-
-/* =========================================================
-   25. HERO AUTOPLAY
-========================================================= */
-
-function stopHeroSlider() {
-
-    if (sliderTimer) {
-
-        clearInterval(sliderTimer);
-
-        sliderTimer = null;
-
-    }
-
-}
-
-
-function startHeroSlider() {
-
-    stopHeroSlider();
-
-    if (heroSlides.length <= 1) return;
-
     sliderTimer = setInterval(() => {
-
         showHeroSlide(currentSlide + 1);
-
     }, HOME_CONFIG.sliderInterval);
-
 }
-
 
 function restartHeroSlider() {
-
     stopHeroSlider();
-
     startHeroSlider();
-
 }
-
-
 /* =========================================================
    26. LOAD HERO CONTENT
 ========================================================= */
