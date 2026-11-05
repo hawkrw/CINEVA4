@@ -291,7 +291,7 @@ async function loadMovies() {
     try {
         const { data, error } = await supabase
             .from("movies")
-           .select(`
+.select(`
     id,
     title,
     category,
@@ -310,8 +310,7 @@ async function loadMovies() {
     backdrop_path,
     video_url,
     download_url,
-    download_links,
-    parts
+    download_links
 `)
             .order("created_at", { ascending: false });
 
@@ -889,724 +888,29 @@ async function deleteEpisode(id) {
 
     await loadEpisodes();
 }
-
-/* =========================================
-   CINEVA — MULTIPLE MOVIE DOWNLOAD LINKS
-   Stored in movies.download_links (JSONB)
-========================================= */
-
-function normalizeDownloadLinks(value) {
-    if (!value) return [];
-
-    let links = value;
-
-    if (typeof links === "string") {
-        try {
-            links = JSON.parse(links);
-        } catch {
-            return [];
-        }
-    }
-
-    if (!Array.isArray(links)) return [];
-
-    return links
-        .map(link => {
-            if (typeof link === "string") {
-                return {
-                    label: "Download",
-                    url: link
-                };
-            }
-
-            return {
-                label: String(
-                    link?.label || link?.name || "Download"
-                ).trim(),
-
-                url: String(
-                    link?.url || link?.link || link?.download_url || ""
-                ).trim()
-            };
-        })
-        .filter(link => link.url);
-}
-
-
-function createDownloadLinkRow(label = "", url = "") {
-    const row = document.createElement("div");
-
-    row.className = "cineva-download-row";
-
-    const labelField = document.createElement("div");
-    labelField.className = "cineva-field";
-
-    const labelTitle = document.createElement("label");
-    labelTitle.textContent = "Button Name";
-
-    const labelInput = document.createElement("input");
-    labelInput.type = "text";
-    labelInput.className = "download-link-label";
-    labelInput.placeholder = "Download 720p";
-    labelInput.maxLength = 60;
-    labelInput.value = label;
-
-    labelField.append(labelTitle, labelInput);
-
-    const urlField = document.createElement("div");
-    urlField.className = "cineva-field";
-
-    const urlTitle = document.createElement("label");
-    urlTitle.textContent = "Download URL";
-
-    const urlInput = document.createElement("input");
-    urlInput.type = "url";
-    urlInput.className = "download-link-url";
-    urlInput.placeholder = "https://example.com/movie";
-    urlInput.value = url;
-
-    urlField.append(urlTitle, urlInput);
-
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "cineva-remove-link";
-    removeButton.textContent = "Remove";
-    removeButton.dataset.removeDownloadLink = "true";
-
-    row.append(labelField, urlField, removeButton);
-
-    return row;
-}
-
-
-function renderDownloadLinks(links = []) {
-    const container = $("downloadLinksContainer");
-    const emptyMessage = $("downloadLinksEmpty");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    normalizeDownloadLinks(links).forEach(link => {
-        container.appendChild(
-            createDownloadLinkRow(link.label, link.url)
-        );
-    });
-
-    if (emptyMessage) {
-        emptyMessage.hidden = container.children.length > 0;
-    }
-}
-
-
-function collectDownloadLinks() {
-    const container = $("downloadLinksContainer");
-
-    if (!container) return [];
-
-    const rows = [
-        ...container.querySelectorAll(".cineva-download-row")
-    ];
-
-    const links = [];
-
-    for (const row of rows) {
-        const label = row
-            .querySelector(".download-link-label")
-            ?.value.trim() || "";
-
-        const url = row
-            .querySelector(".download-link-url")
-            ?.value.trim() || "";
-
-        // Ignore completely empty rows.
-        if (!label && !url) continue;
-
-        // Both fields are required for a usable button.
-        if (!label || !url) {
-            throw new Error(
-                "Every download button needs both a name and a URL."
-            );
-        }
-
-        let parsedURL;
-
-        try {
-            parsedURL = new URL(url);
-        } catch {
-            throw new Error(
-                `Invalid download URL: ${url}`
-            );
-        }
-
-        if (!["http:", "https:"].includes(parsedURL.protocol)) {
-            throw new Error(
-                "Download links must use HTTP or HTTPS."
-            );
-        }
-
-        links.push({
-            label,
-            url
-        });
-    }
-
-    return links;
-}
-/* =========================================
-   CINEVA PRO — MOVIE ADD / EDIT FORM
-========================================= */
-
-let movieModal = null;
-
-function createMovieModal() {
-    if (movieModal) return movieModal;
-
-    const style = document.createElement("style");
-
-    style.textContent = `
-        .cineva-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(0,0,0,.78);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .cineva-modal[hidden] {
-            display: none;
-        }
-
-        .cineva-modal-card {
-            width: 100%;
-            max-width: 850px;
-            max-height: 92vh;
-            overflow-y: auto;
-            background: #121221;
-            border: 1px solid rgba(255,255,255,.09);
-            border-radius: 16px;
-            padding: 26px;
-            color: #fff;
-        }
-
-        .cineva-modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 24px;
-        }
-
-        .cineva-modal-header h2 {
-            margin: 0;
-            font-size: 22px;
-        }
-
-        .cineva-modal-close {
-            background: #242438;
-            border: 0;
-            color: white;
-            border-radius: 8px;
-            padding: 9px 13px;
-            cursor: pointer;
-        }
-
-        .cineva-form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 17px;
-        }
-
-        .cineva-field {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .cineva-field.full {
-            grid-column: 1 / -1;
-        }
-
-        .cineva-field label {
-            color: #c6c6d7;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .cineva-field input,
-        .cineva-field textarea,
-        .cineva-field select {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 12px 13px;
-            background: #0b0b17;
-            color: #fff;
-            border: 1px solid #303047;
-            border-radius: 8px;
-            outline: none;
-            font: inherit;
-        }
-
-        .cineva-field input:focus,
-        .cineva-field textarea:focus,
-        .cineva-field select:focus {
-            border-color: #8b35f5;
-        }
-
-        .cineva-field textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .cineva-form-checks {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
-            margin-top: 22px;
-        }
-
-        .cineva-form-checks label {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            color: #ddd;
-            font-size: 14px;
-        }
-
-        .cineva-form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 26px;
-        }
-
-        .cineva-form-actions button {
-            border: 0;
-            border-radius: 8px;
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .cineva-cancel {
-            background: #29293c;
-            color: white;
-        }
-
-        .cineva-save {
-            background: linear-gradient(135deg,#8b35f5,#ef315e);
-            color: white;
-        }
-
-        .cineva-save:disabled {
-            opacity: .6;
-            cursor: not-allowed;
-        }
-
-        @media(max-width:600px) {
-            .cineva-form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .cineva-modal-card {
-                padding: 18px;
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-
-    movieModal = document.createElement("div");
-    movieModal.className = "cineva-modal";
-    movieModal.hidden = true;
-
-    movieModal.innerHTML = `
-        <div class="cineva-modal-card">
-
-            <div class="cineva-modal-header">
-                <h2 id="movieFormTitle">Add New Movie</h2>
-                <button type="button"
-                    class="cineva-modal-close"
-                    id="closeMovieForm">✕</button>
-            </div>
-
-            <form id="movieForm">
-
-                <input type="hidden" name="movieId">
-
-                <div class="cineva-form-grid">
-
-                    <div class="cineva-field full">
-                        <label>Movie Title *</label>
-                        <input name="title" required maxlength="250"
-                            placeholder="Enter movie title">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Category</label>
-                        <input name="category"
-                            placeholder="Action, Drama, Comedy...">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Release Year</label>
-                        <input name="year" type="number"
-                            min="1800" max="2200">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Translator</label>
-                        <input name="translator">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Language</label>
-                        <input name="language">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Country</label>
-                        <input name="country">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Quality</label>
-                        <select name="quality">
-                            <option value="HD">HD</option>
-                            <option value="FHD">FHD</option>
-                            <option value="4K">4K</option>
-                            <option value="SD">SD</option>
-                        </select>
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Runtime (minutes)</label>
-                        <input name="runtime" type="number" min="0">
-                    </div>
-
-                    <div class="cineva-field">
-                        <label>Release Date</label>
-                        <input name="release_date" type="date">
-                    </div>
-
-                    <div class="cineva-field full">
-                        <label>Movie Overview</label>
-                        <textarea name="overview"
-                            placeholder="Write a movie description..."></textarea>
-                    </div>
-
-                    <div class="cineva-field full">
-                        <label>Poster Image URL</label>
-                        <input name="poster_path" type="url"
-                            placeholder="https://...">
-                    </div>
-
-                    <div class="cineva-field full">
-                        <label>Backdrop Image URL</label>
-                        <input name="backdrop_path" type="url"
-                            placeholder="https://...">
-                    </div>
-
-                    <div class="cineva-field full">
-                        <label>Watch URL</label>
-                        <input name="video_url" type="url"
-                            placeholder="Your movie streaming link">
-                    </div>
-
-                    <div class="cineva-field full">
-                        <label>Download URL</label>
-                        <input name="download_url" type="url"
-                            placeholder="Your movie download link">
-                    </div>
-
-                </div>
-
-                <div class="cineva-form-checks">
-
-                    <label>
-                        <input type="checkbox" name="is_active" checked>
-                        Active Movie
-                    </label>
-
-                    <label>
-                        <input type="checkbox" name="is_featured">
-                        Featured Movie
-                    </label>
-
-                </div>
-
-                <div class="cineva-form-actions">
-                    <button type="button"
-                        class="cineva-cancel"
-                        id="cancelMovieForm">
-                        Cancel
-                    </button>
-
-                    <button type="submit"
-                        class="cineva-save"
-                        id="saveMovieButton">
-                        Save Movie
-                    </button>
-                </div>
-
-            </form>
-        </div>
-    `;
-
-    document.body.appendChild(movieModal);
-   const downloadContainer = $("downloadLinksContainer");
-
-movieModal.querySelector("#addDownloadLink")
-    .addEventListener("click", () => {
-        const row = createDownloadLinkRow();
-
-        downloadContainer.appendChild(row);
-
-        const emptyMessage = $("downloadLinksEmpty");
-
-        if (emptyMessage) {
-            emptyMessage.hidden = true;
-        }
-
-        row.querySelector(".download-link-label").focus();
-    });
-
-downloadContainer.addEventListener("click", event => {
-    const removeButton = event.target.closest(
-        "[data-remove-download-link]"
-    );
-
-    if (!removeButton) return;
-
-    removeButton.closest(".cineva-download-row")?.remove();
-
-    const emptyMessage = $("downloadLinksEmpty");
-
-    if (emptyMessage) {
-        emptyMessage.hidden = downloadContainer.children.length > 0;
-    }
-});
-
-    movieModal.querySelector("#closeMovieForm")
-        .addEventListener("click", closeMovieForm);
-
-    movieModal.querySelector("#cancelMovieForm")
-        .addEventListener("click", closeMovieForm);
-
-    movieModal.addEventListener("click", event => {
-        if (event.target === movieModal) {
-            closeMovieForm();
-        }
-    });
-
-    movieModal.querySelector("#movieForm")
-        .addEventListener("submit", saveMovie);
-
-    return movieModal;
-}
-
-
-function openMovieForm(movie = null) {
-    createMovieModal();
-
-    const form = movieModal.querySelector("#movieForm");
-
-    form.reset();
-
-    form.elements.namedItem("movieId").value =
-        movie?.id ?? "";
-
-    setText(
-        "movieFormTitle",
-        movie ? "Edit Movie" : "Add New Movie"
-    );
-
-    const fields = [
-        "title",
-        "category",
-        "year",
-        "translator",
-        "language",
-        "country",
-        "quality",
-        "runtime",
-        "release_date",
-        "overview",
-        "poster_path",
-        "backdrop_path",
-        "video_url",
-        "download_url"
-    ];
-
-    fields.forEach(name => {
-        form.elements.namedItem(name).value =
-            movie?.[name] ?? "";
-    });
-
-    form.elements.namedItem("is_active").checked =
-        movie ? movie.is_active !== false : true;
-
-    form.elements.namedItem("is_featured").checked =
-        movie?.is_featured === true;
-
-    setText(
-        "saveMovieButton",
-        movie ? "Update Movie" : "Save Movie"
-    );
-
-    movieModal.hidden = false;
-
-    form.elements.namedItem("title").focus();
-   renderDownloadLinks(
-    normalizeDownloadLinks(movie?.download_links)
-);
-}
-
-function closeMovieForm() {
-    if (movieModal) {
-        movieModal.hidden = true;
-    }
-}
-
-
-async function saveMovie(event) {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    const saveButton = $("saveMovieButton");
-
-    if (!form.reportValidity()) return;
-
-    const movieId = form.elements.namedItem("movieId").value;
-
-    const numberValue = name => {
-        const value = form.elements.namedItem(name).value.trim();
-        return value === "" ? null : Number(value);
-    };
-
-    const textValue = name => {
-        const value = form.elements.namedItem(name).value.trim();
-        return value || null;
-    };
-let downloadLinks = [];
-
-try {
-    downloadLinks = collectDownloadLinks();
-} catch (error) {
-    alert(error.message);
-    return;
-}
-    const payload = {
-        title: textValue("title"),
-        category: textValue("category"),
-        year: numberValue("year"),
-        translator: textValue("translator"),
-        language: textValue("language"),
-        country: textValue("country"),
-        quality: textValue("quality") || "HD",
-        runtime: numberValue("runtime"),
-        release_date: textValue("release_date"),
-        overview: textValue("overview"),
-        poster_path: textValue("poster_path"),
-        backdrop_path: textValue("backdrop_path"),
-       download_links: downloadLinks,
-
-        // These two links are intentionally independent.
-        video_url: textValue("video_url"),
-        download_url: textValue("download_url"),
-
-        is_active: form.elements.namedItem("is_active").checked,
-        is_featured: form.elements.namedItem("is_featured").checked,
-        updated_at: new Date().toISOString()
-    };
-
-    if (!payload.title) {
-        alert("Movie title is required.");
-        return;
-    }
-
-    if (
-        (payload.year !== null &&
-            (!Number.isInteger(payload.year) ||
-             payload.year < 1800 ||
-             payload.year > 2200)) ||
-        (payload.runtime !== null &&
-            (!Number.isInteger(payload.runtime) ||
-             payload.runtime < 0))
-    ) {
-        alert("Please enter a valid year and runtime.");
-        return;
-    }
-
-    saveButton.disabled = true;
-    saveButton.textContent = movieId ? "Updating..." : "Saving...";
-
-    try {
-        let response;
-
-        if (movieId) {
-            response = await supabase
-                .from("movies")
-                .update(payload)
-                .eq("id", movieId);
-        } else {
-            response = await supabase
-                .from("movies")
-                .insert(payload);
-        }
-
-        if (response.error) {
-            throw response.error;
-        }
-
-        closeMovieForm();
-
-        alert(
-            movieId
-                ? "Movie updated successfully."
-                : "Movie added successfully."
-        );
-
-        await refreshContent();
-
-    } catch (error) {
-        console.error("Movie save error:", error);
-
-        alert(
-            "Unable to save movie.\n\n" +
-            (error.message || "Please try again.")
-        );
-
-    } finally {
-        saveButton.disabled = false;
-        saveButton.textContent = movieId
-            ? "Update Movie"
-            : "Save Movie";
-    }
-}
-
-/* =========================================
-   TABLE ACTIONS
-========================================= */
-
 document.addEventListener("click", async event => {
     const button = event.target.closest("[data-action]");
 
     if (!button || button.disabled) return;
 
     const { action, id } = button.dataset;
-
     if (!id) return;
 
     button.disabled = true;
 
     try {
         switch (action) {
+            case "edit-movie": {
+                const movie = moviesCache.find(
+                    item => String(item.id) === String(id)
+                );
+
+                if (movie) {
+                    openMovieForm(movie);
+                }
+                break;
+            }
+
             case "toggle-movie":
                 await toggleMovie(id);
                 break;
@@ -1635,19 +939,10 @@ document.addEventListener("click", async event => {
                 await deleteEpisode(id);
                 break;
 
-            case "edit-movie": {
-    const movie = moviesCache.find(
-        item => String(item.id) === String(id)
-    );
-
-    if (movie) openMovieForm(movie);
-    break;
-}
-
-case "edit-series":
-case "edit-episode":
-    alert("Series and episode forms will be implemented separately.");
-    break;
+            case "edit-series":
+            case "edit-episode":
+                alert("Series and episode forms will be implemented separately.");
+                break;
         }
 
     } catch (error) {
@@ -1658,12 +953,27 @@ case "edit-episode":
         button.disabled = false;
     }
 });
+function closeMovieForm() {
+    if (!movieModal) return;
 
+    const form = movieModal.querySelector("#movieForm");
 
+    form?.reset();
+
+    renderDownloadLinks([]);
+
+    movieModal.hidden = true;
+}
 /* =========================================
    SEARCH AND FILTERS
 ========================================= */
 
+// ADD MOVIE BUTTON
+bind("addMovieBtn", "click", () => {
+    openMovieForm();
+});
+
+// MOVIE SEARCH AND FILTERS
 bind("movieSearch", "input", renderMovies);
 bind("movieCategoryFilter", "change", renderMovies);
 bind("movieStatusFilter", "change", renderMovies);
@@ -1672,8 +982,6 @@ bind("seriesSearch", "input", renderSeries);
 bind("seriesStatusFilter", "change", renderSeries);
 
 bind("episodeSeasonFilter", "change", renderEpisodes);
-
-
 /* =========================================
    REFRESH CONTENT
 ========================================= */
@@ -1693,30 +1001,6 @@ async function refreshContent() {
 bind("refreshMoviesBtn", "click", loadMovies);
 bind("refreshSeriesBtn", "click", loadSeries);
 bind("closeEpisodeManager", "click", closeEpisodeManager);
-
-
-/* =========================================
-   ADD BUTTONS
-========================================= */
-
-bind("addMovieBtn", "click", () => {
-    openMovieForm();
-});
-
-bind("addSeriesBtn", "click", () => {
-    alert("The Add Series form will be connected in the next implementation step.");
-});
-
-bind("addEpisodeBtn", "click", () => {
-    if (selectedSeriesId === null) {
-        alert("Please select a series first.");
-        return;
-    }
-
-    alert("The Add Episode form will be connected in the next implementation step.");
-});
-
-
 /* =========================================
    NAVIGATION
 ========================================= */
@@ -1916,7 +1200,883 @@ bind("retryVerification", "click", async () => {
     initialized = false;
     await initializeDashboard();
 });
+/* =========================================
+   CINEVA PRO — MULTIPLE MOVIE DOWNLOAD LINKS
+   Supabase: movies.download_links (JSONB)
+========================================= */
 
+function normalizeDownloadLinks(value) {
+    if (!value) return [];
+
+    let links = value;
+
+    if (typeof links === "string") {
+        try {
+            links = JSON.parse(links);
+        } catch {
+            return [];
+        }
+    }
+
+    if (!Array.isArray(links)) return [];
+
+    return links.map(link => {
+        if (typeof link === "string") {
+            return {
+                label: "Download",
+                url: link
+            };
+        }
+
+        return {
+            label: String(
+                link?.label || link?.name || "Download"
+            ).trim(),
+
+            url: String(
+                link?.url ||
+                link?.link ||
+                link?.download_url ||
+                ""
+            ).trim()
+        };
+    }).filter(link => link.url);
+}
+
+
+/* CREATE DOWNLOAD LINK ROW */
+
+function createDownloadLinkRow(label = "", url = "") {
+    const row = document.createElement("div");
+
+    row.className = "cineva-download-row";
+
+    const labelField = document.createElement("div");
+    labelField.className = "cineva-field";
+
+    const labelTitle = document.createElement("label");
+    labelTitle.textContent = "Button Name";
+
+    const labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.className = "download-link-label";
+    labelInput.placeholder = "Download 720p";
+    labelInput.maxLength = 60;
+    labelInput.value = label;
+
+    labelField.append(labelTitle, labelInput);
+
+    const urlField = document.createElement("div");
+    urlField.className = "cineva-field";
+
+    const urlTitle = document.createElement("label");
+    urlTitle.textContent = "Download URL";
+
+    const urlInput = document.createElement("input");
+    urlInput.type = "url";
+    urlInput.className = "download-link-url";
+    urlInput.placeholder = "https://example.com/movie";
+    urlInput.value = url;
+
+    urlField.append(urlTitle, urlInput);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "cineva-remove-link";
+    removeButton.textContent = "Remove";
+    removeButton.dataset.removeDownloadLink = "true";
+
+    row.append(labelField, urlField, removeButton);
+
+    return row;
+}
+
+
+/* RENDER SAVED DOWNLOAD LINKS */
+
+function renderDownloadLinks(links = []) {
+    const container = movieModal?.querySelector(
+        "#downloadLinksContainer"
+    );
+
+    const emptyMessage = movieModal?.querySelector(
+        "#downloadLinksEmpty"
+    );
+
+    if (!container) return;
+
+    container.replaceChildren();
+
+    normalizeDownloadLinks(links).forEach(link => {
+        container.appendChild(
+            createDownloadLinkRow(link.label, link.url)
+        );
+    });
+
+    if (emptyMessage) {
+        emptyMessage.hidden = container.children.length > 0;
+    }
+}
+
+
+/* COLLECT DOWNLOAD LINKS */
+
+function collectDownloadLinks() {
+    const container = movieModal?.querySelector(
+        "#downloadLinksContainer"
+    );
+
+    if (!container) return [];
+
+    const rows = [
+        ...container.querySelectorAll(".cineva-download-row")
+    ];
+
+    const links = [];
+
+    for (const row of rows) {
+        const label = row
+            .querySelector(".download-link-label")
+            ?.value.trim() || "";
+
+        const url = row
+            .querySelector(".download-link-url")
+            ?.value.trim() || "";
+
+        if (!label && !url) continue;
+
+        if (!label || !url) {
+            throw new Error(
+                "Every download button needs both a name and a URL."
+            );
+        }
+
+        let parsedURL;
+
+        try {
+            parsedURL = new URL(url);
+        } catch {
+            throw new Error(
+                `Invalid download URL: ${url}`
+            );
+        }
+
+        if (!["http:", "https:"].includes(parsedURL.protocol)) {
+            throw new Error(
+                "Download links must use HTTP or HTTPS."
+            );
+        }
+
+        links.push({
+            label,
+            url
+        });
+    }
+
+    return links;
+}
+
+
+/* INITIALIZE DOWNLOAD EVENTS */
+
+function initializeDownloadLinkEvents() {
+    if (!movieModal) return;
+
+    const container = movieModal.querySelector(
+        "#downloadLinksContainer"
+    );
+
+    const addButton = movieModal.querySelector(
+        "#addDownloadLink"
+    );
+
+    const emptyMessage = movieModal.querySelector(
+        "#downloadLinksEmpty"
+    );
+
+    if (!container || !addButton || !emptyMessage) {
+        console.error(
+            "CINEVA: Multiple download link elements are missing."
+        );
+        return;
+    }
+
+    addButton.addEventListener("click", () => {
+        const row = createDownloadLinkRow();
+
+        container.appendChild(row);
+        emptyMessage.hidden = true;
+
+        row.querySelector(".download-link-label").focus();
+    });
+
+    container.addEventListener("click", event => {
+        const removeButton = event.target.closest(
+            "[data-remove-download-link]"
+        );
+
+        if (!removeButton) return;
+
+        removeButton.closest(".cineva-download-row")?.remove();
+
+        emptyMessage.hidden = container.children.length > 0;
+    });
+}
+/* =========================================
+   CINEVA PRO — MOVIE ADD / EDIT MODAL
+========================================= */
+
+let movieModal = null;
+
+function createMovieModal() {
+    if (movieModal) return movieModal;
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .cineva-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0,0,0,.78);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .cineva-modal[hidden] {
+            display: none;
+        }
+
+        .cineva-modal-card {
+            width: 100%;
+            max-width: 850px;
+            max-height: 92vh;
+            overflow-y: auto;
+            background: #121221;
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 16px;
+            padding: 26px;
+            color: #fff;
+        }
+
+        .cineva-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .cineva-modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .cineva-modal-close {
+            background: #242438;
+            border: 0;
+            color: white;
+            border-radius: 8px;
+            padding: 9px 13px;
+            cursor: pointer;
+        }
+
+        .cineva-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .cineva-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cineva-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .cineva-field label {
+            color: #c6c6d7;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .cineva-field input,
+        .cineva-field textarea,
+        .cineva-field select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 13px;
+            background: #0b0b17;
+            color: #fff;
+            border: 1px solid #303047;
+            border-radius: 8px;
+            outline: none;
+            font: inherit;
+        }
+
+        .cineva-field input:focus,
+        .cineva-field textarea:focus,
+        .cineva-field select:focus {
+            border-color: #8b35f5;
+        }
+
+        .cineva-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .cineva-form-checks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-top: 22px;
+        }
+
+        .cineva-form-checks label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        /* MULTIPLE DOWNLOAD LINKS */
+
+        .cineva-download-section {
+            grid-column: 1 / -1;
+            background: #0b0b17;
+            border: 1px solid #303047;
+            border-radius: 12px;
+            padding: 17px;
+            margin-top: 5px;
+        }
+
+        .cineva-download-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .cineva-download-heading h3 {
+            margin: 0 0 5px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .cineva-download-heading p {
+            margin: 0;
+            color: #9999ad;
+            font-size: 12px;
+        }
+
+        .cineva-add-link {
+            flex-shrink: 0;
+            border: 0;
+            background: #8b35f5;
+            color: #fff;
+            border-radius: 7px;
+            padding: 10px 13px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .cineva-add-link:hover {
+            background: #a855f7;
+        }
+
+        .cineva-download-row {
+            display: grid;
+            grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) auto;
+            gap: 12px;
+            align-items: end;
+            margin-top: 13px;
+            padding-top: 13px;
+            border-top: 1px solid #25253a;
+        }
+
+        .cineva-remove-link {
+            border: 0;
+            background: #ef315e;
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .cineva-remove-link:hover {
+            background: #d91f4d;
+        }
+
+        .cineva-download-empty {
+            color: #9999ad;
+            font-size: 13px;
+            margin: 12px 0 0;
+        }
+
+        .cineva-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 26px;
+        }
+
+        .cineva-form-actions button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .cineva-cancel {
+            background: #29293c;
+            color: white;
+        }
+
+        .cineva-save {
+            background: linear-gradient(135deg,#8b35f5,#ef315e);
+            color: white;
+        }
+
+        .cineva-save:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        @media(max-width:600px) {
+            .cineva-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cineva-modal-card {
+                padding: 18px;
+            }
+
+            .cineva-download-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .cineva-download-row {
+                grid-template-columns: 1fr;
+            }
+
+            .cineva-download-row button {
+                width: 100%;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+
+    movieModal = document.createElement("div");
+    movieModal.className = "cineva-modal";
+    movieModal.hidden = true;
+
+    movieModal.innerHTML = `
+        <div class="cineva-modal-card">
+
+            <div class="cineva-modal-header">
+                <h2 id="movieFormTitle">Add New Movie</h2>
+
+                <button
+                    type="button"
+                    class="cineva-modal-close"
+                    id="closeMovieForm">
+                    ✕
+                </button>
+            </div>
+
+            <form id="movieForm">
+
+                <input type="hidden" name="movieId">
+
+                <div class="cineva-form-grid">
+
+                    <div class="cineva-field full">
+                        <label>Movie Title *</label>
+                        <input
+                            name="title"
+                            required
+                            maxlength="250"
+                            placeholder="Enter movie title">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Category</label>
+                        <input
+                            name="category"
+                            placeholder="Action, Drama, Comedy...">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Release Year</label>
+                        <input
+                            name="year"
+                            type="number"
+                            min="1800"
+                            max="2200">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Translator</label>
+                        <input name="translator">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Language</label>
+                        <input name="language">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Country</label>
+                        <input name="country">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Quality</label>
+                        <select name="quality">
+                            <option value="HD">HD</option>
+                            <option value="FHD">FHD</option>
+                            <option value="4K">4K</option>
+                            <option value="SD">SD</option>
+                        </select>
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Runtime (minutes)</label>
+                        <input name="runtime" type="number" min="0">
+                    </div>
+
+                    <div class="cineva-field">
+                        <label>Release Date</label>
+                        <input name="release_date" type="date">
+                    </div>
+
+                    <div class="cineva-field full">
+                        <label>Movie Overview</label>
+                        <textarea
+                            name="overview"
+                            placeholder="Write a movie description..."></textarea>
+                    </div>
+
+                    <div class="cineva-field full">
+                        <label>Poster Image URL</label>
+                        <input
+                            name="poster_path"
+                            type="url"
+                            placeholder="https://...">
+                    </div>
+
+                    <div class="cineva-field full">
+                        <label>Backdrop Image URL</label>
+                        <input
+                            name="backdrop_path"
+                            type="url"
+                            placeholder="https://...">
+                    </div>
+
+                    <div class="cineva-field full">
+                        <label>Watch URL</label>
+                        <input
+                            name="video_url"
+                            type="url"
+                            placeholder="Your movie streaming link">
+                    </div>
+
+                    <div class="cineva-field full">
+                        <label>Primary Download URL</label>
+                        <input
+                            name="download_url"
+                            type="url"
+                            placeholder="Your primary movie download link">
+                    </div>
+
+                    <!-- MULTIPLE DOWNLOAD LINKS -->
+
+                    <div class="cineva-download-section">
+
+                        <div class="cineva-download-heading">
+
+                            <div>
+                                <h3>Additional Download Links</h3>
+                                <p>
+                                    Add multiple download buttons for this movie.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="cineva-add-link"
+                                id="addDownloadLink">
+                                + Add Download
+                            </button>
+
+                        </div>
+
+                        <p
+                            class="cineva-download-empty"
+                            id="downloadLinksEmpty">
+                            No additional download links added yet.
+                        </p>
+
+                        <div id="downloadLinksContainer"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="cineva-form-checks">
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked>
+                        Active Movie
+                    </label>
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="is_featured">
+                        Featured Movie
+                    </label>
+
+                </div>
+
+                <div class="cineva-form-actions">
+
+                    <button
+                        type="button"
+                        class="cineva-cancel"
+                        id="cancelMovieForm">
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="cineva-save"
+                        id="saveMovieButton">
+                        Save Movie
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(movieModal);
+
+    // Initialize only after the modal HTML exists.
+    initializeDownloadLinkEvents();
+
+    movieModal.querySelector("#closeMovieForm")
+        .addEventListener("click", closeMovieForm);
+
+    movieModal.querySelector("#cancelMovieForm")
+        .addEventListener("click", closeMovieForm);
+
+    movieModal.addEventListener("click", event => {
+        if (event.target === movieModal) {
+            closeMovieForm();
+        }
+    });
+
+    movieModal.querySelector("#movieForm")
+        .addEventListener("submit", saveMovie);
+
+    return movieModal;
+}
+function openMovieForm(movie = null) {
+    createMovieModal();
+
+    const form = movieModal.querySelector("#movieForm");
+
+    form.reset();
+
+    form.elements.namedItem("movieId").value =
+        movie?.id ?? "";
+
+    movieModal.querySelector("#movieFormTitle").textContent =
+        movie ? "Edit Movie" : "Add New Movie";
+
+    const fields = [
+        "title",
+        "category",
+        "year",
+        "translator",
+        "language",
+        "country",
+        "quality",
+        "runtime",
+        "release_date",
+        "overview",
+        "poster_path",
+        "backdrop_path",
+        "video_url",
+        "download_url"
+    ];
+
+    fields.forEach(name => {
+        form.elements.namedItem(name).value =
+            movie?.[name] ?? "";
+    });
+
+    form.elements.namedItem("is_active").checked =
+        movie ? movie.is_active !== false : true;
+
+    form.elements.namedItem("is_featured").checked =
+        movie?.is_featured === true;
+
+    // Load previously saved additional download buttons.
+    renderDownloadLinks(movie?.download_links || []);
+
+    movieModal.querySelector("#saveMovieButton").textContent =
+        movie ? "Update Movie" : "Save Movie";
+
+    movieModal.hidden = false;
+
+    form.elements.namedItem("title").focus();
+}
+async function saveMovie(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+
+    const saveButton = movieModal.querySelector(
+        "#saveMovieButton"
+    );
+
+    if (!form.reportValidity()) return;
+
+    const movieId = form.elements.namedItem("movieId").value;
+
+    const numberValue = name => {
+        const value = form.elements.namedItem(name).value.trim();
+        return value === "" ? null : Number(value);
+    };
+
+    const textValue = name => {
+        const value = form.elements.namedItem(name).value.trim();
+        return value || null;
+    };
+
+    let downloadLinks = [];
+
+    try {
+        downloadLinks = collectDownloadLinks();
+    } catch (error) {
+        alert(error.message);
+        return;
+    }
+
+    const payload = {
+        title: textValue("title"),
+        category: textValue("category"),
+        year: numberValue("year"),
+        translator: textValue("translator"),
+        language: textValue("language"),
+        country: textValue("country"),
+        quality: textValue("quality") || "HD",
+        runtime: numberValue("runtime"),
+        release_date: textValue("release_date"),
+        overview: textValue("overview"),
+        poster_path: textValue("poster_path"),
+        backdrop_path: textValue("backdrop_path"),
+
+        // Additional download buttons are saved separately.
+        download_links: downloadLinks,
+
+        // Never mix the watch link with download links.
+        video_url: textValue("video_url"),
+        download_url: textValue("download_url"),
+
+        is_active: form.elements.namedItem("is_active").checked,
+        is_featured: form.elements.namedItem("is_featured").checked,
+
+        updated_at: new Date().toISOString()
+    };
+
+    if (!payload.title) {
+        alert("Movie title is required.");
+        return;
+    }
+
+    if (
+        (payload.year !== null &&
+            (!Number.isInteger(payload.year) ||
+             payload.year < 1800 ||
+             payload.year > 2200)) ||
+        (payload.runtime !== null &&
+            (!Number.isInteger(payload.runtime) ||
+             payload.runtime < 0))
+    ) {
+        alert("Please enter a valid year and runtime.");
+        return;
+    }
+
+    saveButton.disabled = true;
+
+    saveButton.textContent = movieId
+        ? "Updating..."
+        : "Saving...";
+
+    try {
+        let response;
+
+        if (movieId) {
+            response = await supabase
+                .from("movies")
+                .update(payload)
+                .eq("id", movieId);
+        } else {
+            response = await supabase
+                .from("movies")
+                .insert(payload);
+        }
+
+        if (response.error) {
+            throw response.error;
+        }
+
+        closeMovieForm();
+
+        alert(
+            movieId
+                ? "Movie updated successfully."
+                : "Movie added successfully."
+        );
+
+        await refreshContent();
+
+    } catch (error) {
+        console.error("Movie save error:", error);
+
+        alert(
+            "Unable to save movie.\n\n" +
+            (error.message || "Please try again.")
+        );
+
+    } finally {
+        saveButton.disabled = false;
+
+        saveButton.textContent = movieId
+            ? "Update Movie"
+            : "Save Movie";
+    }
+}
 
 /* =========================================
    START DASHBOARD
