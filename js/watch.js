@@ -1455,6 +1455,7 @@ async function fetchParts(item) {
     return data || [];
 }
 
+
 /* =====================================================
    RENDER GROUPED MOVIE PARTS
 ===================================================== */
@@ -1464,35 +1465,56 @@ function renderParts(parts) {
 
     currentParts = Array.isArray(parts) ? parts : [];
 
+    // Hide parts section for non-movies or movies without parts.
     if (contentType !== "movie" || !currentParts.length) {
         el.partsContainer.hidden = true;
+        el.partsContainer.style.display = "none";
+
+        // Restore the main action bar.
+        const mainActionBar = document.getElementById("main-watch-btn")
+            ?.parentElement?.parentElement;
+
+        if (mainActionBar) {
+            mainActionBar.classList.remove("has-parts");
+            mainActionBar.style.display = "";
+        }
+
         return;
     }
 
     el.partsContainer.hidden = false;
+    el.partsContainer.style.display = "";
+
+    // Hide the main Watch / Download / Like / Share action bar.
+    const mainWatchButton = document.getElementById("main-watch-btn");
+    const mainDownloadButton = document.getElementById("main-download-btn");
+
+    if (mainWatchButton && mainDownloadButton) {
+        let actionBar = mainWatchButton.parentElement;
+
+        while (
+            actionBar &&
+            !actionBar.contains(mainDownloadButton)
+        ) {
+            actionBar = actionBar.parentElement;
+        }
+
+        if (actionBar) {
+            actionBar.classList.add("has-parts");
+            actionBar.style.display = "none";
+        }
+    }
 
     if (!el.partsGrid) return;
 
     el.partsGrid.innerHTML = currentParts.map((part, index) => {
-        const label = part.title ||
-            `Part ${part.part_number ?? index + 1}`;
-
-        const hasWatch = Boolean(
-            part.video_url && isSafeHttpUrl(part.video_url)
-        );
-
-        const hasDownload = Boolean(
-            part.download_url ||
-            part.download_link ||
-            normalizeLinks(part).length
-        );
+        const partNumber = part.part_number ?? index + 1;
+        const label = part.title || `Part ${partNumber}`;
 
         return `
             <article class="movie-part-card">
                 <div class="episode-top">
-                    <span>PART ${escapeHTML(
-                        part.part_number ?? index + 1
-                    )}</span>
+                    <span>PART ${escapeHTML(partNumber)}</span>
                 </div>
 
                 <h3>${escapeHTML(label)}</h3>
@@ -1505,7 +1527,6 @@ function renderParts(parts) {
                         type="button"
                         data-action="select-part"
                         data-index="${index}"
-                        ${hasWatch ? "" : "disabled"}
                     >
                         <i class="fa-solid fa-play"></i>
                         Watch
@@ -1516,7 +1537,6 @@ function renderParts(parts) {
                         type="button"
                         data-action="download-part"
                         data-index="${index}"
-                        ${hasDownload ? "" : "disabled"}
                     >
                         <i class="fa-solid fa-download"></i>
                         Download
@@ -1526,39 +1546,49 @@ function renderParts(parts) {
         `;
     }).join("");
 
-    el.partsGrid.querySelectorAll("button").forEach(button => {
+    // Make each part button functional.
+    el.partsGrid.querySelectorAll("button[data-index]").forEach(button => {
         button.addEventListener("click", () => {
-            const part = currentParts[
-                Number(button.dataset.index)
-            ];
+            const index = Number(button.dataset.index);
+            const part = currentParts[index];
 
-            if (!part) return;
-
-            setSelectedMedia(part);
+            if (!part) {
+                alert("This part could not be found.");
+                return;
+            }
 
             if (button.dataset.action === "select-part") {
-                if (!part.video_url) {
-                    alert("No watch link is available for this part.");
+                const videoUrl = part.video_url;
+
+                if (!videoUrl || !isSafeHttpUrl(videoUrl)) {
+                    alert("No valid watch link has been added for this part.");
                     return;
                 }
 
                 setSelectedMedia(part, true);
+
+                return;
             }
 
             if (button.dataset.action === "download-part") {
-                const url = part.download_url ||
+                const downloadUrl =
+                    part.download_url ||
                     part.download_link ||
-                    normalizeLinks(part)[0]?.url;
+                    normalizeLinks(part)[0]?.url ||
+                    "";
 
-                if (url) {
-                    openDownload(url);
-                } else {
-                    alert("No download link is available for this part.");
+                if (!downloadUrl || !isSafeHttpUrl(downloadUrl)) {
+                    alert("No valid download link has been added for this part.");
+                    return;
                 }
+
+                setSelectedMedia(part);
+                openDownload(downloadUrl);
             }
         });
     });
 }
+
 
 /* =====================================================
    COMMENTS
