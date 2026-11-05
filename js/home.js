@@ -86,152 +86,178 @@ function escapeHTML(value = "") {
     })[char]);
 
 }
-
-
 /* =========================================================
-   05. IMAGE URL HANDLER
+   05. SMART IMAGE URL HANDLER
 ========================================================= */
 
-function safeImageURL(value, tmdbPath = false, size = "w500") {
+function safeImageURL(value, size = HOME_CONFIG.posterSize, forceTMDB = false) {
+    if (typeof value !== "string") return "";
 
-    if (!value || typeof value !== "string") {
-        return "";
-    }
+    const image = value.trim();
 
-    value = value.trim();
+    if (!image) return "";
 
-    if (!value) {
-        return "";
-    }
+    // Already a complete URL
+    if (/^https?:\/\//i.test(image)) {
+        try {
+            const url = new URL(image);
 
-    // TMDB image paths such as /abc123.jpg
-    if (tmdbPath && value.startsWith("/")) {
-
-        value = `${HOME_CONFIG.tmdbImageBase}${size}${value}`;
-
-    }
-
-    try {
-
-        const url = new URL(value, window.location.href);
-
-        if (!["http:", "https:"].includes(url.protocol)) {
+            return ["http:", "https:"].includes(url.protocol)
+                ? url.href
+                : "";
+        } catch {
             return "";
         }
-
-        return url.href;
-
-    } catch {
-
-        return "";
-
     }
 
+    // Protocol-relative URL
+    if (image.startsWith("//")) {
+        return `https:${image}`;
+    }
+
+    // Local website images must remain local
+    if (
+        image.startsWith("./") ||
+        image.startsWith("../") ||
+        image.startsWith("assets/") ||
+        image.startsWith("/assets/") ||
+        image.startsWith("images/") ||
+        image.startsWith("/images/")
+    ) {
+        return new URL(image, window.location.href).href;
+    }
+
+    // TMDB image paths, for example: /abc123.jpg
+    if (forceTMDB || image.startsWith("/")) {
+        const path = image.replace(/^\/+/, "");
+
+        return `${HOME_CONFIG.tmdbImageBase}${size}/${path}`;
+    }
+
+    // Other relative image paths
+    return new URL(image, window.location.href).href;
 }
 
 
 /* =========================================================
-   06. POSTER DETECTION
+   06. ADVANCED POSTER DETECTION
 ========================================================= */
 
 function getPoster(item) {
-
     if (!item) return "";
 
-    // Prefer full image URLs and locally stored images.
-    const directPoster =
-        item.poster_url ||
-        item.poster ||
-        item.thumbnail_url ||
-        item.thumbnail ||
-        item.image;
+    // Check common direct poster/image columns first
+    const posterFields = [
+        "poster_url",
+        "poster",
+        "poster_image",
+        "poster_image_url",
+        "image_url",
+        "thumbnail_url",
+        "thumbnail",
+        "image",
+        "cover_image",
+        "cover"
+    ];
 
-    if (directPoster) {
+    for (const field of posterFields) {
+        const value = item[field];
 
-        const image = safeImageURL(directPoster);
-
-        if (image) return image;
-
-    }
-
-    // TMDB poster path.
-    if (item.poster_path) {
+        if (typeof value !== "string" || !value.trim()) {
+            continue;
+        }
 
         const image = safeImageURL(
-            item.poster_path,
-            true,
+            value,
             HOME_CONFIG.posterSize
         );
 
         if (image) return image;
-
     }
 
-    // Backdrop as last poster fallback.
-    const backdrop =
-        item.backdrop_url ||
-        item.backdrop ||
-        item.banner ||
-        item.backdrop_path;
-
-    if (backdrop) {
-
-        const isTMDBPath =
-            Boolean(item.backdrop_path) &&
-            backdrop === item.backdrop_path;
-
-        return safeImageURL(
-            backdrop,
-            isTMDBPath,
-            HOME_CONFIG.posterSize
+    // TMDB poster path
+    if (item.poster_path) {
+        const image = safeImageURL(
+            item.poster_path,
+            HOME_CONFIG.posterSize,
+            true
         );
 
+        if (image) return image;
+    }
+
+    // Use backdrop/banner as a last poster fallback
+    const fallbackFields = [
+        "backdrop_url",
+        "backdrop",
+        "banner",
+        "backdrop_path"
+    ];
+
+    for (const field of fallbackFields) {
+        const value = item[field];
+
+        if (typeof value !== "string" || !value.trim()) {
+            continue;
+        }
+
+        const image = safeImageURL(
+            value,
+            HOME_CONFIG.posterSize,
+            field === "backdrop_path"
+        );
+
+        if (image) return image;
     }
 
     return "";
-
 }
 
 
 /* =========================================================
-   07. BACKDROP DETECTION
+   07. ADVANCED BACKDROP DETECTION
 ========================================================= */
 
 function getBackdrop(item) {
-
     if (!item) return "";
 
-    const directBackdrop =
-        item.backdrop_url ||
-        item.backdrop ||
-        item.banner;
+    const backdropFields = [
+        "backdrop_url",
+        "backdrop",
+        "banner",
+        "backdrop_image",
+        "backdrop_image_url"
+    ];
 
-    if (directBackdrop) {
+    for (const field of backdropFields) {
+        const value = item[field];
 
-        const image = safeImageURL(directBackdrop);
-
-        if (image) return image;
-
-    }
-
-    if (item.backdrop_path) {
+        if (typeof value !== "string" || !value.trim()) {
+            continue;
+        }
 
         const image = safeImageURL(
-            item.backdrop_path,
-            true,
+            value,
             HOME_CONFIG.backdropSize
         );
 
         if (image) return image;
-
     }
 
-    // Use poster when no backdrop exists.
+    // TMDB backdrop path
+    if (item.backdrop_path) {
+        const image = safeImageURL(
+            item.backdrop_path,
+            HOME_CONFIG.backdropSize,
+            true
+        );
+
+        if (image) return image;
+    }
+
+    // Fall back to poster if no backdrop exists
     return getPoster(item);
-
 }
-
-
 /* =========================================================
    08. CONTENT TYPE
 ========================================================= */
@@ -448,45 +474,46 @@ function showEmpty(
     `;
 
 }
-
-
 /* =========================================================
-   17. POSTER FALLBACK MARKUP
+   17. PREMIUM POSTER MARKUP
 ========================================================= */
 
 function createPosterHTML(item, title) {
-
     const poster = getPoster(item);
 
     const fallback = `
         <div class="poster-placeholder">
-
             <i class="fa-solid fa-film"></i>
-
             <span>CINEVA</span>
-
         </div>
     `;
 
+    // No poster available
     if (!poster) {
         return fallback;
     }
 
     return `
-        ${fallback}
-
         <img
             src="${escapeHTML(poster)}"
             alt="${escapeHTML(title)}"
             loading="lazy"
             decoding="async"
-            onerror="this.remove()"
+            onerror="
+                this.style.display='none';
+                this.nextElementSibling.style.display='flex';
+            "
         >
+
+        <div
+            class="poster-placeholder"
+            style="display:none;"
+        >
+            <i class="fa-solid fa-film"></i>
+            <span>CINEVA</span>
+        </div>
     `;
-
 }
-
-
 /* =========================================================
    18. MOVIE / SERIES CARD
 ========================================================= */
