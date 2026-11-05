@@ -333,67 +333,72 @@
         </section>
 
 
+       <!-- =====================================
+     TRENDING SECTION
+     Ranked by most views
+====================================== -->
 
-        <!-- =====================================
-             TRENDING SECTION
-        ====================================== -->
+<section class="content-section container" id="trending">
 
-        <section class="content-section container" id="trending">
+    <div class="section-heading">
 
-            <div class="section-heading">
+        <div class="section-title">
 
-                <div class="section-title">
+            <span class="section-icon trending-icon">
+                <i class="fa-solid fa-fire"></i>
+            </span>
 
-                    <span class="section-icon trending-icon">
-                        <i class="fa-solid fa-fire"></i>
-                    </span>
-
-                    <div>
-                        <h2>Trending Now</h2>
-                        <p>What everyone is watching</p>
-                    </div>
-
-                </div>
-
-
-                <a href="genre.html?sort=trending" class="view-all">
-                    View All
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
-
+            <div>
+                <h2>Trending Now</h2>
+                <p>Most watched on CINEVA</p>
             </div>
 
+        </div>
 
-            <div class="movie-carousel-wrapper">
+        <a href="genre.html?sort=trending" class="view-all">
+            View All
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
 
-                <button class="carousel-arrow prev"
-                    data-target="trendingMovies"
-                    aria-label="Previous trending movies">
+    </div>
 
-                    <i class="fa-solid fa-chevron-left"></i>
+    <div class="movie-carousel-wrapper">
 
-                </button>
+        <button
+            class="carousel-arrow prev"
+            data-target="trendingMovies"
+            aria-label="Previous trending content"
+            type="button">
 
+            <i class="fa-solid fa-chevron-left"></i>
 
-                <div class="movie-grid horizontal-scroll"
-                    id="trendingMovies">
+        </button>
 
-                    <!-- Supabase trending movies render here -->
+        <div
+            class="movie-grid horizontal-scroll"
+            id="trendingMovies"
+            aria-live="polite">
 
-                </div>
-
-
-                <button class="carousel-arrow next"
-                    data-target="trendingMovies"
-                    aria-label="Next trending movies">
-
-                    <i class="fa-solid fa-chevron-right"></i>
-
-                </button>
-
+            <div class="trending-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span>Loading trending content...</span>
             </div>
 
-        </section>
+        </div>
+
+        <button
+            class="carousel-arrow next"
+            data-target="trendingMovies"
+            aria-label="Next trending content"
+            type="button">
+
+            <i class="fa-solid fa-chevron-right"></i>
+
+        </button>
+
+    </div>
+
+</section>
 
         <!-- =====================================
              LATEST ADDED
