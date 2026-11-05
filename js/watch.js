@@ -1394,7 +1394,41 @@ function renderSeason(seasonNumber) {
 /* =====================================================
    FETCH MOVIE PARTS
 ===================================================== */
+/* =========================================
+   CINEVA — GROUPED MEDIA PARTS
+========================================= */
 
+function parseParts(record) {
+    if (!record || !record.parts) {
+        return [];
+    }
+
+    let parts = record.parts;
+
+    // Handle JSON stored as a string
+    if (typeof parts === "string") {
+        try {
+            parts = JSON.parse(parts);
+        } catch (error) {
+            console.error("Invalid parts JSON:", error);
+            return [];
+        }
+    }
+
+    if (!Array.isArray(parts)) {
+        return [];
+    }
+
+    return parts
+        .filter(part => part && typeof part === "object")
+        .map((part, index) => ({
+            ...part,
+            part_number: Number(part.part_number || index + 1),
+            title: part.title || `Part ${index + 1}`,
+            video_url: part.video_url || "",
+            download_url: part.download_url || ""
+        }));
+}
 async function fetchParts(item) {
     // Preferred format: JSONB parts stored on the movie.
     const storedParts = parseParts(item);
