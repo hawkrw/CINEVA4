@@ -29,7 +29,7 @@ html {
 
 body {
     min-height: 100vh;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     color: var(--text);
     background: var(--background);
     overflow-x: hidden;
