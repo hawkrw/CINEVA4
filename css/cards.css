@@ -1317,3 +1317,58 @@ main > .content-section + .content-section {
         animation: none !important;
     }
 }
+/* =========================================
+   CINEVA — POSTER IMAGE FIX
+========================================= */
+
+.movie-poster {
+    position: relative;
+    overflow: hidden;
+    background: #151323;
+}
+
+.movie-poster > img {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+    object-fit: cover;
+    object-position: center;
+
+    opacity: 1;
+    visibility: visible;
+}
+
+.movie-poster .poster-placeholder {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    background: linear-gradient(
+        145deg,
+        #25183e,
+        #151323
+    );
+
+    color: #8580a8;
+}
+
+.movie-poster .poster-placeholder i {
+    font-size: 34px;
+}
+
+.movie-poster .poster-placeholder span {
+    font-size: 11px;
+    letter-spacing: 3px;
+}
