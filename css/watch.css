@@ -2462,3 +2462,7 @@
         height: 42px;
     }
 }
+/* Hide main actions when a movie has grouped parts */
+.player-action-bar.has-parts {
+    display: none !important;
+}
