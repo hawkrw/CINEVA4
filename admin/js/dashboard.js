@@ -309,7 +309,8 @@ async function loadMovies() {
     poster_path,
     backdrop_path,
     video_url,
-    download_url
+    download_url,
+    parts
 `)
             .order("created_at", { ascending: false });
 
