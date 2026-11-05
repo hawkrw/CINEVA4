@@ -570,38 +570,6 @@ function scrollToPlayer() {
    CINEVA PRO — STRICT WATCH / DOWNLOAD URL DETECTION
 ===================================================== */
 
-function getMediaDownloadUrl(item = {}) {
-    if (!item || typeof item !== "object") return "";
-
-    const fields = [
-        "download_url",
-        "download_link",
-        "downloadUrl",
-        "downloadLink",
-        "download"
-    ];
-
-    for (const field of fields) {
-        const value = item[field];
-
-        if (
-            typeof value === "string" &&
-            isSafeHttpUrl(value.trim())
-        ) {
-            return value.trim();
-        }
-    }
-
-    // Additional download links only.
-    const links = normalizeLinks({
-        download_links: item.download_links,
-        download_options: item.download_options,
-        downloads: item.downloads
-    });
-
-    return links[0]?.url || "";
-}
-
 function getMediaVideoUrl(item = {}) {
     if (!item || typeof item !== "object") return "";
 
