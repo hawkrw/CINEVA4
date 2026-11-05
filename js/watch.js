@@ -575,14 +575,15 @@ function getMediaDownloadUrl(item = {}) {
     }
 
     // 1. Direct download fields
-    const directFields = [
-        "download_url",
-        "download_link",
-        "downloadUrl",
-        "download",
-        "file_url",
-        "direct_link"
-    ];
+  const directFields = [
+    "download_url",
+    "download_link",
+    "downloadUrl",
+    "downloadLink",
+    "download",
+    "file_url",
+    "direct_link"
+];
 
     for (const field of directFields) {
         const value = item[field];
@@ -1245,6 +1246,7 @@ function parseParts(record) {
 
     let parts = record.parts;
 
+    // Parse JSON strings if necessary
     if (typeof parts === "string") {
         try {
             parts = JSON.parse(parts);
@@ -1254,37 +1256,81 @@ function parseParts(record) {
         }
     }
 
-    if (!Array.isArray(parts)) return [];
+    // Support arrays and objects containing arrays
+    if (!Array.isArray(parts)) {
+        if (Array.isArray(parts.parts)) {
+            parts = parts.parts;
+        } else if (Array.isArray(parts.items)) {
+            parts = parts.items;
+        } else if (typeof parts === "object") {
+            parts = Object.values(parts).filter(
+                value => value && typeof value === "object"
+            );
+        } else {
+            return [];
+        }
+    }
 
     return parts
-        .filter(part =>
-            part && typeof part === "object"
-        )
+        .filter(part => part && typeof part === "object")
         .slice(0, 5)
         .map((part, index) => {
-            const watchUrl =
-                typeof part.video_url === "string"
-                    ? part.video_url.trim()
-                    : typeof part.watch_url === "string"
-                        ? part.watch_url.trim()
-                        : "";
+
+            // WATCH URL: never use a download URL here
+            const watchCandidates = [
+                part.video_url,
+                part.watch_url,
+                part.watch_link,
+                part.video_link,
+                part.stream_url,
+                part.videoUrl,
+                part.watchUrl,
+                part.playback_url
+            ];
+
+            const watchUrl = watchCandidates.find(value =>
+                typeof value === "string" &&
+                isSafeHttpUrl(value.trim())
+            ) || "";
+
+            // DOWNLOAD URL: independently identify download fields
+            const downloadCandidates = [
+                part.download_url,
+                part.download_link,
+                part.downloadUrl,
+                part.downloadLink,
+                part.download
+            ];
+
+            let downloadUrl = downloadCandidates.find(value =>
+                typeof value === "string" &&
+                isSafeHttpUrl(value.trim())
+            ) || "";
+
+            if (!downloadUrl) {
+                downloadUrl = getMediaDownloadUrl(part);
+            }
 
             return {
                 ...part,
 
                 part_number:
-                    Number(part.part_number) || index + 1,
+                    Number(part.part_number ?? part.partNumber) ||
+                    index + 1,
 
                 title:
-                    part.title?.trim() ||
-                    `Part ${index + 1}`,
+                    String(
+                        part.title ||
+                        part.part_title ||
+                        part.name ||
+                        `Part ${index + 1}`
+                    ).trim(),
 
-                video_url: isSafeHttpUrl(watchUrl)
-                    ? watchUrl
-                    : "",
+                video_url: watchUrl.trim(),
 
-                download_url:
-                    getMediaDownloadUrl(part)
+                download_url: downloadUrl
+                    ? downloadUrl.trim()
+                    : ""
             };
         });
 }
