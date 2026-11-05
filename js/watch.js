@@ -103,16 +103,6 @@ function formatNumber(value) {
     );
 }
 
-function getPoster(item) {
-    return (
-        item.poster ||
-        item.poster_path ||
-        item.image ||
-        item.thumbnail ||
-        PLACEHOLDER
-    );
-}
-
 function getYear(item) {
     return (
         item.year ||
@@ -250,7 +240,47 @@ function normalizeLinks(item = {}) {
         array.findIndex(item => item.url === link.url) === index
     );
 }
+function normalizeImageUrl(value) {
+    if (typeof value !== "string") return "";
 
+    const image = value.trim();
+
+    if (
+        !image ||
+        image.includes("movie-placeholder.jpg") ||
+        image.includes("placeholder.png")
+    ) {
+        return "";
+    }
+
+    if (/^https?:\/\//i.test(image)) {
+        return image;
+    }
+
+    // TMDB relative image paths
+    if (image.startsWith("/")) {
+        return `https://image.tmdb.org/t/p/w500${image}`;
+    }
+
+    return image;
+}
+
+function getPoster(item = {}) {
+    const candidates = [
+        item.poster_path,
+        item.poster,
+        item.image,
+        item.thumbnail
+    ];
+
+    for (const candidate of candidates) {
+        const image = normalizeImageUrl(candidate);
+
+        if (image) return image;
+    }
+
+    return PLACEHOLDER;
+}
 /* =====================================================
    CINEVA — SAFE HTTP / HTTPS VALIDATION
 ===================================================== */
@@ -535,20 +565,28 @@ function getMediaDownloadUrl(item = {}) {
         "download_url",
         "download_link",
         "downloadUrl",
-        "download",
-        "file_url",
-        "direct_link",
-        "link"
+        "download"
     ];
 
     for (const field of directFields) {
         const value = item[field];
 
-        if (typeof value === "string" && isSafeHttpUrl(value.trim())) {
+        if (
+            typeof value === "string" &&
+            isSafeHttpUrl(value.trim())
+        ) {
             return value.trim();
         }
     }
 
+    const links = normalizeLinks({
+        download_links: item.download_links,
+        download_options: item.download_options,
+        downloads: item.downloads
+    });
+
+    return links[0]?.url || "";
+}
     const links = normalizeLinks({
         download_links: item.download_links,
         download_options: item.download_options,
@@ -1099,21 +1137,40 @@ function parseParts(record) {
         }
     }
 
-    if (!Array.isArray(parts)) {
-        return [];
-    }
+    if (!Array.isArray(parts)) return [];
 
     return parts
-        .filter(part => part && typeof part === "object")
-        .map((part, index) => ({
-            ...part,
-            part_number: Number(part.part_number || index + 1),
-            title: part.title || `Part ${index + 1}`,
-            video_url: typeof part.video_url === "string" ? part.video_url.trim() : "",
-            download_url: getMediaDownloadUrl(part) || ""
-        }));
-}
+        .filter(part =>
+            part && typeof part === "object"
+        )
+        .slice(0, 5)
+        .map((part, index) => {
+            const watchUrl =
+                typeof part.video_url === "string"
+                    ? part.video_url.trim()
+                    : typeof part.watch_url === "string"
+                        ? part.watch_url.trim()
+                        : "";
 
+            return {
+                ...part,
+
+                part_number:
+                    Number(part.part_number) || index + 1,
+
+                title:
+                    part.title?.trim() ||
+                    `Part ${index + 1}`,
+
+                video_url: isSafeHttpUrl(watchUrl)
+                    ? watchUrl
+                    : "",
+
+                download_url:
+                    getMediaDownloadUrl(part)
+            };
+        });
+}
 async function fetchParts(item) {
     const storedParts = parseParts(item);
 
@@ -1130,13 +1187,18 @@ async function fetchParts(item) {
         .order("part_number", { ascending: true });
 
     if (error) {
-        console.warn("Optional movie parts table unavailable:", error.message);
+        console.warn(
+            "Optional movie parts table unavailable:",
+            error.message
+        );
+
         return [];
     }
 
-    return data || [];
+    return parseParts({
+        parts: data || []
+    });
 }
-
 /* =====================================================
    RENDER GROUPED MOVIE PARTS
 ===================================================== */
@@ -1711,15 +1773,9 @@ async function initializeWatchPage() {
         setupLikes(item);
         setupShare(item);
         setupCommentForm(item);
+       
 
-        if (item.video_url) {
-            playVideo(item.video_url);
-        } else {
-            showPlayerMessage(
-                "Ready to watch",
-                "Select an available episode or part to begin."
-            );
-        }
+       
 
         const [
             episodes,
@@ -1740,6 +1796,23 @@ async function initializeWatchPage() {
 
         renderEpisodes(episodes);
         renderParts(parts);
+       // Do not automatically play the main movie when
+// separate movie parts are available.
+if (contentType === "movie" && parts.length > 0) {
+    destroyPlayer();
+
+    showPlayerMessage(
+        "Select a movie part",
+        "Choose a part below to start watching."
+    );
+} else if (contentType === "movie" && item.video_url) {
+    playVideo(item.video_url);
+} else {
+    showPlayerMessage(
+        "Ready to watch",
+        "Select an available episode or part to begin."
+    );
+}
         renderComments(comments);
         renderRelated(related);
 
