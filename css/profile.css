@@ -276,7 +276,7 @@ body::after {
 
 .profile-banner h1 {
     margin: 15px 0 10px;
-    font-family: 'Outfit', sans-serif;
+    font-family:;
     font-size: clamp(38px, 5vw, 65px);
     font-weight: 900;
     letter-spacing: -2px;
