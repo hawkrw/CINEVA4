@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CINEVA PRO | Administrator Access</title>
+
+    <meta
+        name="description"
+        content="Secure administrator access to CINEVA PRO."
+    >
+
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="icon" href="./assets/favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="./css/admin-auth.css">
+</head>
+
+<body>
+
+    <main class="auth-container">
+
+        <section class="auth-card">
+
+            <!-- BRAND -->
+            <div class="auth-brand">
+
+                <div class="brand-logo">
+                    CINE<span>VA</span>
+                </div>
+
+                <div class="brand-label">
+                    PRO ADMINISTRATION
+                </div>
+
+            </div>
+
+            <!-- SECURITY ICON -->
+            <div class="security-icon">
+                <span>♙</span>
+            </div>
+
+            <!-- INTRODUCTION -->
+            <div class="auth-heading">
+
+                <h1>Welcome Back</h1>
+
+                <p>
+                    Sign in to access the CINEVA administration panel.
+                </p>
+
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="adminLoginForm">
+
+                <div class="form-group">
+
+                    <label for="adminEmail">
+                        Administrator Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        name="email"
+                        placeholder="Enter your admin email"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="adminPassword">
+                        Password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            type="password"
+                            id="adminPassword"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+                <button
+                    type="submit"
+                    id="loginButton"
+                    class="login-button"
+                >
+                    <span>ACCESS ADMIN PANEL</span>
+                    <span class="button-arrow">→</span>
+                </button>
+
+            </form>
+
+            <!-- SECURITY NOTICE -->
+            <div class="auth-security">
+
+                <span class="security-dot"></span>
+
+                <p>
+                    Protected administrator access
+                </p>
+
+            </div>
+
+        </section>
+
+        <footer class="auth-footer">
+
+            <p>
+                © <span id="currentYear"></span> CINEVA.
+                All rights reserved.
+            </p>
+
+            <span>SECURE ADMINISTRATION PORTAL</span>
+
+        </footer>
+
+    </main>
+
+    <script type="module" src="./js/admin-auth.js"></script>
+
+</body>
+</html>
