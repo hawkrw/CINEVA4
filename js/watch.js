@@ -138,11 +138,15 @@ function getDescription(item) {
 
 /* =====================================================
    CINEVA — SMART DOWNLOAD LINK DETECTION
-   Supports Supabase URLs, JSON, arrays and objects.
+   Supports:
+   - Direct Supabase URL columns
+   - MediaFire links stored in part.url
+   - JSON strings
+   - Arrays and objects
+   - Multiple download qualities
 ===================================================== */
 
 function normalizeLinks(item = {}) {
-
     const links = [];
 
     /* ---------------------------------------------
@@ -150,14 +154,12 @@ function normalizeLinks(item = {}) {
     --------------------------------------------- */
 
     const addLink = (value, title = "Download") => {
-
         if (typeof value !== "string") return;
 
         const url = value.trim();
 
         if (!url || !isSafeHttpUrl(url)) return;
 
-        // Prevent duplicate download URLs.
         if (links.some(link => link.url === url)) return;
 
         links.push({
@@ -166,8 +168,123 @@ function normalizeLinks(item = {}) {
         });
     };
 
+    /* ---------------------------------------------
+       EXTRACT LINKS FROM DIFFERENT FORMATS
+    --------------------------------------------- */
+
+    function extractLinks(value, label = "Download") {
+        if (value === null || value === undefined) return;
+
+        // FORMAT 1: STRING OR JSON STRING
+        if (typeof value === "string") {
+            const trimmed = value.trim();
+
+            if (!trimmed) return;
+
+            if (
+                (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+                (trimmed.startsWith("{") && trimmed.endsWith("}"))
+            ) {
+                try {
+                    extractLinks(JSON.parse(trimmed), label);
+                    return;
+                } catch (error) {
+                    // Treat as a normal URL if JSON parsing fails.
+                }
+            }
+
+            addLink(trimmed, label);
+            return;
+        }
+
+        // FORMAT 2: ARRAY
+        if (Array.isArray(value)) {
+            value.forEach((entry, index) => {
+                extractLinks(entry, `${label} ${index + 1}`);
+            });
+
+            return;
+        }
+
+        // FORMAT 3: OBJECT
+        if (typeof value === "object") {
+            const urlFields = [
+                "url",
+                "href",
+                "download_url",
+                "download_link",
+                "downloadUrl",
+                "file_url",
+                "direct_link",
+                "link"
+            ];
+
+            let foundDirectUrl = false;
+
+            for (const field of urlFields) {
+                if (typeof value[field] === "string") {
+                    addLink(
+                        value[field],
+                        value.title ||
+                        value.name ||
+                        value.quality ||
+                        value.label ||
+                        label
+                    );
+
+                    foundDirectUrl = true;
+                }
+            }
+
+            if (foundDirectUrl) return;
+
+            // FORMAT 4: QUALITY-BASED OBJECT
+            Object.entries(value).forEach(([key, entry]) => {
+                extractLinks(entry, key);
+            });
+        }
+    }
+
+    /* ---------------------------------------------
+       DIRECT DOWNLOAD COLUMNS
+    --------------------------------------------- */
+
+    [
+        "download_url",
+        "download_link",
+        "download",
+        "file_url",
+        "direct_link",
+        "link",
+        "url"
+    ].forEach(field => {
+        extractLinks(item[field], field);
+    });
+
+    /* ---------------------------------------------
+       JSON DOWNLOAD COLUMNS
+    --------------------------------------------- */
+
+    [
+        "download_links",
+        "download_options",
+        "downloads"
+    ].forEach(field => {
+        extractLinks(item[field], field);
+    });
+
+    /* ---------------------------------------------
+       RETURN UNIQUE LINKS
+    --------------------------------------------- */
+
+    return links.filter((link, index, array) =>
+        array.findIndex(item => item.url === link.url) === index
+    );
+}
+
+
 /* =====================================================
-   CINEVA — GROUPED PARTS SUPPORT
+   CINEVA — GROUPED MOVIE / EPISODE PARTS
 ===================================================== */
 
 function parseParts(record = {}) {
@@ -176,8 +293,9 @@ function parseParts(record = {}) {
     if (typeof parts === "string") {
         try {
             parts = JSON.parse(parts);
-        } catch {
-            parts = [];
+        } catch (error) {
+            console.error("CINEVA: Invalid parts JSON", error);
+            return [];
         }
     }
 
@@ -187,28 +305,60 @@ function parseParts(record = {}) {
         .filter(part => part && typeof part === "object")
         .map((part, index) => ({
             ...part,
-            part_number: part.part_number ?? index + 1,
-            title: part.title || `Part ${part.part_number ?? index + 1}`
+            part_number: Number(part.part_number || index + 1),
+            title: part.title || `Part ${part.part_number || index + 1}`,
+            video_url: part.video_url || "",
+            download_url: part.download_url || "",
+            download_link: part.download_link || ""
         }))
         .sort((a, b) =>
             Number(a.part_number) - Number(b.part_number)
         );
 }
 
-/*
- * Uses a selected part or a normal movie/episode record.
- * The supplied watch and download URLs remain independent.
- */
+
+/* =====================================================
+   CINEVA — GET DOWNLOAD URL
+   IMPORTANT:
+   part.url is a DOWNLOAD fallback only.
+   Never use it as a video URL.
+===================================================== */
+
+function getMediaDownloadUrl(media = {}) {
+    const directUrl =
+        media.download_url ||
+        media.download_link ||
+        "";
+
+    if (directUrl && isSafeHttpUrl(directUrl)) {
+        return directUrl.trim();
+    }
+
+    const links = normalizeLinks(media);
+
+    return links.length ? links[0].url : "";
+}
+
+
+/* =====================================================
+   CINEVA — SELECTED MEDIA CONTROLLER
+   Supports normal movies and grouped parts.
+===================================================== */
+
 function setSelectedMedia(media, autoplay = false) {
+    if (!media) return;
+
     selectedMedia = media;
 
-    const videoUrl = media?.video_url || "";
+    // Watch URL is independent of the download URL.
+    const videoUrl = media.video_url || "";
 
-    const downloadLinks = normalizeLinks(media || {});
-    const downloadUrl = media?.download_url ||
-        media?.download_link ||
-        downloadLinks[0]?.url ||
-        "";
+    // Download URL supports part.url.
+    const downloadUrl = getMediaDownloadUrl(media);
+
+    /* ---------------------------------------------
+       MAIN WATCH BUTTON
+    --------------------------------------------- */
 
     if (el.mainWatch) {
         el.mainWatch.disabled = !(
@@ -234,6 +384,10 @@ function setSelectedMedia(media, autoplay = false) {
         };
     }
 
+    /* ---------------------------------------------
+       MAIN DOWNLOAD BUTTON
+    --------------------------------------------- */
+
     if (el.mainDownload) {
         el.mainDownload.disabled = !(
             downloadUrl && isSafeHttpUrl(downloadUrl)
@@ -249,192 +403,43 @@ function setSelectedMedia(media, autoplay = false) {
         };
     }
 
-    if (autoplay && videoUrl && isSafeHttpUrl(videoUrl)) {
-        playVideo(videoUrl, true);
-    }
-}
     /* ---------------------------------------------
-       EXTRACT LINKS FROM DIFFERENT FORMATS
+       OPTIONAL AUTOPLAY
     --------------------------------------------- */
 
-    function extractLinks(value, label = "Download") {
-
-        if (value === null || value === undefined) return;
-
-
-        // FORMAT 1: STRING OR JSON STRING
-        if (typeof value === "string") {
-
-            const trimmed = value.trim();
-
-            if (!trimmed) return;
-
-            // Detect JSON stored as text.
-            if (
-                (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
-                (trimmed.startsWith("{") && trimmed.endsWith("}"))
-            ) {
-
-                try {
-
-                    const parsed = JSON.parse(trimmed);
-
-                    extractLinks(parsed, label);
-
-                    return;
-
-                } catch (error) {
-
-                    // Continue and try treating it as a URL.
-                }
-            }
-
-            addLink(trimmed, label);
-
-            return;
-        }
-
-
-        // FORMAT 2: ARRAY OF DOWNLOAD LINKS
-        if (Array.isArray(value)) {
-
-            value.forEach((entry, index) => {
-
-                extractLinks(
-                    entry,
-                    `${label} ${index + 1}`
-                );
-
-            });
-
-            return;
-        }
-
-
-        // FORMAT 3: OBJECT WITH DOWNLOAD URL
-        if (typeof value === "object") {
-
-            const urlFields = [
-                "url",
-                "href",
-                "download_url",
-                "download_link",
-                "downloadUrl",
-                "file_url",
-                "direct_link",
-                "link"
-            ];
-
-            let foundDirectUrl = false;
-
-            for (const field of urlFields) {
-
-                if (typeof value[field] === "string") {
-
-                    addLink(
-                        value[field],
-                        value.title ||
-                        value.name ||
-                        value.quality ||
-                        value.label ||
-                        label
-                    );
-
-                    foundDirectUrl = true;
-                }
-            }
-
-            if (foundDirectUrl) return;
-
-
-            // FORMAT 4: QUALITY-BASED OBJECT
-            // Example:
-            // {
-            //   "480p": "https://example.com/480.mp4",
-            //   "720p": "https://example.com/720.mp4"
-            // }
-
-            Object.entries(value).forEach(([key, entry]) => {
-
-                extractLinks(entry, key);
-
-            });
+    if (autoplay) {
+        if (videoUrl && isSafeHttpUrl(videoUrl)) {
+            playVideo(videoUrl, true);
+        } else {
+            showPlayerMessage(
+                "Video unavailable",
+                "No valid watch link has been added for this part."
+            );
         }
     }
-
-
-    /* ---------------------------------------------
-       DIRECT SUPABASE DOWNLOAD COLUMNS
-    --------------------------------------------- */
-
-    [
-        "download_url",
-        "download_link",
-        "download",
-        "file_url",
-        "direct_link",
-        "link"
-    ].forEach(field => {
-
-        extractLinks(item[field], field);
-
-    });
-
-
-    /* ---------------------------------------------
-       SUPABASE JSON DOWNLOAD COLUMNS
-    --------------------------------------------- */
-
-    [
-        "download_links",
-        "download_options",
-        "downloads"
-    ].forEach(field => {
-
-        extractLinks(item[field], field);
-
-    });
-
-
-    /* ---------------------------------------------
-       RETURN UNIQUE DOWNLOAD LINKS
-    --------------------------------------------- */
-
-    return links.filter((link, index, array) =>
-
-        array.findIndex(
-            item => item.url === link.url
-        ) === index
-
-    );
 }
 
 
 /* =====================================================
-   VALIDATE HTTP / HTTPS URL
+   CINEVA — SAFE HTTP / HTTPS VALIDATION
 ===================================================== */
 
 function isSafeHttpUrl(value) {
+    if (typeof value !== "string" || !value.trim()) {
+        return false;
+    }
 
     try {
-
-        const url = new URL(
-            value,
-            window.location.href
-        );
+        const url = new URL(value.trim());
 
         return (
             url.protocol === "http:" ||
             url.protocol === "https:"
         );
-
     } catch (error) {
-
         return false;
-
     }
 }
-
 
 /* =====================================================
    LOADING STATE
