@@ -13,18 +13,9 @@ const hasLoginHandoff =
 
 sessionStorage.removeItem(LOGIN_HANDOFF_KEY);
 
-const bootScreen = document.getElementById("adminBootScreen");
-const errorScreen = document.getElementById("adminErrorScreen");
-const adminApp = document.getElementById("adminApp");
-
-const bootMessage = document.getElementById("bootMessage");
-const errorMessage = document.getElementById("adminErrorMessage");
-
-const retryButton = document.getElementById("retryVerification");
-const logoutButton = document.getElementById("logoutButton");
-
 let authorizedUserId = null;
 let signingOut = false;
+let initialized = false;
 
 let moviesCache = [];
 let seriesCache = [];
@@ -33,62 +24,42 @@ let episodesCache = [];
 let selectedSeriesId = null;
 let selectedSeriesName = "";
 
+const $ = id => document.getElementById(id);
 
-/* =========================================
-   SCREEN MANAGEMENT
-========================================= */
+const bootScreen = $("adminBootScreen");
+const errorScreen = $("adminErrorScreen");
+const adminApp = $("adminApp");
 
-function showBoot(message = "Verifying administrator access...") {
-    bootMessage.textContent = message;
-    bootScreen.hidden = false;
-    errorScreen.hidden = true;
-    adminApp.hidden = true;
-}
+const bootMessage = $("bootMessage");
+const errorMessage = $("adminErrorMessage");
 
-function showError(message) {
-    errorMessage.textContent = message;
-    bootScreen.hidden = true;
-    errorScreen.hidden = false;
-    adminApp.hidden = true;
-}
-
-function showDashboard() {
-    bootScreen.hidden = true;
-    errorScreen.hidden = true;
-    adminApp.hidden = false;
-}
-
-
-/* =========================================
-   ADMIN PROFILE
-========================================= */
-
-function displayAdminProfile(user) {
-    const email = user.email || "Administrator";
-    const name = email.split("@")[0];
-
-    document.getElementById("adminName").textContent = name;
-    document.getElementById("adminEmail").textContent = email;
-
-    document.getElementById("adminAvatar").textContent =
-        name.charAt(0).toUpperCase();
-
-    document.getElementById("currentYear").textContent =
-        new Date().getFullYear();
-
-    document.getElementById("dashboardDate").textContent =
-        new Intl.DateTimeFormat("en", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }).format(new Date());
-}
+const retryButton = $("retryVerification");
+const logoutButton = $("logoutButton");
 
 
 /* =========================================
    SAFE DOM HELPERS
 ========================================= */
+
+function setText(id, value) {
+    const element = $(id);
+    if (element) element.textContent = value ?? "";
+}
+
+function getValue(id) {
+    return $(id)?.value ?? "";
+}
+
+function bind(id, event, callback) {
+    const element = $(id);
+
+    if (!element) {
+        console.warn(`CINEVA: Element #${id} was not found.`);
+        return;
+    }
+
+    element.addEventListener(event, callback);
+}
 
 function createCell(value) {
     const cell = document.createElement("td");
@@ -109,6 +80,8 @@ function createButton(label, className, action, id) {
 }
 
 function showTableMessage(tableBody, colspan, message) {
+    if (!tableBody) return;
+
     tableBody.replaceChildren();
 
     const row = document.createElement("tr");
@@ -138,43 +111,121 @@ function getStatus(value) {
 
 
 /* =========================================
+   SCREEN MANAGEMENT
+========================================= */
+
+function showBoot(message = "Verifying administrator access...") {
+    if (bootMessage) bootMessage.textContent = message;
+
+    if (bootScreen) bootScreen.hidden = false;
+    if (errorScreen) errorScreen.hidden = true;
+    if (adminApp) adminApp.hidden = true;
+}
+
+function showError(message) {
+    if (errorMessage) errorMessage.textContent = message;
+
+    if (bootScreen) bootScreen.hidden = true;
+    if (errorScreen) errorScreen.hidden = false;
+    if (adminApp) adminApp.hidden = true;
+}
+
+function showDashboard() {
+    if (bootScreen) bootScreen.hidden = true;
+    if (errorScreen) errorScreen.hidden = true;
+    if (adminApp) adminApp.hidden = false;
+}
+
+
+/* =========================================
+   ADMIN PROFILE
+========================================= */
+
+function displayAdminProfile(user) {
+    const email = user.email || "Administrator";
+    const name = email.split("@")[0];
+
+    setText("adminName", name);
+    setText("adminEmail", email);
+    setText("adminAvatar", name.charAt(0).toUpperCase());
+    setText("currentYear", new Date().getFullYear());
+
+    setText(
+        "dashboardDate",
+        new Intl.DateTimeFormat("en", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }).format(new Date())
+    );
+}
+
+
+/* =========================================
    DASHBOARD STATISTICS
+   Categories are derived from movies.
+   No categories table is required.
 ========================================= */
 
 async function loadDashboardStatistics() {
-    const [movies, series, categories, featured] =
-        await Promise.all([
-            supabase.from("movies")
-                .select("id", { count: "exact", head: true }),
+    const results = await Promise.allSettled([
+        supabase
+            .from("movies")
+            .select("id", { count: "exact", head: true }),
 
-            supabase.from("series")
-                .select("id", { count: "exact", head: true }),
+        supabase
+            .from("series")
+            .select("id", { count: "exact", head: true }),
 
-            supabase.from("categories")
-                .select("id", { count: "exact", head: true }),
+        supabase
+            .from("movies")
+            .select("id", { count: "exact", head: true })
+            .eq("is_featured", true)
+    ]);
 
-            supabase.from("movies")
-                .select("id", { count: "exact", head: true })
-                .eq("is_featured", true)
-        ]);
+    const labels = ["Movies", "Series", "Featured"];
 
-    document.getElementById("totalMovies").textContent =
-        movies.error ? "—" : (movies.count ?? 0);
+    results.forEach((result, index) => {
+        const elementId = [
+            "totalMovies",
+            "totalSeries",
+            "totalFeatured"
+        ][index];
 
-    document.getElementById("totalSeries").textContent =
-        series.error ? "—" : (series.count ?? 0);
+        if (result.status === "rejected") {
+            console.error(
+                `${labels[index]} statistics failed:`,
+                result.reason
+            );
 
-    document.getElementById("totalCategories").textContent =
-        categories.error ? "—" : (categories.count ?? 0);
-
-    document.getElementById("totalFeatured").textContent =
-        featured.error ? "—" : (featured.count ?? 0);
-
-    [movies, series, categories, featured].forEach(result => {
-        if (result.error) {
-            console.error("Dashboard statistics error:", result.error);
+            setText(elementId, "—");
+            return;
         }
+
+        const response = result.value;
+
+        if (response.error) {
+            console.error(
+                `${labels[index]} statistics error:`,
+                response.error
+            );
+
+            setText(elementId, "—");
+            return;
+        }
+
+        setText(elementId, response.count ?? 0);
     });
+
+    // Derive unique categories from the movie records.
+    const uniqueCategories = new Set(
+        moviesCache
+            .map(movie => movie.category?.trim())
+            .filter(Boolean)
+    );
+
+    setText("totalCategories", uniqueCategories.size);
 }
 
 
@@ -183,39 +234,48 @@ async function loadDashboardStatistics() {
 ========================================= */
 
 async function loadRecentMovies() {
-    const tableBody = document.getElementById("recentMoviesTable");
+    const tableBody = $("recentMoviesTable");
 
-    const { data, error } = await supabase
-        .from("movies")
-        .select("id, title, category, created_at, is_active")
-        .order("created_at", { ascending: false })
-        .limit(5);
+    if (!tableBody) {
+        console.warn("CINEVA: #recentMoviesTable was not found.");
+        return;
+    }
 
-    if (error) {
-        console.error("Recent movies error:", error);
+    showTableMessage(tableBody, 4, "Loading recent movies...");
+
+    try {
+        const { data, error } = await supabase
+            .from("movies")
+            .select("id, title, category, created_at, is_active")
+            .order("created_at", { ascending: false })
+            .limit(5);
+
+        if (error) throw error;
+
+        tableBody.replaceChildren();
+
+        if (!data?.length) {
+            showTableMessage(tableBody, 4, "No movies found.");
+            return;
+        }
+
+        data.forEach(movie => {
+            const row = document.createElement("tr");
+
+            row.append(
+                createCell(movie.title || "Untitled"),
+                createCell(movie.category || "Uncategorized"),
+                createCell(formatDate(movie.created_at)),
+                createCell(getStatus(movie.is_active))
+            );
+
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("Recent movies loading error:", error);
         showTableMessage(tableBody, 4, "Unable to load recent movies.");
-        return;
     }
-
-    tableBody.replaceChildren();
-
-    if (!data?.length) {
-        showTableMessage(tableBody, 4, "No movies found.");
-        return;
-    }
-
-    data.forEach(movie => {
-        const row = document.createElement("tr");
-
-        row.append(
-            createCell(movie.title || "Untitled"),
-            createCell(movie.category || "Uncategorized"),
-            createCell(formatDate(movie.created_at)),
-            createCell(getStatus(movie.is_active))
-        );
-
-        tableBody.appendChild(row);
-    });
 }
 
 
@@ -224,38 +284,52 @@ async function loadRecentMovies() {
 ========================================= */
 
 async function loadMovies() {
-    const tableBody = document.getElementById("moviesTable");
+    const tableBody = $("moviesTable");
 
     showTableMessage(tableBody, 6, "Loading movies...");
 
-    const { data, error } = await supabase
-        .from("movies")
-        .select("id, title, category, year, is_active, is_featured, created_at")
-        .order("created_at", { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from("movies")
+            .select(
+                "id, title, category, year, is_active, is_featured, created_at"
+            )
+            .order("created_at", { ascending: false });
 
-    if (error) {
+        if (error) throw error;
+
+        moviesCache = data || [];
+
+        populateMovieCategories();
+        renderMovies();
+
+        console.log(`CINEVA: Loaded ${moviesCache.length} movies.`);
+
+    } catch (error) {
         console.error("Movies loading error:", error);
-        showTableMessage(tableBody, 6, "Unable to load movies.");
-        return;
+
+        showTableMessage(
+            tableBody,
+            6,
+            `Unable to load movies: ${error.message || "Unknown error"}`
+        );
     }
-
-    moviesCache = data || [];
-
-    populateMovieCategories();
-    renderMovies();
 }
 
+
 function populateMovieCategories() {
-    const select = document.getElementById("movieCategoryFilter");
+    const select = $("movieCategoryFilter");
+    if (!select) return;
+
     const previousValue = select.value;
 
     const categories = [
         ...new Set(
             moviesCache
-                .map(movie => movie.category)
+                .map(movie => movie.category?.trim())
                 .filter(Boolean)
         )
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
 
     select.replaceChildren();
 
@@ -266,22 +340,26 @@ function populateMovieCategories() {
 
     categories.forEach(category => {
         const option = document.createElement("option");
+
         option.value = category;
         option.textContent = category;
+
         select.appendChild(option);
     });
 
-    select.value = previousValue;
+    select.value = categories.includes(previousValue)
+        ? previousValue
+        : "";
 }
 
+
 function renderMovies() {
-    const tableBody = document.getElementById("moviesTable");
+    const tableBody = $("moviesTable");
+    if (!tableBody) return;
 
-    const search = document.getElementById("movieSearch")
-        .value.trim().toLowerCase();
-
-    const category = document.getElementById("movieCategoryFilter").value;
-    const status = document.getElementById("movieStatusFilter").value;
+    const search = getValue("movieSearch").trim().toLowerCase();
+    const category = getValue("movieCategoryFilter");
+    const status = getValue("movieStatusFilter");
 
     const filtered = moviesCache.filter(movie => {
         const matchesSearch =
@@ -297,8 +375,7 @@ function renderMovies() {
         return matchesSearch && matchesCategory && matchesStatus;
     });
 
-    document.getElementById("movieResultsCount").textContent =
-        `${filtered.length} movie(s) found`;
+    setText("movieResultsCount", `${filtered.length} movie(s) found`);
 
     tableBody.replaceChildren();
 
@@ -309,18 +386,24 @@ function renderMovies() {
 
     filtered.forEach(movie => {
         const row = document.createElement("tr");
-
         const actions = document.createElement("td");
 
         actions.append(
             createButton("Edit", "table-action edit", "edit-movie", movie.id),
+
             createButton(
                 movie.is_active === false ? "Activate" : "Deactivate",
                 "table-action",
                 "toggle-movie",
                 movie.id
             ),
-            createButton("Delete", "table-action delete", "delete-movie", movie.id)
+
+            createButton(
+                "Delete",
+                "table-action delete",
+                "delete-movie",
+                movie.id
+            )
         );
 
         row.append(
@@ -336,8 +419,12 @@ function renderMovies() {
     });
 }
 
+
 async function toggleMovie(id) {
-    const movie = moviesCache.find(item => String(item.id) === String(id));
+    const movie = moviesCache.find(
+        item => String(item.id) === String(id)
+    );
+
     if (!movie) return;
 
     const nextStatus = movie.is_active === false;
@@ -351,7 +438,7 @@ async function toggleMovie(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Movie update error:", error);
         alert("Unable to update movie status: " + error.message);
         return;
     }
@@ -359,13 +446,17 @@ async function toggleMovie(id) {
     await refreshContent();
 }
 
+
 async function deleteMovie(id) {
-    const movie = moviesCache.find(item => String(item.id) === String(id));
+    const movie = moviesCache.find(
+        item => String(item.id) === String(id)
+    );
+
     if (!movie) return;
 
-    if (!confirm(`Delete "${movie.title}" permanently? This cannot be undone.`)) {
-        return;
-    }
+    if (!confirm(
+        `Delete "${movie.title}" permanently? This cannot be undone.`
+    )) return;
 
     const { error } = await supabase
         .from("movies")
@@ -373,7 +464,7 @@ async function deleteMovie(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Movie deletion error:", error);
         alert("Unable to delete movie: " + error.message);
         return;
     }
@@ -387,32 +478,44 @@ async function deleteMovie(id) {
 ========================================= */
 
 async function loadSeries() {
-    const tableBody = document.getElementById("seriesTable");
+    const tableBody = $("seriesTable");
 
     showTableMessage(tableBody, 6, "Loading series...");
 
-    const { data, error } = await supabase
-        .from("series")
-        .select("id, title, category, year, total_seasons, is_active, created_at")
-        .order("created_at", { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from("series")
+            .select(
+                "id, title, category, year, total_seasons, is_active, created_at"
+            )
+            .order("created_at", { ascending: false });
 
-    if (error) {
+        if (error) throw error;
+
+        seriesCache = data || [];
+
+        renderSeries();
+
+        console.log(`CINEVA: Loaded ${seriesCache.length} series.`);
+
+    } catch (error) {
         console.error("Series loading error:", error);
-        showTableMessage(tableBody, 6, "Unable to load series.");
-        return;
-    }
 
-    seriesCache = data || [];
-    renderSeries();
+        showTableMessage(
+            tableBody,
+            6,
+            `Unable to load series: ${error.message || "Unknown error"}`
+        );
+    }
 }
 
+
 function renderSeries() {
-    const tableBody = document.getElementById("seriesTable");
+    const tableBody = $("seriesTable");
+    if (!tableBody) return;
 
-    const search = document.getElementById("seriesSearch")
-        .value.trim().toLowerCase();
-
-    const status = document.getElementById("seriesStatusFilter").value;
+    const search = getValue("seriesSearch").trim().toLowerCase();
+    const status = getValue("seriesStatusFilter");
 
     const filtered = seriesCache.filter(series => {
         const matchesSearch =
@@ -425,8 +528,7 @@ function renderSeries() {
         return matchesSearch && matchesStatus;
     });
 
-    document.getElementById("seriesResultsCount").textContent =
-        `${filtered.length} series found`;
+    setText("seriesResultsCount", `${filtered.length} series found`);
 
     tableBody.replaceChildren();
 
@@ -440,15 +542,33 @@ function renderSeries() {
         const actions = document.createElement("td");
 
         actions.append(
-            createButton("Episodes", "table-action edit", "open-episodes", series.id),
-            createButton("Edit", "table-action edit", "edit-series", series.id),
+            createButton(
+                "Episodes",
+                "table-action edit",
+                "open-episodes",
+                series.id
+            ),
+
+            createButton(
+                "Edit",
+                "table-action edit",
+                "edit-series",
+                series.id
+            ),
+
             createButton(
                 series.is_active === false ? "Activate" : "Deactivate",
                 "table-action",
                 "toggle-series",
                 series.id
             ),
-            createButton("Delete", "table-action delete", "delete-series", series.id)
+
+            createButton(
+                "Delete",
+                "table-action delete",
+                "delete-series",
+                series.id
+            )
         );
 
         row.append(
@@ -464,8 +584,12 @@ function renderSeries() {
     });
 }
 
+
 async function toggleSeries(id) {
-    const series = seriesCache.find(item => String(item.id) === String(id));
+    const series = seriesCache.find(
+        item => String(item.id) === String(id)
+    );
+
     if (!series) return;
 
     const nextStatus = series.is_active === false;
@@ -479,7 +603,7 @@ async function toggleSeries(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Series update error:", error);
         alert("Unable to update series status: " + error.message);
         return;
     }
@@ -487,13 +611,17 @@ async function toggleSeries(id) {
     await refreshContent();
 }
 
+
 async function deleteSeries(id) {
-    const series = seriesCache.find(item => String(item.id) === String(id));
+    const series = seriesCache.find(
+        item => String(item.id) === String(id)
+    );
+
     if (!series) return;
 
     const confirmed = confirm(
         `Delete "${series.title}" permanently?\n\n` +
-        "Check its episodes and database relationships before proceeding."
+        "This may fail if episodes are still linked to this series."
     );
 
     if (!confirmed) return;
@@ -504,11 +632,13 @@ async function deleteSeries(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Series deletion error:", error);
+
         alert(
             "Unable to delete series. It may still have related episodes.\n\n" +
             error.message
         );
+
         return;
     }
 
@@ -531,51 +661,69 @@ async function openEpisodeManager(seriesId) {
     selectedSeriesId = series.id;
     selectedSeriesName = series.title;
 
-    document.getElementById("selectedSeriesTitle").textContent =
-        `${series.title} — Episodes`;
+    setText(
+        "selectedSeriesTitle",
+        `${series.title} — Episodes`
+    );
 
-    document.getElementById("episodeManagementPanel").hidden = false;
+    const panel = $("episodeManagementPanel");
+    if (panel) panel.hidden = false;
 
     await loadEpisodes();
 }
 
+
 function closeEpisodeManager() {
     selectedSeriesId = null;
     selectedSeriesName = "";
+    episodesCache = [];
 
-    document.getElementById("episodeManagementPanel").hidden = true;
+    const panel = $("episodeManagementPanel");
+    if (panel) panel.hidden = true;
 }
+
 
 async function loadEpisodes() {
     if (selectedSeriesId === null) return;
 
-    const tableBody = document.getElementById("episodesTable");
+    const tableBody = $("episodesTable");
 
     showTableMessage(tableBody, 7, "Loading episodes...");
 
-    const { data, error } = await supabase
-        .from("episodes")
-        .select(
-            "id, series_id, season, episode, season_number, episode_number, title, duration, is_active, is_final"
-        )
-        .eq("series_id", selectedSeriesId)
-        .order("season_number", { ascending: true })
-        .order("episode_number", { ascending: true });
+    try {
+        const { data, error } = await supabase
+            .from("episodes")
+            .select(
+                "id, series_id, season, episode, season_number, " +
+                "episode_number, title, duration, is_active, is_final"
+            )
+            .eq("series_id", selectedSeriesId)
+            .order("season_number", { ascending: true })
+            .order("episode_number", { ascending: true });
 
-    if (error) {
+        if (error) throw error;
+
+        episodesCache = data || [];
+
+        populateEpisodeSeasons();
+        renderEpisodes();
+
+    } catch (error) {
         console.error("Episodes loading error:", error);
-        showTableMessage(tableBody, 7, "Unable to load episodes.");
-        return;
+
+        showTableMessage(
+            tableBody,
+            7,
+            `Unable to load episodes: ${error.message || "Unknown error"}`
+        );
     }
-
-    episodesCache = data || [];
-
-    populateEpisodeSeasons();
-    renderEpisodes();
 }
 
+
 function populateEpisodeSeasons() {
-    const select = document.getElementById("episodeSeasonFilter");
+    const select = $("episodeSeasonFilter");
+    if (!select) return;
+
     const previousValue = select.value;
 
     const seasons = [
@@ -591,21 +739,29 @@ function populateEpisodeSeasons() {
     const allOption = document.createElement("option");
     allOption.value = "";
     allOption.textContent = "All Seasons";
+
     select.appendChild(allOption);
 
     seasons.forEach(season => {
         const option = document.createElement("option");
+
         option.value = String(season);
         option.textContent = `Season ${season}`;
+
         select.appendChild(option);
     });
 
-    select.value = previousValue;
+    select.value = seasons.some(
+        season => String(season) === previousValue
+    ) ? previousValue : "";
 }
 
+
 function renderEpisodes() {
-    const tableBody = document.getElementById("episodesTable");
-    const seasonFilter = document.getElementById("episodeSeasonFilter").value;
+    const tableBody = $("episodesTable");
+    if (!tableBody) return;
+
+    const seasonFilter = getValue("episodeSeasonFilter");
 
     const filtered = episodesCache.filter(item => {
         const season = item.season_number ?? item.season ?? 1;
@@ -628,14 +784,26 @@ function renderEpisodes() {
         const episode = item.episode_number ?? item.episode ?? 1;
 
         actions.append(
-            createButton("Edit", "table-action edit", "edit-episode", item.id),
+            createButton(
+                "Edit",
+                "table-action edit",
+                "edit-episode",
+                item.id
+            ),
+
             createButton(
                 item.is_active === false ? "Activate" : "Deactivate",
                 "table-action",
                 "toggle-episode",
                 item.id
             ),
-            createButton("Delete", "table-action delete", "delete-episode", item.id)
+
+            createButton(
+                "Delete",
+                "table-action delete",
+                "delete-episode",
+                item.id
+            )
         );
 
         row.append(
@@ -651,6 +819,7 @@ function renderEpisodes() {
         tableBody.appendChild(row);
     });
 }
+
 
 async function toggleEpisode(id) {
     const item = episodesCache.find(
@@ -668,13 +837,14 @@ async function toggleEpisode(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Episode update error:", error);
         alert("Unable to update episode: " + error.message);
         return;
     }
 
     await loadEpisodes();
 }
+
 
 async function deleteEpisode(id) {
     const item = episodesCache.find(
@@ -683,9 +853,9 @@ async function deleteEpisode(id) {
 
     if (!item) return;
 
-    if (!confirm(`Delete "${item.title || "this episode"}" permanently?`)) {
-        return;
-    }
+    if (!confirm(
+        `Delete "${item.title || "this episode"}" permanently?`
+    )) return;
 
     const { error } = await supabase
         .from("episodes")
@@ -693,7 +863,7 @@ async function deleteEpisode(id) {
         .eq("id", id);
 
     if (error) {
-        console.error(error);
+        console.error("Episode deletion error:", error);
         alert("Unable to delete episode: " + error.message);
         return;
     }
@@ -708,7 +878,8 @@ async function deleteEpisode(id) {
 
 document.addEventListener("click", async event => {
     const button = event.target.closest("[data-action]");
-    if (!button) return;
+
+    if (!button || button.disabled) return;
 
     const { action, id } = button.dataset;
 
@@ -749,9 +920,16 @@ document.addEventListener("click", async event => {
             case "edit-movie":
             case "edit-series":
             case "edit-episode":
-                alert("The Add/Edit forms will be connected in the next implementation step.");
+                alert(
+                    "The Add/Edit forms will be connected in the next implementation step."
+                );
                 break;
         }
+
+    } catch (error) {
+        console.error("Dashboard action error:", error);
+        alert("Something went wrong. Check the browser Console.");
+
     } finally {
         button.disabled = false;
     }
@@ -762,72 +940,57 @@ document.addEventListener("click", async event => {
    SEARCH AND FILTERS
 ========================================= */
 
-document.getElementById("movieSearch")
-    .addEventListener("input", renderMovies);
+bind("movieSearch", "input", renderMovies);
+bind("movieCategoryFilter", "change", renderMovies);
+bind("movieStatusFilter", "change", renderMovies);
 
-document.getElementById("movieCategoryFilter")
-    .addEventListener("change", renderMovies);
+bind("seriesSearch", "input", renderSeries);
+bind("seriesStatusFilter", "change", renderSeries);
 
-document.getElementById("movieStatusFilter")
-    .addEventListener("change", renderMovies);
-
-document.getElementById("seriesSearch")
-    .addEventListener("input", renderSeries);
-
-document.getElementById("seriesStatusFilter")
-    .addEventListener("change", renderSeries);
-
-document.getElementById("episodeSeasonFilter")
-    .addEventListener("change", renderEpisodes);
+bind("episodeSeasonFilter", "change", renderEpisodes);
 
 
 /* =========================================
-   REFRESH BUTTONS
+   REFRESH CONTENT
 ========================================= */
 
 async function refreshContent() {
     await Promise.all([
         loadMovies(),
         loadSeries(),
-        loadDashboardStatistics(),
         loadRecentMovies()
     ]);
+
+    // Statistics run after movies load so category
+    // totals use the latest movie records.
+    await loadDashboardStatistics();
 }
 
-document.getElementById("refreshMoviesBtn")
-    .addEventListener("click", loadMovies);
-
-document.getElementById("refreshSeriesBtn")
-    .addEventListener("click", loadSeries);
-
-document.getElementById("closeEpisodeManager")
-    .addEventListener("click", closeEpisodeManager);
+bind("refreshMoviesBtn", "click", loadMovies);
+bind("refreshSeriesBtn", "click", loadSeries);
+bind("closeEpisodeManager", "click", closeEpisodeManager);
 
 
 /* =========================================
    ADD BUTTONS
-   Forms are added in the next step.
 ========================================= */
 
-document.getElementById("addMovieBtn")
-    .addEventListener("click", () => {
-        alert("The Add Movie form will be connected in the next step.");
-    });
+bind("addMovieBtn", "click", () => {
+    alert("The Add Movie form will be connected in the next implementation step.");
+});
 
-document.getElementById("addSeriesBtn")
-    .addEventListener("click", () => {
-        alert("The Add Series form will be connected in the next step.");
-    });
+bind("addSeriesBtn", "click", () => {
+    alert("The Add Series form will be connected in the next implementation step.");
+});
 
-document.getElementById("addEpisodeBtn")
-    .addEventListener("click", () => {
-        if (selectedSeriesId === null) {
-            alert("Please select a series first.");
-            return;
-        }
+bind("addEpisodeBtn", "click", () => {
+    if (selectedSeriesId === null) {
+        alert("Please select a series first.");
+        return;
+    }
 
-        alert("The Add Episode form will be connected in the next step.");
-    });
+    alert("The Add Episode form will be connected in the next implementation step.");
+});
 
 
 /* =========================================
@@ -836,11 +999,12 @@ document.getElementById("addEpisodeBtn")
 
 function initializeNavigation() {
     const links = document.querySelectorAll("[data-page]");
-    const pageTitle = document.getElementById("pageTitle");
-    const sidebar = document.getElementById("sidebar");
+    const pageTitle = $("pageTitle");
+    const sidebar = $("sidebar");
 
     function openPage(page) {
-        const target = document.getElementById(`${page}Page`);
+        const target = $(`${page}Page`);
+
         if (!target) return;
 
         document.querySelectorAll(".dashboard-page")
@@ -849,20 +1013,26 @@ function initializeNavigation() {
         target.classList.add("active");
 
         document.querySelectorAll(".nav-link")
-            .forEach(link => link.classList.toggle(
-                "active",
-                link.dataset.page === page
-            ));
+            .forEach(link => {
+                link.classList.toggle(
+                    "active",
+                    link.dataset.page === page
+                );
+            });
 
         const activeLink = document.querySelector(
             `.nav-link[data-page="${page}"]`
         );
 
-        pageTitle.textContent = activeLink
-            ? activeLink.querySelector("span:last-child").textContent
-            : page.charAt(0).toUpperCase() + page.slice(1);
+        const titleElement = activeLink?.querySelector("span:last-child");
 
-        sidebar.classList.remove("open");
+        if (pageTitle) {
+            pageTitle.textContent = titleElement
+                ? titleElement.textContent
+                : page.charAt(0).toUpperCase() + page.slice(1);
+        }
+
+        sidebar?.classList.remove("open");
     }
 
     links.forEach(link => {
@@ -879,14 +1049,13 @@ function initializeNavigation() {
         });
     });
 
-    document.getElementById("sidebarToggle")
-        .addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-        });
+    bind("sidebarToggle", "click", () => {
+        sidebar?.classList.toggle("open");
+    });
 
     const requestedPage = location.hash.replace("#", "");
 
-    if (requestedPage && document.getElementById(`${requestedPage}Page`)) {
+    if (requestedPage && $(`${requestedPage}Page`)) {
         openPage(requestedPage);
     }
 }
@@ -900,19 +1069,27 @@ async function logout() {
     if (signingOut) return;
 
     signingOut = true;
-    logoutButton.disabled = true;
-    logoutButton.textContent = "Signing out...";
+
+    if (logoutButton) {
+        logoutButton.disabled = true;
+        logoutButton.textContent = "Signing out...";
+    }
 
     try {
         const { error } = await supabase.auth.signOut();
+
         if (error) throw error;
 
         window.location.replace("./index.html");
+
     } catch (error) {
         console.error("Logout error:", error);
 
-        logoutButton.disabled = false;
-        logoutButton.textContent = "↪ Sign Out";
+        if (logoutButton) {
+            logoutButton.disabled = false;
+            logoutButton.textContent = "↪ Sign Out";
+        }
+
         signingOut = false;
 
         alert("Unable to sign out. Please try again.");
@@ -925,43 +1102,61 @@ async function logout() {
 ========================================= */
 
 async function initializeDashboard() {
+    if (initialized) return;
+
     showBoot();
 
-    if (!hasLoginHandoff) {
-        await supabase.auth.signOut();
-        window.location.replace("./index.html");
-        return;
-    }
-
-    const result = await verifyAdmin();
-
-    if (!result.authorized) {
-        if (result.error) {
-            showError(result.reason);
+    try {
+        // A dashboard refresh has no login handoff.
+        // Always sign out and require a fresh login.
+        if (!hasLoginHandoff) {
+            await supabase.auth.signOut();
+            window.location.replace("./index.html");
             return;
         }
 
-        await supabase.auth.signOut();
-        window.location.replace("./index.html");
-        return;
+        const result = await verifyAdmin();
+
+        if (!result.authorized) {
+            if (result.error) {
+                showError(result.reason);
+                return;
+            }
+
+            await supabase.auth.signOut();
+            window.location.replace("./index.html");
+            return;
+        }
+
+        authorizedUserId = result.user.id;
+
+        initialized = true;
+
+        displayAdminProfile(result.user);
+        showDashboard();
+
+        initializeNavigation();
+
+        bind("logoutButton", "click", logout);
+
+        await refreshContent();
+
+        if (selectedSeriesId !== null) {
+            await loadEpisodes();
+        }
+
+        console.log("CINEVA PRO management dashboard initialized.");
+
+    } catch (error) {
+        console.error("Dashboard initialization error:", error);
+
+        initialized = false;
+
+        showError(
+            "Dashboard initialization failed. " +
+            (error.message || "Please try again.")
+        );
     }
-
-    authorizedUserId = result.user.id;
-
-    displayAdminProfile(result.user);
-    showDashboard();
-
-    initializeNavigation();
-
-    logoutButton.addEventListener("click", logout);
-
-    await refreshContent();
-
-    if (selectedSeriesId !== null) {
-        await loadEpisodes();
-    }
-
-    console.log("CINEVA PRO management dashboard initialized.");
 }
 
 
@@ -988,6 +1183,19 @@ supabase.auth.onAuthStateChange((event, session) => {
     }
 });
 
-retryButton.addEventListener("click", initializeDashboard);
+
+/* =========================================
+   RETRY VERIFICATION
+========================================= */
+
+bind("retryVerification", "click", async () => {
+    initialized = false;
+    await initializeDashboard();
+});
+
+
+/* =========================================
+   START DASHBOARD
+========================================= */
 
 initializeDashboard();
