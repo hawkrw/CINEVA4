@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080812">
+    <meta name="description" content="Join CINEVA VIP for premium streaming benefits and exclusive movie requests.">
+
+    <title>CINEVA VIP — Premium Membership</title>
+
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/vip.css">
+</head>
+
+<body>
+
+    <!-- PAGE LOADER -->
+    <div class="vip-loader" id="vipLoader">
+        <div class="loader-logo">CINEVA<span>+</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="vip-header">
+        <a href="index.html" class="brand">
+            CINEVA<span>+</span>
+        </a>
+
+        <nav class="header-nav">
+            <a href="index.html">Home</a>
+            <a href="index.html#movies">Movies</a>
+            <a href="index.html#series">Series</a>
+            <a href="vip.html" class="active">VIP Membership</a>
+        </nav>
+
+        <a href="login.html" class="login-btn" id="vipAuthBtn">
+            Sign In
+        </a>
+
+        <button class="mobile-menu-btn" id="vipMenuBtn" aria-label="Open menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- MOBILE NAVIGATION -->
+    <div class="mobile-nav" id="vipMobileNav">
+        <a href="index.html">Home</a>
+        <a href="index.html#movies">Movies</a>
+        <a href="index.html#series">Series</a>
+        <a href="vip.html">VIP Membership</a>
+        <a href="login.html">Sign In</a>
+    </div>
+
+    <main>
+
+        <!-- HERO -->
+        <section class="vip-hero">
+            <div class="hero-glow"></div>
+
+            <div class="hero-content">
+                <div class="vip-badge">
+                    <span class="badge-star">✦</span>
+                    CINEVA EXCLUSIVE MEMBERSHIP
+                </div>
+
+                <h1>
+                    ENTER THE
+                    <span>VIP ROOM</span>
+                </h1>
+
+                <p>
+                    More entertainment. More privileges.
+                    Your favorite movies, exclusive access,
+                    and the power to request what comes next.
+                </p>
+
+                <a href="#vipPlans" class="hero-btn">
+                    Explore Membership
+                    <span>→</span>
+                </a>
+
+                <div class="hero-note">
+                    <span class="online-dot"></span>
+                    Exclusive membership for CINEVA users
+                </div>
+            </div>
+
+            <div class="hero-decoration">
+                <div class="decoration-circle circle-one"></div>
+                <div class="decoration-circle circle-two"></div>
+                <div class="vip-card-art">
+                    <div class="art-top">CINEVA</div>
+                    <div class="art-symbol">✦</div>
+                    <div class="art-bottom">VIP MEMBER</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BENEFITS -->
+        <section class="vip-benefits section-container">
+            <div class="section-heading">
+                <span class="section-label">WHY JOIN VIP?</span>
+                <h2>Unlock More With <span>CINEVA VIP</span></h2>
+                <p>Get more from your entertainment experience.</p>
+            </div>
+
+            <div class="benefits-grid">
+
+                <article class="benefit-card">
+                    <div class="benefit-icon">🎬</div>
+                    <h3>Exclusive VIP Room</h3>
+                    <p>Access your dedicated membership area.</p>
+                </article>
+
+                <article class="benefit-card">
+                    <div class="benefit-icon">✦</div>
+                    <h3>Request Movies</h3>
+                    <p>Request movies and series you want added to CINEVA.</p>
+                </article>
+
+                <article class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Priority Requests</h3>
+                    <p>Get priority consideration for your requests.</p>
+                </article>
+
+                <article class="benefit-card">
+                    <div class="benefit-icon">👑</div>
+                    <h3>VIP Recognition</h3>
+                    <p>Enjoy your exclusive CINEVA VIP member status.</p>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- SUBSCRIPTION PLANS -->
+        <section class="vip-plans section-container" id="vipPlans">
+
+            <div class="section-heading">
+                <span class="section-label">CHOOSE YOUR ACCESS</span>
+                <h2>VIP <span>Membership Plans</span></h2>
+                <p>Select a subscription that works for you.</p>
+            </div>
+
+            <div class="plans-grid" id="vipPlansContainer">
+
+                <!-- Plans are loaded from Supabase -->
+
+                <div class="plans-loading">
+                    <div class="small-spinner"></div>
+                    <p>Loading membership plans...</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PAYMENT SECTION -->
+        <section class="vip-payment section-container" id="vipPayment">
+
+            <div class="payment-panel">
+
+                <div class="payment-info">
+                    <span class="section-label">SECURE MOBILE PAYMENT</span>
+
+                    <h2>Activate Your <span>VIP Access</span></h2>
+
+                    <p>
+                        Choose your preferred mobile money network
+                        and follow the payment instructions.
+                    </p>
+
+                    <div class="payment-security">
+                        <span>🔒</span>
+                        Secure payment verification
+                    </div>
+                </div>
+
+                <div class="payment-form">
+
+                    <h3>Subscription Checkout</h3>
+
+                    <form id="vipPaymentForm">
+
+                        <label for="selectedPlan">Selected Plan</label>
+                        <select id="selectedPlan" required>
+                            <option value="">Choose a membership plan</option>
+                        </select>
+
+                        <label>Payment Method</label>
+
+                        <div class="payment-methods">
+
+                            <label class="payment-method">
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value="mtn"
+                                    required
+                                >
+
+                                <span class="method-content">
+                                    <span class="method-logo mtn-logo">MTN</span>
+                                    <span>
+                                        <strong>MTN Mobile Money</strong>
+                                        <small>Pay using MoMo</small>
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label class="payment-method">
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value="airtel"
+                                    required
+                                >
+
+                                <span class="method-content">
+                                    <span class="method-logo airtel-logo">A</span>
+                                    <span>
+                                        <strong>Airtel Money</strong>
+                                        <small>Pay using Airtel Money</small>
+                                    </span>
+                                </span>
+                            </label>
+
+                        </div>
+
+                        <label for="vipPhone">Mobile Money Phone Number</label>
+
+                        <input
+                            type="tel"
+                            id="vipPhone"
+                            placeholder="e.g. 078XXXXXXX"
+                            autocomplete="tel"
+                            required
+                        >
+
+                        <button type="submit" class="payment-submit" id="vipPayBtn">
+                            Continue to Payment →
+                        </button>
+
+                        <p class="payment-message" id="vipPaymentMessage">
+                            Your membership activates after verified payment.
+                        </p>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- FAQ -->
+        <section class="vip-faq section-container">
+
+            <div class="section-heading">
+                <span class="section-label">NEED TO KNOW?</span>
+                <h2>Frequently Asked <span>Questions</span></h2>
+            </div>
+
+            <div class="faq-list">
+
+                <details>
+                    <summary>How do I become a CINEVA VIP member?</summary>
+                    <p>Choose a membership plan, select MTN or Airtel Money, and complete the payment. Your membership is activated after payment verification.</p>
+                </details>
+
+                <details>
+                    <summary>Can I request new movies?</summary>
+                    <p>Yes. Active VIP members can submit movie and series requests through the VIP Room.</p>
+                </details>
+
+                <details>
+                    <summary>How long does my membership last?</summary>
+                    <p>Your membership duration depends on the plan you purchase.</p>
+                </details>
+
+                <details>
+                    <summary>When will my payment be confirmed?</summary>
+                    <p>Payment confirmation is handled securely through the payment provider. Do not share your mobile money PIN with anyone.</p>
+                </details>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="vip-footer">
+        <a href="index.html" class="brand">CINEVA<span>+</span></a>
+
+        <p>Experience entertainment beyond ordinary.</p>
+
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="vip.html">VIP Membership</a>
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+        </div>
+
+        <small>© <span id="vipYear"></span> CINEVA. All rights reserved.</small>
+    </footer>
+
+    <!-- JAVASCRIPT: added in the next step -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/vip.js"></script>
+
+</body>
+</html>
