@@ -1,0 +1,466 @@
+
+/* =========================================
+   CINEVA PRO — ADMIN AUTHENTICATION
+   Premium Dark Cinematic Design
+========================================= */
+
+:root {
+    --auth-bg: #070610;
+    --auth-card: #100e1d;
+    --auth-card-light: #171329;
+    --auth-primary: #853cff;
+    --auth-primary-light: #a66bff;
+    --auth-secondary: #e83276;
+    --auth-text: #ffffff;
+    --auth-muted: #9692aa;
+    --auth-border: rgba(255,255,255,.09);
+    --auth-success: #36d99a;
+    --auth-danger: #ff5374;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background: var(--auth-bg);
+    color: var(--auth-text);
+    overflow-x: hidden;
+}
+
+/* =========================================
+   BACKGROUND
+========================================= */
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    filter: blur(130px);
+    opacity: .22;
+    pointer-events: none;
+    z-index: -1;
+}
+
+body::before {
+    background: var(--auth-primary);
+    top: -180px;
+    left: -150px;
+}
+
+body::after {
+    background: var(--auth-secondary);
+    right: -180px;
+    bottom: -200px;
+}
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 45px 20px 25px;
+    position: relative;
+}
+
+/* =========================================
+   AUTHENTICATION CARD
+========================================= */
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 42px 38px 35px;
+    position: relative;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(25,21,44,.97),
+            rgba(12,10,23,.98)
+        );
+
+    border: 1px solid var(--auth-border);
+    border-radius: 22px;
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.55),
+        0 0 60px rgba(133,60,255,.09);
+
+    animation: authAppear .7s ease both;
+}
+
+.auth-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--auth-primary),
+        var(--auth-secondary),
+        transparent
+    );
+}
+
+/* =========================================
+   BRAND
+========================================= */
+
+.auth-brand {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.brand-logo {
+    font-size: 39px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    color: #fff;
+}
+
+.brand-logo span {
+    color: var(--auth-primary-light);
+}
+
+.brand-label {
+    margin-top: 7px;
+    color: var(--auth-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 4px;
+}
+
+/* =========================================
+   SECURITY ICON
+========================================= */
+
+.security-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 23px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 19px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(133,60,255,.22),
+        rgba(232,50,118,.12)
+    );
+
+    border: 1px solid rgba(166,107,255,.25);
+    box-shadow: 0 0 35px rgba(133,60,255,.12);
+}
+
+.security-icon span {
+    font-size: 30px;
+    color: var(--auth-primary-light);
+}
+
+/* =========================================
+   HEADING
+========================================= */
+
+.auth-heading {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-heading h1 {
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+}
+
+.auth-heading p {
+    color: var(--auth-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+#adminLoginForm {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 21px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+
+    color: #d9d5e8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.form-group input {
+    width: 100%;
+    height: 51px;
+    padding: 0 15px;
+
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 9px;
+
+    background: rgba(255,255,255,.035);
+    color: #fff;
+
+    outline: none;
+    font-family: inherit;
+    font-size: 12px;
+
+    transition: .25s ease;
+}
+
+.form-group input::placeholder {
+    color: #68647b;
+}
+
+.form-group input:focus {
+    border-color: var(--auth-primary);
+    background: rgba(133,60,255,.06);
+
+    box-shadow:
+        0 0 0 3px rgba(133,60,255,.11);
+}
+
+/* =========================================
+   PASSWORD FIELD
+========================================= */
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 70px;
+}
+
+#togglePassword {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+
+    border: none;
+    background: none;
+
+    color: var(--auth-primary-light);
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+/* =========================================
+   LOGIN MESSAGE
+========================================= */
+
+.login-message {
+    min-height: 0;
+    margin-bottom: 12px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.login-message.error {
+    color: var(--auth-danger);
+}
+
+.login-message.success {
+    color: var(--auth-success);
+}
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+    width: 100%;
+    min-height: 53px;
+    padding: 0 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border: none;
+    border-radius: 9px;
+
+    background: linear-gradient(
+        110deg,
+        #7131df,
+        #913ff5,
+        #b342c7
+    );
+
+    color: #fff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+    transition: .3s ease;
+
+    box-shadow: 0 9px 25px rgba(133,60,255,.22);
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(133,60,255,.35);
+    filter: brightness(1.1);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button-arrow {
+    font-size: 19px;
+    font-weight: 400;
+}
+
+/* =========================================
+   SECURITY NOTICE
+========================================= */
+
+.auth-security {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+
+    margin-top: 29px;
+}
+
+.auth-security p {
+    color: var(--auth-muted);
+    font-size: 10px;
+}
+
+.security-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+
+    background: var(--auth-success);
+    box-shadow: 0 0 10px rgba(54,217,154,.6);
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.auth-footer {
+    width: 100%;
+    max-width: 450px;
+
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.auth-footer p,
+.auth-footer span {
+    color: #666176;
+    font-size: 9px;
+}
+
+.auth-footer span {
+    letter-spacing: 1px;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes authAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media(max-width: 500px) {
+    .auth-container {
+        padding: 25px 15px;
+    }
+
+    .auth-card {
+        padding: 35px 23px 28px;
+        border-radius: 17px;
+    }
+
+    .brand-logo {
+        font-size: 34px;
+    }
+
+    .auth-heading h1 {
+        font-size: 24px;
+    }
+
+    .auth-footer {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media(prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
