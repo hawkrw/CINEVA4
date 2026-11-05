@@ -1462,10 +1462,10 @@ function openMovieForm(movie = null) {
     movieModal.hidden = false;
 
     form.elements.namedItem("title").focus();
-}
-renderDownloadLinks(
+   renderDownloadLinks(
     normalizeDownloadLinks(movie?.download_links)
 );
+}
 
 function closeMovieForm() {
     if (movieModal) {
