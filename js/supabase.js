@@ -1,26 +1,66 @@
 
 /* =========================================
-   CINEVA — SUPABASE DATABASE SYSTEM
+   CINEVA PRO — SUPABASE DATABASE SYSTEM
+   Reliable data fetching and error handling
 ========================================= */
 
 import { supabase, APP_CONFIG } from "./config.js";
 
-// =========================================
-// COMMON ERROR HANDLER
-// =========================================
+/* =========================================
+   01. DATABASE ERROR HANDLING
+========================================= */
 
 function handleError(label, error) {
-    if (error) {
-        console.error(`CINEVA ${label}:`, error.message);
-        return true;
-    }
+    if (!error) return;
 
-    return false;
+    console.error(`CINEVA ${label}:`, error);
+
+    throw new Error(
+        `${label}: ${error.message || "Database request failed."}`,
+        { cause: error }
+    );
 }
 
-// =========================================
-// FETCH LATEST MOVIES
-// =========================================
+/* =========================================
+   02. COMMON HELPERS
+========================================= */
+
+function safeLimit(value, fallback = 20, maximum = 100) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number) || number < 1) {
+        return fallback;
+    }
+
+    return Math.min(Math.floor(number), maximum);
+}
+
+function sortByNewest(items) {
+    return [...items].sort((a, b) => {
+        const dateA = Date.parse(a.created_at || "") || 0;
+        const dateB = Date.parse(b.created_at || "") || 0;
+
+        return dateB - dateA;
+    });
+}
+
+function combineContent(movies, series) {
+    return sortByNewest([
+        ...(movies || []).map(item => ({
+            ...item,
+            content_type: "movie"
+        })),
+
+        ...(series || []).map(item => ({
+            ...item,
+            content_type: "series"
+        }))
+    ]);
+}
+
+/* =========================================
+   03. FETCH LATEST MOVIES
+========================================= */
 
 export async function getLatestMovies(
     limit = APP_CONFIG.latestLimit
@@ -30,16 +70,16 @@ export async function getLatestMovies(
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(safeLimit(limit));
 
-    if (handleError("Latest movies error", error)) return [];
+    handleError("Latest movies error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH ALL MOVIES
-// =========================================
+/* =========================================
+   04. FETCH ALL MOVIES
+========================================= */
 
 export async function getAllMovies() {
     const { data, error } = await supabase
@@ -48,14 +88,14 @@ export async function getAllMovies() {
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-    if (handleError("Movies error", error)) return [];
+    handleError("Movies error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH FEATURED MOVIES
-// =========================================
+/* =========================================
+   05. FETCH FEATURED MOVIES
+========================================= */
 
 export async function getFeaturedMovies(
     limit = APP_CONFIG.featuredLimit
@@ -66,37 +106,59 @@ export async function getFeaturedMovies(
         .eq("is_active", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(safeLimit(limit, 10));
 
-    if (handleError("Featured movies error", error)) return [];
+    handleError("Featured movies error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH MOVIES BY CATEGORY
-// =========================================
+/* =========================================
+   06. FETCH CONTENT BY CATEGORY
+   Includes movies AND series
+========================================= */
 
 export async function getMoviesByCategory(
     category,
     limit = 20
 ) {
-    const { data, error } = await supabase
-        .from(APP_CONFIG.moviesTable)
-        .select("*")
-        .eq("is_active", true)
-        .ilike("category", category)
-        .order("created_at", { ascending: false })
-        .limit(limit);
+    if (!category || !String(category).trim()) {
+        return [];
+    }
 
-    if (handleError("Movie category error", error)) return [];
+    const safeCategory = String(category).trim();
+    const resultLimit = safeLimit(limit);
 
-    return data || [];
+    const [moviesResult, seriesResult] = await Promise.all([
+        supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("*")
+            .eq("is_active", true)
+            .ilike("category", safeCategory)
+            .order("created_at", { ascending: false })
+            .limit(resultLimit),
+
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select("*")
+            .eq("is_active", true)
+            .ilike("category", safeCategory)
+            .order("created_at", { ascending: false })
+            .limit(resultLimit)
+    ]);
+
+    handleError("Category movies error", moviesResult.error);
+    handleError("Category series error", seriesResult.error);
+
+    return combineContent(
+        moviesResult.data,
+        seriesResult.data
+    ).slice(0, resultLimit);
 }
 
-// =========================================
-// FETCH ALL SERIES
-// =========================================
+/* =========================================
+   07. FETCH ALL SERIES
+========================================= */
 
 export async function getAllSeries() {
     const { data, error } = await supabase
@@ -105,14 +167,14 @@ export async function getAllSeries() {
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-    if (handleError("Series error", error)) return [];
+    handleError("Series error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH LATEST SERIES
-// =========================================
+/* =========================================
+   08. FETCH LATEST SERIES
+========================================= */
 
 export async function getLatestSeries(limit = 20) {
     const { data, error } = await supabase
@@ -120,37 +182,41 @@ export async function getLatestSeries(limit = 20) {
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(safeLimit(limit));
 
-    if (handleError("Latest series error", error)) return [];
+    handleError("Latest series error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH SERIES BY CATEGORY
-// =========================================
+/* =========================================
+   09. FETCH SERIES BY CATEGORY
+========================================= */
 
 export async function getSeriesByCategory(
     category,
     limit = 20
 ) {
+    if (!category || !String(category).trim()) {
+        return [];
+    }
+
     const { data, error } = await supabase
         .from(APP_CONFIG.seriesTable)
         .select("*")
         .eq("is_active", true)
-        .ilike("category", category)
+        .ilike("category", String(category).trim())
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(safeLimit(limit));
 
-    if (handleError("Series category error", error)) return [];
+    handleError("Series category error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH ALL CATEGORIES
-// =========================================
+/* =========================================
+   10. FETCH ALL CATEGORIES
+========================================= */
 
 export async function getCategories() {
     const { data, error } = await supabase
@@ -158,14 +224,14 @@ export async function getCategories() {
         .select("*")
         .order("name", { ascending: true });
 
-    if (handleError("Categories error", error)) return [];
+    handleError("Categories error", error);
 
     return data || [];
 }
 
-// =========================================
-// FETCH SINGLE MOVIE
-// =========================================
+/* =========================================
+   11. FETCH SINGLE MOVIE
+========================================= */
 
 export async function getMovieById(id) {
     const { data, error } = await supabase
@@ -174,14 +240,14 @@ export async function getMovieById(id) {
         .eq("id", id)
         .maybeSingle();
 
-    if (handleError("Movie details error", error)) return null;
+    handleError("Movie details error", error);
 
     return data;
 }
 
-// =========================================
-// FETCH SINGLE SERIES
-// =========================================
+/* =========================================
+   12. FETCH SINGLE SERIES
+========================================= */
 
 export async function getSeriesById(id) {
     const { data, error } = await supabase
@@ -190,14 +256,14 @@ export async function getSeriesById(id) {
         .eq("id", id)
         .maybeSingle();
 
-    if (handleError("Series details error", error)) return null;
+    handleError("Series details error", error);
 
     return data;
 }
 
-// =========================================
-// SEARCH MOVIES AND SERIES
-// =========================================
+/* =========================================
+   13. SEARCH MOVIES AND SERIES
+========================================= */
 
 export async function searchContent(searchTerm) {
     const term = String(searchTerm || "").trim();
@@ -227,76 +293,53 @@ export async function searchContent(searchTerm) {
     handleError("Movie search error", moviesResult.error);
     handleError("Series search error", seriesResult.error);
 
-    return [
-        ...(moviesResult.data || []).map(item => ({
-            ...item,
-            content_type: "movie"
-        })),
-
-        ...(seriesResult.data || []).map(item => ({
-            ...item,
-            content_type: "series"
-        }))
-    ].sort((a, b) =>
-        new Date(b.created_at || 0) -
-        new Date(a.created_at || 0)
+    return combineContent(
+        moviesResult.data,
+        seriesResult.data
     );
 }
 
-// =========================================
-// FETCH LATEST MOVIES AND SERIES TOGETHER
-// =========================================
+/* =========================================
+   14. FETCH LATEST MOVIES AND SERIES
+========================================= */
 
 export async function getLatestContent(
     limit = APP_CONFIG.latestLimit
 ) {
+    const safeResultLimit = safeLimit(limit);
+
     const [moviesResult, seriesResult] = await Promise.all([
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("*")
             .eq("is_active", true)
             .order("created_at", { ascending: false })
-            .limit(limit),
+            .limit(safeResultLimit),
 
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
             .order("created_at", { ascending: false })
-            .limit(limit)
+            .limit(safeResultLimit)
     ]);
 
     handleError("Latest movies error", moviesResult.error);
     handleError("Latest series error", seriesResult.error);
 
-    return [
-        ...(moviesResult.data || []).map(item => ({
-            ...item,
-            content_type: "movie"
-        })),
-
-        ...(seriesResult.data || []).map(item => ({
-            ...item,
-            content_type: "series"
-        }))
-    ]
-        .sort((a, b) =>
-            new Date(b.created_at || 0) -
-            new Date(a.created_at || 0)
-        )
-        .slice(0, limit);
+    return combineContent(
+        moviesResult.data,
+        seriesResult.data
+    ).slice(0, safeResultLimit);
 }
 
-// =========================================
-// FETCH TRENDING MOVIES AND SERIES
-// RANKED BY REAL VIEW COUNTS
-// =========================================
+/* =========================================
+   15. FETCH TRENDING MOVIES AND SERIES
+   Ranked by real view counts
+========================================= */
 
 export async function getTrendingContent(limit = 12) {
-    const safeLimit = Math.max(
-        1,
-        Math.min(Number(limit) || 12, 50)
-    );
+    const safeResultLimit = safeLimit(limit, 12, 50);
 
     const [moviesResult, seriesResult] = await Promise.all([
         supabase
@@ -305,7 +348,7 @@ export async function getTrendingContent(limit = 12) {
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
-            .limit(safeLimit),
+            .limit(safeResultLimit),
 
         supabase
             .from(APP_CONFIG.seriesTable)
@@ -313,7 +356,7 @@ export async function getTrendingContent(limit = 12) {
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
-            .limit(safeLimit)
+            .limit(safeResultLimit)
     ]);
 
     handleError("Trending movies error", moviesResult.error);
@@ -321,33 +364,40 @@ export async function getTrendingContent(limit = 12) {
 
     const movies = (moviesResult.data || []).map(item => ({
         ...item,
-        content_type: "movie",
         views: Number(item.views) || 0
     }));
 
     const series = (seriesResult.data || []).map(item => ({
         ...item,
-        content_type: "series",
         views: Number(item.views) || 0
     }));
 
     return [...movies, ...series]
+        .map(item => ({
+            ...item,
+            content_type: item.content_type ||
+                (series.some(seriesItem => seriesItem.id === item.id)
+                    ? "series"
+                    : "movie")
+        }))
         .sort((a, b) => {
-            const viewDifference = b.views - a.views;
+            const difference =
+                (Number(b.views) || 0) -
+                (Number(a.views) || 0);
 
-            if (viewDifference !== 0) {
-                return viewDifference;
-            }
+            if (difference !== 0) return difference;
 
-            return new Date(b.created_at || 0) -
-                new Date(a.created_at || 0);
+            return (
+                (Date.parse(b.created_at || "") || 0) -
+                (Date.parse(a.created_at || "") || 0)
+            );
         })
-        .slice(0, safeLimit);
+        .slice(0, safeResultLimit);
 }
 
-// =========================================
-// FETCH ALL CONTENT
-// =========================================
+/* =========================================
+   16. FETCH ALL ACTIVE CONTENT
+========================================= */
 
 export async function getAllContent() {
     const [movies, series] = await Promise.all([
@@ -355,28 +405,16 @@ export async function getAllContent() {
         getAllSeries()
     ]);
 
-    return [
-        ...movies.map(item => ({
-            ...item,
-            content_type: "movie"
-        })),
-
-        ...series.map(item => ({
-            ...item,
-            content_type: "series"
-        }))
-    ].sort((a, b) =>
-        new Date(b.created_at || 0) -
-        new Date(a.created_at || 0)
-    );
+    return combineContent(movies, series);
 }
 
-// =========================================
-// FETCH UNIQUE TRANSLATORS
-// =========================================
+/* =========================================
+   17. FETCH UNIQUE TRANSLATORS
+   Movies and series are handled independently
+========================================= */
 
 export async function getOurTranslators() {
-    const [moviesResult, seriesResult] = await Promise.all([
+    const results = await Promise.allSettled([
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("translator")
@@ -390,23 +428,49 @@ export async function getOurTranslators() {
             .not("translator", "is", null)
     ]);
 
-    if (handleError("Movie translators error", moviesResult.error)) {
-        return [];
+    const names = [];
+
+    results.forEach((result, index) => {
+        const label = index === 0
+            ? "Movie translators"
+            : "Series translators";
+
+        if (result.status === "rejected") {
+            console.warn(
+                `CINEVA ${label} request failed:`,
+                result.reason
+            );
+            return;
+        }
+
+        const { data, error } = result.value;
+
+        if (error) {
+            console.warn(
+                `CINEVA ${label} error:`,
+                error.message
+            );
+            return;
+        }
+
+        (data || []).forEach(item => {
+            const name = String(item.translator || "").trim();
+
+            if (name) names.push(name);
+        });
+    });
+
+    if (results.every(result => result.status === "rejected")) {
+        throw new Error("Unable to load translator information.");
     }
 
-    if (handleError("Series translators error", seriesResult.error)) {
-        return [];
-    }
-
-    const names = [
-        ...(moviesResult.data || []),
-        ...(seriesResult.data || [])
-    ]
-        .map(item => String(item.translator || "").trim())
-        .filter(Boolean);
-
-    return [...new Set(names)]
-        .sort((a, b) => a.localeCompare(b));
+    return [...new Set(names)].sort(
+        (a, b) => a.localeCompare(b)
+    );
 }
 
-console.log("CINEVA database functions loaded.");
+/* =========================================
+   18. INITIALIZATION
+========================================= */
+
+console.log("CINEVA database functions loaded successfully.");
