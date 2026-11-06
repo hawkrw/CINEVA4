@@ -381,6 +381,17 @@ function getCategory(item) {
 
 }
 
+/* =========================================================
+   TRANSLATOR DETECTION
+========================================================= */
+
+function getTranslator(item) {
+    const translator = item?.translator;
+
+    if (typeof translator !== "string") return "";
+
+    return translator.trim();
+}
 
 /* =========================================================
    13. DESCRIPTION DETECTION
@@ -517,8 +528,10 @@ function createPosterHTML(item, title) {
         </div>
     `;
 }
+
 /* =========================================================
-   18. MOVIE / SERIES CARD
+   18. PREMIUM MOVIE / SERIES CARD
+   Includes translator badge on poster
 ========================================================= */
 
 function createMovieCard(item) {
@@ -541,9 +554,25 @@ function createMovieCard(item) {
 
     const rating = getRating(item);
 
+    const translator = escapeHTML(
+        getTranslator(item)
+    );
+
     const type = getContentType(item) === "series"
         ? "Series"
         : "Movie";
+
+    const translatorHTML = translator
+        ? `
+            <span
+                class="movie-translator-badge"
+                title="Translated by ${translator}"
+            >
+                <i class="fa-solid fa-language"></i>
+                ${translator}
+            </span>
+        `
+        : "";
 
     const ratingHTML = rating
         ? `
@@ -569,6 +598,8 @@ function createMovieCard(item) {
                     ${type}
                 </span>
 
+                ${translatorHTML}
+
                 <div class="movie-overlay">
 
                     <span class="play-icon">
@@ -578,7 +609,6 @@ function createMovieCard(item) {
                 </div>
 
             </div>
-
 
             <div class="movie-info">
 
@@ -605,9 +635,7 @@ function createMovieCard(item) {
 
         </a>
     `;
-
 }
-
 
 /* =========================================================
    19. RENDER MOVIE GRID
