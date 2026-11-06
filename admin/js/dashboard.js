@@ -1676,46 +1676,79 @@ async function saveContentForm(event) {
             : "Save";
     }
 }
+
 /* =========================================
-   AUTOMATIC ADD BUTTONS
-   No dashboard HTML changes required.
+   CINEVA PRO — AUTOMATIC MANAGEMENT BUTTONS
 ========================================= */
 
 function createManagementButton(id, label, tableId, callback) {
-    if ($(id)) {
-        bind(id, "click", callback);
-        return;
+    let button = document.getElementById(id);
+
+    if (!button) {
+        const tableBody = document.getElementById(tableId);
+
+        if (!tableBody) {
+            console.warn(
+                `CINEVA: Cannot create ${label}; #${tableId} is missing.`
+            );
+            return;
+        }
+
+        const table = tableBody.closest("table") || tableBody;
+
+        button = document.createElement("button");
+        button.id = id;
+        button.type = "button";
+        button.textContent = label;
+
+        const parent = table.parentElement;
+
+        if (!parent) {
+            console.warn(`CINEVA: Cannot insert ${label}.`);
+            return;
+        }
+
+        parent.insertBefore(button, table);
     }
-
-    const tableBody = $(tableId);
-
-    if (!tableBody) {
-        console.warn(`CINEVA: Cannot create ${label}; #${tableId} is missing.`);
-        return;
-    }
-
-    const table = tableBody.closest("table") || tableBody;
-    const button = document.createElement("button");
 
     button.type = "button";
-    button.id = id;
-    button.className = "cineva-add-content-button";
-    button.textContent = label;
+    button.classList.add("cineva-add-content-button");
 
-    button.addEventListener("click", callback);
+    // Prevent duplicate click listeners.
+    if (button.dataset.cinevaClickBound === "true") {
+        return;
+    }
 
-    table.parentElement.insertBefore(button, table);
+    button.dataset.cinevaClickBound = "true";
+
+    button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        callback();
+    });
 }
 
 
+/* =========================================
+   SERIES & EPISODE FORM INITIALIZATION
+========================================= */
+
 function initializeSeriesEpisodeForms() {
+
+    // ADD NEW SERIES
     createManagementButton(
         "addSeriesBtn",
         "+ Add New Series",
         "seriesTable",
-        () => openContentForm("series")
+        () => {
+            console.log("CINEVA: Opening Add New Series form.");
+
+            openContentForm("series");
+        }
     );
 
+    // ADD SINGLE EPISODE
     createManagementButton(
         "addEpisodeBtn",
         "+ Add Episode",
