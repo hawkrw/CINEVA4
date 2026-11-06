@@ -2585,3 +2585,55 @@
 .episode-download-btn i {
     font-size: 16px;
 }
+/* =========================================================
+   CINEVA PRO — HIDE DOWNLOAD TEXT, KEEP ICONS
+   Add this block at the VERY END of watch.css
+========================================================= */
+
+.part-download-btn,
+.episode-download-btn {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 0 !important;
+
+    font-size: 0 !important;
+    line-height: 0 !important;
+
+    flex-shrink: 0;
+}
+
+/* Keep download icons visible */
+.part-download-btn i,
+.episode-download-btn i {
+    display: inline-block !important;
+    width: 17px !important;
+    height: 17px !important;
+
+    font-size: 17px !important;
+    line-height: 17px !important;
+}
+
+/* Support SVG download icons */
+.part-download-btn svg,
+.episode-download-btn svg {
+    display: block !important;
+    width: 17px !important;
+    height: 17px !important;
+    flex-shrink: 0;
+}
+
+/* Hide nested text labels if present */
+.part-download-btn span,
+.episode-download-btn span {
+    display: none !important;
+}
