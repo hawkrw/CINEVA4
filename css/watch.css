@@ -2572,3 +2572,16 @@
         width: 100%;
     }
 }
+.episode-download-btn {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.episode-download-btn i {
+    font-size: 16px;
+}
