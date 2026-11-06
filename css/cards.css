@@ -1372,3 +1372,71 @@ main > .content-section + .content-section {
     font-size: 11px;
     letter-spacing: 3px;
 }
+
+/* =========================================================
+   CINEVA — MOVIE TRANSLATOR BADGE
+========================================================= */
+
+.movie-poster {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Translator badge — top right */
+
+.movie-translator-badge {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    z-index: 5;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    max-width: calc(100% - 95px);
+    padding: 6px 10px;
+
+    color: #ffffff;
+    background: rgba(8, 8, 18, 0.90);
+
+    border: 1px solid rgba(168, 85, 247, 0.65);
+    border-radius: 6px;
+
+    font-family:;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.45px;
+    line-height: 1.2;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.45),
+        0 0 10px rgba(139, 53, 245, 0.15);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    pointer-events: none;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.movie-translator-badge i {
+    flex-shrink: 0;
+    color: #c084fc;
+    font-size: 12px;
+}
+
+/* Slight enhancement when hovering over a card */
+
+.movie-card:hover .movie-translator-badge {
+    background: rgba(20, 12, 35, 0.96);
+    border-color: #a855f7;
+}
