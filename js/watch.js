@@ -8,32 +8,16 @@ import { supabase, APP_CONFIG } from "./config.js";
 const PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 
 /* =====================================================
-   CONFIGURATION — CLEAN URL SUPPORT
+   CONFIGURATION — ORIGINAL URL SYSTEM
 ===================================================== */
 
 const params = new URLSearchParams(window.location.search);
 
-const pathParts = window.location.pathname
-    .split("/")
-    .filter(Boolean);
+const contentId = params.get("id");
 
-const isCleanUrl =
-    pathParts.length >= 2 &&
-    ["movie", "series"].includes(pathParts[0].toLowerCase());
-
-let contentType;
-let contentId;
-
-if (isCleanUrl) {
-    contentType = pathParts[0].toLowerCase();
-    contentId = decodeURIComponent(pathParts[1]);
-} else {
-    contentId = params.get("id");
-
-    contentType = params.get("type") === "series"
-        ? "series"
-        : "movie";
-}
+const contentType = params.get("type") === "series"
+    ? "series"
+    : "movie";
 
 const table = contentType === "series"
     ? APP_CONFIG.seriesTable
@@ -364,6 +348,7 @@ function showContent() {
 /* =====================================================
    FETCH MAIN CONTENT
 ===================================================== */
+
 async function fetchContent() {
     const { data, error } = await supabase
         .from(table)
@@ -1710,21 +1695,11 @@ function renderRelated(items) {
         const title = escapeHTML(item.title || "Untitled");
         const poster = escapeHTML(getPoster(item));
 
-        // Always use the Supabase database ID.
-        const itemId = item.id;
-
-        // Skip records without a valid database ID.
-        if (itemId === null || itemId === undefined || itemId === "") {
-            console.warn("Related content has no database ID:", item);
-            return "";
-        }
-
-        const itemUrl =
-            `/${contentType}/${encodeURIComponent(itemId)}`;
+        if (item.id == null) return "";
 
         return `
             <a
-                href="${itemUrl}"
+                href="watch.html?id=${encodeURIComponent(item.id)}&type=${contentType}"
                 class="movie-card"
             >
                 <div class="movie-poster">
@@ -1732,7 +1707,6 @@ function renderRelated(items) {
                         src="${poster}"
                         alt="${title}"
                         loading="lazy"
-                        onerror="this.onerror=null;this.src='${PLACEHOLDER}'"
                     >
                 </div>
 
@@ -1744,7 +1718,6 @@ function renderRelated(items) {
         `;
     }).join("");
 }
-
 /* =====================================================
    CINEVA — FOOTER, BACK TO TOP & RELATED NAVIGATION
 ===================================================== */
