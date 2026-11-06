@@ -1336,17 +1336,18 @@ function openContentForm(type, record = null) {
             ? (isSeries ? "Edit Series" : "Edit Episode")
             : (isSeries ? "Add New Series" : "Add New Episode");
 
-    const fields = isSeries
-        ? [
-            ["title", "Series Title *", "text", true],
-            ["category", "Category", "text", false],
-            ["year", "Release Year", "number", false],
-            ["total_seasons", "Total Seasons", "number", false],
-            ["description", "Description", "textarea", true],
-            ["overview", "Overview", "textarea", true],
-            ["poster", "Poster Image URL", "url", true],
-            ["backdrop", "Backdrop Image URL", "url", true]
-        ]
+   const fields = isSeries
+    ? [
+        ["title", "Series Title *", "text", true],
+        ["category", "Category", "text", false],
+        ["translator", "Translator", "text", false],
+        ["year", "Release Year", "number", false],
+        ["total_seasons", "Total Seasons", "number", false],
+        ["description", "Description", "textarea", true],
+        ["overview", "Overview", "textarea", true],
+        ["poster", "Poster Image URL", "url", true],
+        ["backdrop", "Backdrop Image URL", "url", true]
+    ]
         : [
             ["season", "Season Number *", "number", false],
             ["episode", "Episode Number *", "number", false],
@@ -1492,17 +1493,7 @@ async function saveContentForm(event) {
             title: value("title"),
 
             category: value("category") || null,
-           <div class="cineva-content-field">
-    <label for="seriesTranslator">Translator</label>
-    <input
-        type="text"
-        id="seriesTranslator"
-        name="translator"
-        placeholder="Enter translator name"
-        autocomplete="off"
-    >
-</div>
-
+          
             year: year === null
                 ? null
                 : String(year),
