@@ -3791,12 +3791,22 @@ function createMovieModal() {
                             placeholder="Enter movie title">
                     </div>
 
-                    <div class="cineva-field">
-                        <label>Category</label>
-                        <input
-                            name="category"
-                            placeholder="Action, Drama, Comedy...">
-                    </div>
+                   <div class="cineva-field">
+    <label>Movie Category *</label>
+    <select name="category" required>
+        <option value="">Select movie category</option>
+        <option value="Action">Action</option>
+        <option value="Horror">Horror</option>
+        <option value="Drama">Drama</option>
+        <option value="Highschool">Highschool</option>
+        <option value="Animation">Animation</option>
+        <option value="Comedy">Comedy</option>
+        <option value="Erotic">Erotic</option>
+    </select>
+    <small class="cineva-field-hint">
+        Select the category that matches your movie.
+    </small>
+</div>
 
                     <div class="cineva-field">
                         <label>Release Year</label>
@@ -3818,9 +3828,72 @@ function createMovieModal() {
                     </div>
 
                     <div class="cineva-field">
-                        <label>Country</label>
-                        <input name="country">
-                    </div>
+    <label>Production Country *</label>
+
+    <select name="country" required>
+        <option value="">Select production country</option>
+
+        <optgroup label="🌍 Major Film Industries">
+            <option value="United States">United States</option>
+            <option value="India">India</option>
+            <option value="China">China</option>
+            <option value="Japan">Japan</option>
+            <option value="South Korea">South Korea</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="France">France</option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="Canada">Canada</option>
+            <option value="Germany">Germany</option>
+            <option value="Italy">Italy</option>
+            <option value="Spain">Spain</option>
+            <option value="Turkey">Turkey</option>
+            <option value="Thailand">Thailand</option>
+            <option value="Indonesia">Indonesia</option>
+            <option value="Hong Kong">Hong Kong</option>
+            <option value="Egypt">Egypt</option>
+            <option value="Brazil">Brazil</option>
+            <option value="Mexico">Mexico</option>
+            <option value="Australia">Australia</option>
+        </optgroup>
+
+        <optgroup label="🌎 Other Film-Producing Countries">
+            <option value="Argentina">Argentina</option>
+            <option value="Austria">Austria</option>
+            <option value="Belgium">Belgium</option>
+            <option value="Chile">Chile</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Czech Republic">Czech Republic</option>
+            <option value="Denmark">Denmark</option>
+            <option value="Finland">Finland</option>
+            <option value="Greece">Greece</option>
+            <option value="Hungary">Hungary</option>
+            <option value="Ireland">Ireland</option>
+            <option value="Israel">Israel</option>
+            <option value="Kenya">Kenya</option>
+            <option value="Malaysia">Malaysia</option>
+            <option value="Netherlands">Netherlands</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="Norway">Norway</option>
+            <option value="Pakistan">Pakistan</option>
+            <option value="Philippines">Philippines</option>
+            <option value="Poland">Poland</option>
+            <option value="Portugal">Portugal</option>
+            <option value="Rwanda">Rwanda</option>
+            <option value="Russia">Russia</option>
+            <option value="Saudi Arabia">Saudi Arabia</option>
+            <option value="Singapore">Singapore</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Sweden">Sweden</option>
+            <option value="Switzerland">Switzerland</option>
+            <option value="Taiwan">Taiwan</option>
+            <option value="Vietnam">Vietnam</option>
+        </optgroup>
+    </select>
+
+    <small class="cineva-field-hint">
+        Countries are arranged by major film-producing industries first.
+    </small>
+</div>
 
                     <div class="cineva-field">
                         <label>Quality</label>
