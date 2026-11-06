@@ -504,9 +504,20 @@ async function loadSeries() {
     try {
         const { data, error } = await supabase
             .from("series")
-            .select(
-                "id, title, category, year, total_seasons, is_active, created_at"
-            )
+           .select(`
+    id,
+    title,
+    category,
+    year,
+    total_seasons,
+    description,
+    overview,
+    poster,
+    backdrop,
+    is_active,
+    created_at,
+    updated_at
+`)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -712,10 +723,29 @@ async function loadEpisodes() {
     try {
         const { data, error } = await supabase
             .from("episodes")
-            .select(
-                "id, series_id, season, episode, season_number, " +
-                "episode_number, title, duration, is_active, is_final"
-            )
+           .select(`
+    id,
+    series_id,
+    season,
+    episode,
+    season_number,
+    episode_number,
+    title,
+    description,
+    overview,
+    duration,
+    runtime,
+    thumbnail,
+    video_url,
+    download_url,
+    download_link,
+    download_links,
+    is_final,
+    is_active,
+    parts,
+    created_at,
+    updated_at
+`)
             .eq("series_id", selectedSeriesId)
             .order("season_number", { ascending: true })
             .order("episode_number", { ascending: true });
@@ -889,6 +919,615 @@ async function deleteEpisode(id) {
 
     await loadEpisodes();
 }
+
+/* =========================================
+   CINEVA PRO — SERIES & EPISODE FORMS
+========================================= */
+
+let contentFormModal = null;
+
+function createContentFormModal() {
+    if (contentFormModal) return contentFormModal;
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .cineva-content-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0,0,0,.82);
+            backdrop-filter: blur(8px);
+            overflow-y: auto;
+        }
+
+        .cineva-content-modal[hidden] {
+            display: none;
+        }
+
+        .cineva-content-card {
+            width: 100%;
+            max-width: 760px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 25px;
+            color: #fff;
+            background: #121221;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 15px;
+        }
+
+        .cineva-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .cineva-content-header h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .cineva-content-close {
+            border: 0;
+            border-radius: 7px;
+            padding: 9px 13px;
+            color: white;
+            background: #29293c;
+            cursor: pointer;
+        }
+
+        .cineva-content-grid {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 15px;
+        }
+
+        .cineva-content-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .cineva-content-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .cineva-content-field label {
+            color: #c6c6d7;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .cineva-content-field input,
+        .cineva-content-field textarea,
+        .cineva-content-field select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            color: white;
+            background: #0b0b17;
+            border: 1px solid #303047;
+            border-radius: 8px;
+            outline: none;
+            font: inherit;
+        }
+
+        .cineva-content-field input:focus,
+        .cineva-content-field textarea:focus,
+        .cineva-content-field select:focus {
+            border-color: #8b35f5;
+        }
+
+        .cineva-content-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .cineva-content-check {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 20px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .cineva-content-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .cineva-content-actions button {
+            padding: 12px 19px;
+            border: 0;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cineva-content-cancel {
+            color: white;
+            background: #29293c;
+        }
+
+        .cineva-content-save {
+            color: white;
+            background: linear-gradient(135deg,#8b35f5,#ef315e);
+        }
+
+        .cineva-content-save:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .cineva-add-content-button {
+            margin: 0 0 14px;
+            padding: 10px 16px;
+            color: white;
+            background: #8b35f5;
+            border: 0;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cineva-add-content-button:hover {
+            background: #a855f7;
+        }
+
+        @media(max-width:600px) {
+            .cineva-content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cineva-content-card {
+                padding: 17px;
+            }
+
+            .cineva-content-actions {
+                flex-direction: column-reverse;
+            }
+
+            .cineva-content-actions button {
+                width: 100%;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+
+    contentFormModal = document.createElement("div");
+    contentFormModal.className = "cineva-content-modal";
+    contentFormModal.hidden = true;
+
+    contentFormModal.innerHTML = `
+        <div class="cineva-content-card">
+            <div class="cineva-content-header">
+                <h2 id="contentFormTitle">Add Content</h2>
+
+                <button
+                    type="button"
+                    class="cineva-content-close"
+                    id="closeContentForm">
+                    ✕
+                </button>
+            </div>
+
+            <form id="contentForm">
+                <input type="hidden" name="contentId">
+                <input type="hidden" name="contentType">
+
+                <div id="contentFormFields" class="cineva-content-grid"></div>
+
+                <label class="cineva-content-check">
+                    <input type="checkbox" name="is_active" checked>
+                    Active
+                </label>
+
+                <div class="cineva-content-actions">
+                    <button
+                        type="button"
+                        class="cineva-content-cancel"
+                        id="cancelContentForm">
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="cineva-content-save"
+                        id="saveContentButton">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(contentFormModal);
+
+    contentFormModal.querySelector("#closeContentForm")
+        .addEventListener("click", closeContentForm);
+
+    contentFormModal.querySelector("#cancelContentForm")
+        .addEventListener("click", closeContentForm);
+
+    contentFormModal.addEventListener("click", event => {
+        if (event.target === contentFormModal) {
+            closeContentForm();
+        }
+    });
+
+    contentFormModal.querySelector("#contentForm")
+        .addEventListener("submit", saveContentForm);
+
+    return contentFormModal;
+}
+
+
+function closeContentForm() {
+    if (!contentFormModal) return;
+
+    contentFormModal.querySelector("#contentForm")?.reset();
+    contentFormModal.hidden = true;
+}
+
+
+function createContentField(name, label, type = "text", value = "", full = false) {
+    const wrapper = document.createElement("div");
+
+    wrapper.className =
+        "cineva-content-field" + (full ? " full" : "");
+
+    const fieldLabel = document.createElement("label");
+    fieldLabel.textContent = label;
+
+    let input;
+
+    if (type === "textarea") {
+        input = document.createElement("textarea");
+    } else {
+        input = document.createElement("input");
+        input.type = type;
+    }
+
+    input.name = name;
+    input.value = value ?? "";
+    input.autocomplete = "off";
+
+    if (type === "url") {
+        input.placeholder = "https://example.com/...";
+    }
+
+    wrapper.append(fieldLabel, input);
+
+    return wrapper;
+}
+
+
+function openContentForm(type, record = null) {
+    createContentFormModal();
+
+    const form = contentFormModal.querySelector("#contentForm");
+    const fieldsContainer = contentFormModal.querySelector("#contentFormFields");
+
+    form.reset();
+    fieldsContainer.replaceChildren();
+
+    form.elements.namedItem("contentType").value = type;
+    form.elements.namedItem("contentId").value = record?.id ?? "";
+
+    const isSeries = type === "series";
+
+    contentFormModal.querySelector("#contentFormTitle").textContent =
+        record
+            ? (isSeries ? "Edit Series" : "Edit Episode")
+            : (isSeries ? "Add New Series" : "Add New Episode");
+
+    const fields = isSeries
+        ? [
+            ["title", "Series Title *", "text", true],
+            ["category", "Category", "text", false],
+            ["year", "Release Year", "number", false],
+            ["total_seasons", "Total Seasons", "number", false],
+            ["description", "Description", "textarea", true],
+            ["overview", "Overview", "textarea", true],
+            ["poster", "Poster Image URL", "url", true],
+            ["backdrop", "Backdrop Image URL", "url", true]
+        ]
+        : [
+            ["season", "Season Number *", "number", false],
+            ["episode", "Episode Number *", "number", false],
+            ["title", "Episode Title *", "text", true],
+            ["duration", "Duration (e.g. 45 min)", "text", false],
+            ["thumbnail", "Episode Thumbnail URL", "url", true],
+            ["video_url", "Episode Watch URL", "url", true],
+            ["download_url", "Episode Download URL", "url", true],
+            ["description", "Description", "textarea", true]
+        ];
+
+    fields.forEach(([name, label, fieldType, full]) => {
+        const field = createContentField(
+            name,
+            label,
+            fieldType,
+            record?.[name] ?? "",
+            full
+        );
+
+        const input = field.querySelector("input, textarea");
+
+        if (name === "title") {
+            input.required = true;
+            input.maxLength = 250;
+        }
+
+        if (["season", "episode", "total_seasons"].includes(name)) {
+            input.min = "1";
+            input.step = "1";
+            input.required = true;
+        }
+
+        fieldsContainer.appendChild(field);
+    });
+
+    // Restore episode numbering from either supported column pair.
+    if (!isSeries && record) {
+        form.elements.namedItem("season").value =
+            record.season ?? record.season_number ?? 1;
+
+        form.elements.namedItem("episode").value =
+            record.episode ?? record.episode_number ?? 1;
+    }
+
+    // Restore the active checkbox.
+    form.elements.namedItem("is_active").checked =
+        record ? record.is_active !== false : true;
+
+    // Final episode is only relevant to episodes.
+    if (!isSeries) {
+        const finalLabel = document.createElement("label");
+        finalLabel.className = "cineva-content-check";
+        finalLabel.innerHTML = `
+            <input type="checkbox" name="is_final">
+            This is the final episode
+        `;
+
+        contentFormModal.querySelector("#contentFormFields")
+            .appendChild(finalLabel);
+
+        form.elements.namedItem("is_final").checked =
+            record?.is_final === true;
+    }
+
+    contentFormModal.querySelector("#saveContentButton").textContent =
+        record ? "Update" : "Save";
+
+    contentFormModal.hidden = false;
+
+    form.elements.namedItem("title")?.focus();
+}
+
+
+async function saveContentForm(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+
+    if (!form.reportValidity()) return;
+
+    const type = form.elements.namedItem("contentType").value;
+    const contentId = form.elements.namedItem("contentId").value;
+
+    const isSeries = type === "series";
+
+    const saveButton = contentFormModal.querySelector(
+        "#saveContentButton"
+    );
+
+    const value = name =>
+        form.elements.namedItem(name)?.value.trim() ?? "";
+
+    const number = name => {
+        const raw = value(name);
+        return raw === "" ? null : Number(raw);
+    };
+
+    const active = form.elements.namedItem("is_active").checked;
+
+    let payload;
+
+    if (isSeries) {
+        const totalSeasons = number("total_seasons") ?? 1;
+        const year = number("year");
+
+        if (
+            !Number.isInteger(totalSeasons) ||
+            totalSeasons < 1 ||
+            (year !== null && !Number.isInteger(year))
+        ) {
+            alert("Please enter valid season and release-year values.");
+            return;
+        }
+
+        payload = {
+            title: value("title"),
+            category: value("category") || null,
+            year: year === null ? null : String(year),
+            total_seasons: totalSeasons,
+            description: value("description") || null,
+            overview: value("overview") || null,
+            poster: value("poster") || null,
+            backdrop: value("backdrop") || null,
+            is_active: active,
+            updated_at: new Date().toISOString()
+        };
+
+    } else {
+        const season = number("season");
+        const episode = number("episode");
+
+        if (
+            !Number.isInteger(season) || season < 1 ||
+            !Number.isInteger(episode) || episode < 1
+        ) {
+            alert("Season and episode numbers must be positive whole numbers.");
+            return;
+        }
+
+        const description = value("description") || null;
+        const duration = value("duration") || null;
+
+        payload = {
+            series_id: selectedSeriesId,
+
+            // Both column pairs are populated because the
+            // database requires season and episode to be NOT NULL.
+            season,
+            episode,
+            season_number: season,
+            episode_number: episode,
+
+            title: value("title"),
+            description,
+            overview: description,
+            duration,
+            thumbnail: value("thumbnail") || null,
+
+            // Playback and download remain independent.
+            video_url: value("video_url") || null,
+            download_url: value("download_url") || null,
+            download_link: value("download_url") || null,
+
+            is_final: form.elements.namedItem("is_final").checked,
+            is_active: active,
+            updated_at: new Date().toISOString()
+        };
+    }
+
+    if (!payload.title) {
+        alert("A title is required.");
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.textContent = contentId ? "Updating..." : "Saving...";
+
+    try {
+        let response;
+
+        const table = isSeries ? "series" : "episodes";
+
+        if (contentId) {
+            response = await supabase
+                .from(table)
+                .update(payload)
+                .eq("id", contentId);
+        } else {
+            response = await supabase
+                .from(table)
+                .insert(payload);
+        }
+
+        if (response.error) throw response.error;
+
+        closeContentForm();
+
+        alert(
+            contentId
+                ? (isSeries ? "Series updated successfully." : "Episode updated successfully.")
+                : (isSeries ? "Series added successfully." : "Episode added successfully.")
+        );
+
+        if (isSeries) {
+            await refreshContent();
+        } else {
+            await loadEpisodes();
+        }
+
+    } catch (error) {
+        console.error("Series/Episode save error:", error);
+
+        alert(
+            "Unable to save " + (isSeries ? "series" : "episode") +
+            ".\n\n" + (error.message || "Please try again.")
+        );
+
+    } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = contentId ? "Update" : "Save";
+    }
+}
+
+
+/* =========================================
+   AUTOMATIC ADD BUTTONS
+   No dashboard HTML changes required.
+========================================= */
+
+function createManagementButton(id, label, tableId, callback) {
+    if ($(id)) {
+        bind(id, "click", callback);
+        return;
+    }
+
+    const tableBody = $(tableId);
+
+    if (!tableBody) {
+        console.warn(`CINEVA: Cannot create ${label}; #${tableId} is missing.`);
+        return;
+    }
+
+    const table = tableBody.closest("table") || tableBody;
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.id = id;
+    button.className = "cineva-add-content-button";
+    button.textContent = label;
+
+    button.addEventListener("click", callback);
+
+    table.parentElement.insertBefore(button, table);
+}
+
+
+function initializeSeriesEpisodeForms() {
+    createManagementButton(
+        "addSeriesBtn",
+        "+ Add New Series",
+        "seriesTable",
+        () => openContentForm("series")
+    );
+
+    createManagementButton(
+        "addEpisodeBtn",
+        "+ Add Episode",
+        "episodesTable",
+        () => {
+            if (selectedSeriesId === null) {
+                alert("Open a series first.");
+                return;
+            }
+
+            openContentForm("episode");
+        }
+    );
+}
+
+
+/* =========================================
+   END SERIES & EPISODE FORMS
+========================================= */
+
 document.addEventListener("click", async event => {
     const button = event.target.closest("[data-action]");
 
@@ -940,10 +1579,29 @@ document.addEventListener("click", async event => {
                 await deleteEpisode(id);
                 break;
 
-            case "edit-series":
-            case "edit-episode":
-                alert("Series and episode forms will be implemented separately.");
-                break;
+           case "edit-series": {
+    const series = seriesCache.find(
+        item => String(item.id) === String(id)
+    );
+
+    if (series) {
+        openContentForm("series", series);
+    }
+
+    break;
+}
+
+case "edit-episode": {
+    const episode = episodesCache.find(
+        item => String(item.id) === String(id)
+    );
+
+    if (episode) {
+        openContentForm("episode", episode);
+    }
+
+    break;
+}
         }
 
     } catch (error) {
@@ -1141,14 +1799,15 @@ async function initializeDashboard() {
 
         initialized = true;
 
-        displayAdminProfile(result.user);
-        showDashboard();
+       displayAdminProfile(result.user);
+showDashboard();
 
-        initializeNavigation();
+initializeNavigation();
+initializeSeriesEpisodeForms();
 
-        bind("logoutButton", "click", logout);
+bind("logoutButton", "click", logout);
 
-        await refreshContent();
+await refreshContent();
 
         if (selectedSeriesId !== null) {
             await loadEpisodes();
