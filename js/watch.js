@@ -4,6 +4,8 @@
 ===================================================== */
 
 import { supabase, APP_CONFIG } from "./config.js";
+/* DEFAULT POSTER */
+const PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 
 /* =====================================================
    CONFIGURATION — CLEAN URL SUPPORT
