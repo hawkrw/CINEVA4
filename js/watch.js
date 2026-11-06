@@ -6,28 +6,28 @@
 import { supabase, APP_CONFIG } from "./config.js";
 
 /* =====================================================
-   CONFIGURATION
+   CONFIGURATION — CLEAN URL SUPPORT
 ===================================================== */
+
 const params = new URLSearchParams(window.location.search);
+
 const pathParts = window.location.pathname
     .split("/")
     .filter(Boolean);
 
+const isCleanUrl =
+    pathParts.length >= 2 &&
+    ["movie", "series"].includes(pathParts[0].toLowerCase());
+
 let contentType;
 let contentId;
 
-// New clean URLs: /movie/2552 and /series/492
-if (
-    pathParts.length >= 2 &&
-    ["movie", "series"].includes(pathParts[0].toLowerCase())
-) {
+if (isCleanUrl) {
     contentType = pathParts[0].toLowerCase();
     contentId = decodeURIComponent(pathParts[1]);
-}
-
-// Backward compatibility: /watch?id=...&type=...
-else {
+} else {
     contentId = params.get("id");
+
     contentType = params.get("type") === "series"
         ? "series"
         : "movie";
