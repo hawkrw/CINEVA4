@@ -1081,3 +1081,142 @@ td {
     outline: 2px solid #c084fc;
     outline-offset: 3px;
 }
+
+/* =========================================
+   CINEVA PRO — PREMIUM SERIES FORM
+========================================= */
+
+/* Form layout */
+.content-form-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    color: #f5f3ff;
+    font-family: Inter, sans-serif;
+}
+
+/* Labels */
+.content-form-modal label {
+    color: #ded8ed;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+/* Inputs and textareas */
+.content-form-modal input:not([type="checkbox"]),
+.content-form-modal select,
+.content-form-modal textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px 14px;
+
+    background: #090914;
+    color: #ffffff;
+
+    border: 1px solid #343047;
+    border-radius: 9px;
+
+    font-family:;
+    font-size: 13px;
+
+    outline: none;
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+}
+
+/* Placeholder */
+.content-form-modal input::placeholder,
+.content-form-modal textarea::placeholder {
+    color: #777187;
+}
+
+/* Focus */
+.content-form-modal input:focus,
+.content-form-modal select:focus,
+.content-form-modal textarea:focus {
+    border-color: #a855f7;
+    background: #111020;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.14);
+}
+
+/* Textareas */
+.content-form-modal textarea {
+    min-height: 105px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* Checkbox */
+.content-form-modal input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #a855f7;
+    cursor: pointer;
+}
+
+/* Footer divider */
+.content-form-modal .form-footer {
+    border-top: 1px solid #292638;
+    padding-top: 20px;
+    margin-top: 12px;
+}
+
+/* Buttons */
+.content-form-modal button {
+    min-height: 42px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-family:;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+/* Save button */
+.content-form-modal button[type="submit"] {
+    color: #ffffff;
+    background: linear-gradient(135deg, #a855f7, #812cf0);
+    border: 1px solid #b56aff;
+    box-shadow: 0 5px 18px rgba(139, 53, 245, 0.2);
+}
+
+.content-form-modal button[type="submit"]:hover {
+    background: linear-gradient(135deg, #bd70ff, #9333ea);
+    box-shadow: 0 7px 22px rgba(168, 85, 247, 0.35);
+    transform: translateY(-2px);
+}
+
+/* Cancel button */
+.content-form-modal button[type="button"] {
+    color: #e4dff0;
+    background: #292638;
+    border: 1px solid #39354b;
+}
+
+.content-form-modal button[type="button"]:hover {
+    background: #383248;
+    border-color: #66517f;
+}
+
+/* Responsive */
+@media (max-width: 650px) {
+    .content-form-modal {
+        width: calc(100% - 24px) !important;
+        max-width: none !important;
+        padding: 20px !important;
+    }
+
+    .content-form-modal form {
+        gap: 15px;
+    }
+
+    .content-form-modal input:not([type="checkbox"]),
+    .content-form-modal select,
+    .content-form-modal textarea {
+        width: 100%;
+    }
+}
