@@ -1367,3 +1367,51 @@ td {
         width: 100% !important;
     }
 }
+/* =========================================
+   PREMIUM COUNTRY & CATEGORY SELECTORS
+========================================= */
+
+.cineva-field select {
+    min-height: 45px;
+    padding: 12px 38px 12px 13px;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    background-color: #0b0b17;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b77aff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    background-size: 16px;
+
+    cursor: pointer;
+}
+
+.cineva-field select:hover {
+    border-color: #7040a5;
+}
+
+.cineva-field select:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, .15);
+}
+
+.cineva-field select option {
+    background: #121221;
+    color: #ffffff;
+    padding: 10px;
+}
+
+.cineva-field select optgroup {
+    background: #121221;
+    color: #b77aff;
+    font-weight: 700;
+}
+
+.cineva-field-hint {
+    color: #85839a;
+    font-size: 10px;
+    line-height: 1.5;
+}
