@@ -365,12 +365,10 @@ function showContent() {
    FETCH MAIN CONTENT
 ===================================================== */
 async function fetchContent() {
-    const lookupColumn = isCleanUrl ? "tmdb_id" : "id";
-
     const { data, error } = await supabase
         .from(table)
         .select("*")
-        .eq(lookupColumn, contentId)
+        .eq("id", contentId)
         .maybeSingle();
 
     if (error) {
@@ -1712,9 +1710,21 @@ function renderRelated(items) {
         const title = escapeHTML(item.title || "Untitled");
         const poster = escapeHTML(getPoster(item));
 
+        // Always use the Supabase database ID.
+        const itemId = item.id;
+
+        // Skip records without a valid database ID.
+        if (itemId === null || itemId === undefined || itemId === "") {
+            console.warn("Related content has no database ID:", item);
+            return "";
+        }
+
+        const itemUrl =
+            `/${contentType}/${encodeURIComponent(itemId)}`;
+
         return `
             <a
-              href="/${contentType}/${encodeURIComponent(item.tmdb_id)}"
+                href="${itemUrl}"
                 class="movie-card"
             >
                 <div class="movie-poster">
@@ -1722,6 +1732,7 @@ function renderRelated(items) {
                         src="${poster}"
                         alt="${title}"
                         loading="lazy"
+                        onerror="this.onerror=null;this.src='${PLACEHOLDER}'"
                     >
                 </div>
 
