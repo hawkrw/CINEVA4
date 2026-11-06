@@ -42,74 +42,88 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Display series cards.
-    function renderSeries(seriesList) {
-        if (!seriesList.length) {
-            seriesGrid.innerHTML = `
-                <div class="series-empty">
-                    <h3>No series found</h3>
-                    <p>Try another search or genre.</p>
-                </div>
-            `;
-
-            if (resultCount) {
-                resultCount.textContent = "0 series";
-            }
-
-            return;
-        }
-
-        seriesGrid.innerHTML = seriesList.map(series => {
-            const id = encodeURIComponent(series.id);
-            const title = escapeHTML(series.title || "Untitled Series");
-            const category = escapeHTML(series.category || "Series");
-            const poster = escapeHTML(
-                safeImageURL(
-                    series.poster_url ||
-                    series.thumbnail_url ||
-                    ""
-                )
-            );
-
-            const year = escapeHTML(series.release_year || "");
-            const rating = Number(series.rating || 0);
-
-            return `
-                <a
-                    class="movie-card"
-                    href="watch.html?id=${id}&type=series"
-                >
-                    <div class="movie-card-image">
-                        <img
-                            src="${poster}"
-                            alt="${title}"
-                            loading="lazy"
-                            onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
-                        >
-
-                        <span class="movie-card-category">
-                            ${category}
-                        </span>
-
-                        ${rating > 0 ? `
-                            <span class="movie-card-rating">
-                                ★ ${rating.toFixed(1)}
-                            </span>
-                        ` : ""}
-                    </div>
-
-                    <div class="movie-card-info">
-                        <h3>${title}</h3>
-                        <p>${year || "TV Series"}</p>
-                    </div>
-                </a>
-            `;
-        }).join("");
+ 
+// Display series cards with translator badges.
+function renderSeries(seriesList) {
+    if (!seriesList.length) {
+        seriesGrid.innerHTML = `
+            <div class="series-empty">
+                <h3>No series found</h3>
+                <p>Try another search or genre.</p>
+            </div>
+        `;
 
         if (resultCount) {
-            resultCount.textContent =
-                `${seriesList.length} ${seriesList.length === 1 ? "series" : "series"}`;
+            resultCount.textContent = "0 series";
         }
+
+        return;
     }
+
+    seriesGrid.innerHTML = seriesList.map(series => {
+        const id = encodeURIComponent(series.id);
+        const title = escapeHTML(series.title || "Untitled Series");
+        const category = escapeHTML(series.category || "Series");
+
+        const translator = escapeHTML(
+            series.translator?.trim() || ""
+        );
+
+        const poster = escapeHTML(
+            safeImageURL(
+                series.poster_url ||
+                series.thumbnail_url ||
+                ""
+            )
+        );
+
+        const year = escapeHTML(series.release_year || "");
+        const rating = Number(series.rating || 0);
+
+        return `
+            <a
+                class="movie-card"
+                href="watch.html?id=${id}&type=series"
+            >
+                <div class="movie-card-image">
+                    <img
+                        src="${poster}"
+                        alt="${title}"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
+                    >
+
+                    <span class="movie-card-category">
+                        ${category}
+                    </span>
+
+                    ${translator ? `
+                        <span class="movie-translator-badge">
+                            <i class="fa-solid fa-language"></i>
+                            ${translator}
+                        </span>
+                    ` : ""}
+
+                    ${rating > 0 ? `
+                        <span class="movie-card-rating">
+                            ★ ${rating.toFixed(1)}
+                        </span>
+                    ` : ""}
+                </div>
+
+                <div class="movie-card-info">
+                    <h3>${title}</h3>
+                    <p>${year || "TV Series"}</p>
+                </div>
+            </a>
+        `;
+    }).join("");
+
+    if (resultCount) {
+        resultCount.textContent =
+            `${seriesList.length} series`;
+    }
+}
 
     // Search, filter and sort series.
     function filterSeries() {
