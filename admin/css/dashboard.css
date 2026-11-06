@@ -979,3 +979,41 @@ td {
         padding: 17px;
     }
 }
+/* CINEVA PRO — PREMIUM ACTION BUTTONS */
+.cineva-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 11px 20px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 10px;
+    background: linear-gradient(135deg, #8b35f5, #6424c9);
+    color: #fff;
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 5px 18px rgba(139, 53, 245, 0.22);
+    transition: all 0.25s ease;
+}
+
+.cineva-action-btn:hover {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    border-color: #c084fc;
+    box-shadow: 0 8px 24px rgba(139, 53, 245, 0.35);
+    transform: translateY(-2px);
+}
+
+.cineva-action-btn:active {
+    transform: translateY(0);
+}
+
+.cineva-action-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
