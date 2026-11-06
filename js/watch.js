@@ -1714,7 +1714,7 @@ function renderRelated(items) {
 
         return `
             <a
-               href="/${contentType}/${encodeURIComponent(item.id)}"
+              href="/${contentType}/${encodeURIComponent(item.tmdb_id)}"
                 class="movie-card"
             >
                 <div class="movie-poster">
