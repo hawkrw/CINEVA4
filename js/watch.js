@@ -8,20 +8,34 @@ import { supabase, APP_CONFIG } from "./config.js";
 /* =====================================================
    CONFIGURATION
 ===================================================== */
-
-const PLACEHOLDER = "assets/images/movie-placeholder.jpg";
-
 const params = new URLSearchParams(window.location.search);
+const pathParts = window.location.pathname
+    .split("/")
+    .filter(Boolean);
 
-const contentId = params.get("id");
-const contentType = params.get("type") === "series"
-    ? "series"
-    : "movie";
+let contentType;
+let contentId;
+
+// New clean URLs: /movie/2552 and /series/492
+if (
+    pathParts.length >= 2 &&
+    ["movie", "series"].includes(pathParts[0].toLowerCase())
+) {
+    contentType = pathParts[0].toLowerCase();
+    contentId = decodeURIComponent(pathParts[1]);
+}
+
+// Backward compatibility: /watch?id=...&type=...
+else {
+    contentId = params.get("id");
+    contentType = params.get("type") === "series"
+        ? "series"
+        : "movie";
+}
 
 const table = contentType === "series"
     ? APP_CONFIG.seriesTable
     : APP_CONFIG.moviesTable;
-
 /* =====================================================
    DOM ELEMENTS
 ===================================================== */
@@ -348,12 +362,13 @@ function showContent() {
 /* =====================================================
    FETCH MAIN CONTENT
 ===================================================== */
-
 async function fetchContent() {
+    const lookupColumn = isCleanUrl ? "tmdb_id" : "id";
+
     const { data, error } = await supabase
         .from(table)
         .select("*")
-        .eq("id", contentId)
+        .eq(lookupColumn, contentId)
         .maybeSingle();
 
     if (error) {
@@ -1697,7 +1712,7 @@ function renderRelated(items) {
 
         return `
             <a
-                href="watch.html?id=${encodeURIComponent(item.id)}&type=${contentType}"
+               href="/${contentType}/${encodeURIComponent(item.id)}"
                 class="movie-card"
             >
                 <div class="movie-poster">
