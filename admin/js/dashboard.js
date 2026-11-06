@@ -1103,37 +1103,232 @@ function createContentFormModal() {
         }
     `;
 
+/* =========================================
+   CINEVA PRO — CONTENT FORM MODAL
+   SERIES & EPISODE MANAGEMENT
+========================================= */
+
+function createContentFormModal() {
+    if (contentFormModal) {
+        return contentFormModal;
+    }
+
+    /* =====================================
+       MODAL STYLES
+    ===================================== */
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .cineva-content-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
+        }
+
+        .cineva-content-modal[hidden] {
+            display: none !important;
+        }
+
+        .cineva-content-card {
+            width: 100%;
+            max-width: 720px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #121221;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 16px;
+            padding: 25px;
+            color: #fff;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+            animation: cinevaContentModalIn 0.2s ease;
+        }
+
+        @keyframes cinevaContentModalIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .cineva-content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .cineva-content-header h2 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .cineva-content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .cineva-content-grid > * {
+            min-width: 0;
+        }
+
+        .cineva-content-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .cineva-content-check input {
+            accent-color: #8b35f5;
+            width: 17px;
+            height: 17px;
+        }
+
+        .cineva-content-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .cineva-content-cancel,
+        .cineva-content-save {
+            min-width: 110px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .cineva-content-cancel {
+            color: #ddd;
+            background: #29293b;
+        }
+
+        .cineva-content-cancel:hover {
+            background: #38384c;
+        }
+
+        .cineva-content-save {
+            color: #fff;
+            background: linear-gradient(
+                135deg,
+                #8b35f5,
+                #a855f7
+            );
+        }
+
+        .cineva-content-save:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+        }
+
+        .cineva-content-save:disabled,
+        .cineva-content-cancel:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 600px) {
+            .cineva-content-modal {
+                padding: 10px;
+            }
+
+            .cineva-content-card {
+                padding: 18px;
+                max-height: 94vh;
+            }
+
+            .cineva-content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cineva-content-actions {
+                flex-direction: column-reverse;
+            }
+
+            .cineva-content-cancel,
+            .cineva-content-save {
+                width: 100%;
+            }
+        }
+    `;
+
     document.head.appendChild(style);
 
+    /* =====================================
+       CREATE MODAL
+    ===================================== */
+
     contentFormModal = document.createElement("div");
+
     contentFormModal.className = "cineva-content-modal";
     contentFormModal.hidden = true;
 
     contentFormModal.innerHTML = `
         <div class="cineva-content-card">
-            <div class="cineva-content-header">
-                <h2 id="contentFormTitle">Add Content</h2>
 
-                <button
-                    type="button"
-                    class="cineva-content-close"
-                    id="closeContentForm">
-                    ✕
-                </button>
+            <div class="cineva-content-header">
+                <h2 id="contentFormTitle">
+                    Add Content
+                </h2>
             </div>
 
             <form id="contentForm">
-                <input type="hidden" name="contentId">
-                <input type="hidden" name="contentType">
 
-                <div id="contentFormFields" class="cineva-content-grid"></div>
+                <input
+                    type="hidden"
+                    name="contentId"
+                >
+
+                <input
+                    type="hidden"
+                    name="contentType"
+                >
+
+                <div
+                    id="contentFormFields"
+                    class="cineva-content-grid">
+                </div>
 
                 <label class="cineva-content-check">
-                    <input type="checkbox" name="is_active" checked>
+                    <input
+                        type="checkbox"
+                        name="is_active"
+                        checked
+                    >
                     Active
                 </label>
 
                 <div class="cineva-content-actions">
+
                     <button
                         type="button"
                         class="cineva-content-cancel"
@@ -1147,38 +1342,125 @@ function createContentFormModal() {
                         id="saveContentButton">
                         Save
                     </button>
+
                 </div>
+
             </form>
         </div>
     `;
 
     document.body.appendChild(contentFormModal);
 
-    contentFormModal.querySelector("#closeContentForm")
-        .addEventListener("click", closeContentForm);
+    /* =====================================
+       CANCEL BUTTON
+       ONLY MANUAL CLOSE CONTROL
+    ===================================== */
 
-    contentFormModal.querySelector("#cancelContentForm")
-        .addEventListener("click", closeContentForm);
+    contentFormModal
+        .querySelector("#cancelContentForm")
+        .addEventListener("click", requestCloseContentForm);
+
+    /* =====================================
+       DISABLE BACKDROP CLOSING
+
+       Clicking outside the card does
+       absolutely nothing.
+    ===================================== */
 
     contentFormModal.addEventListener("click", event => {
         if (event.target === contentFormModal) {
-            closeContentForm();
+            event.stopPropagation();
         }
     });
 
-    contentFormModal.querySelector("#contentForm")
+    /* =====================================
+       FORM SUBMISSION
+    ===================================== */
+
+    contentFormModal
+        .querySelector("#contentForm")
         .addEventListener("submit", saveContentForm);
 
     return contentFormModal;
 }
 
 
+/* =========================================
+   CLOSE CONTENT FORM
+   INTERNAL SUCCESS / CANCEL CLOSE
+========================================= */
+
 function closeContentForm() {
     if (!contentFormModal) return;
 
-    contentFormModal.querySelector("#contentForm")?.reset();
+    const form = contentFormModal.querySelector("#contentForm");
+
+    if (form?.dataset.saving === "true") {
+        console.warn(
+            "Content form is currently saving. Use requestCloseContentForm()."
+        );
+        return;
+    }
+
+    form?.reset();
+
+    if (form) {
+        delete form.dataset.saving;
+    }
+
     contentFormModal.hidden = true;
 }
+
+
+/* =========================================
+   REQUEST CONTENT FORM CLOSE
+   CONFIRM IF SAVE IS IN PROGRESS
+========================================= */
+
+function requestCloseContentForm() {
+    if (!contentFormModal) return;
+
+    const form = contentFormModal.querySelector("#contentForm");
+
+    const saving = form?.dataset.saving === "true";
+
+    if (saving) {
+        const confirmed = confirm(
+            "A save is currently in progress.\n\n" +
+            "Close this form anyway? The current database request " +
+            "may still finish."
+        );
+
+        if (!confirmed) return;
+    }
+
+    // Close the modal after confirmation.
+    if (form) {
+        delete form.dataset.saving;
+    }
+
+    form?.reset();
+
+    contentFormModal.hidden = true;
+}
+
+
+/* =========================================
+   PREVENT ESCAPE KEY FROM CLOSING MODAL
+========================================= */
+
+document.addEventListener("keydown", event => {
+    if (
+        event.key !== "Escape" ||
+        !contentFormModal ||
+        contentFormModal.hidden
+    ) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+});
 
 
 function createContentField(name, label, type = "text", value = "", full = false) {
@@ -1315,7 +1597,9 @@ function openContentForm(type, record = null) {
 
     form.elements.namedItem("title")?.focus();
 }
-
+/* =========================================
+   SAVE SERIES / EPISODE FORM
+========================================= */
 
 async function saveContentForm(event) {
     event.preventDefault();
@@ -1324,8 +1608,11 @@ async function saveContentForm(event) {
 
     if (!form.reportValidity()) return;
 
-    const type = form.elements.namedItem("contentType").value;
-    const contentId = form.elements.namedItem("contentId").value;
+    // Prevent duplicate submissions.
+    if (form.dataset.saving === "true") return;
+
+    const type = form.elements.namedItem("contentType")?.value;
+    const contentId = form.elements.namedItem("contentId")?.value;
 
     const isSeries = type === "series";
 
@@ -1333,17 +1620,36 @@ async function saveContentForm(event) {
         "#saveContentButton"
     );
 
+    if (!saveButton) {
+        console.error("Save button not found.");
+        return;
+    }
+
+    // Safely read form values.
     const value = name =>
-        form.elements.namedItem(name)?.value.trim() ?? "";
+        String(
+            form.elements.namedItem(name)?.value ?? ""
+        ).trim();
 
     const number = name => {
         const raw = value(name);
-        return raw === "" ? null : Number(raw);
+
+        if (raw === "") return null;
+
+        const parsed = Number(raw);
+
+        return Number.isFinite(parsed) ? parsed : NaN;
     };
 
-    const active = form.elements.namedItem("is_active").checked;
+    const active = Boolean(
+        form.elements.namedItem("is_active")?.checked
+    );
 
     let payload;
+
+    /* =====================================
+       SERIES PAYLOAD
+    ===================================== */
 
     if (isSeries) {
         const totalSeasons = number("total_seasons") ?? 1;
@@ -1354,98 +1660,175 @@ async function saveContentForm(event) {
             totalSeasons < 1 ||
             (year !== null && !Number.isInteger(year))
         ) {
-            alert("Please enter valid season and release-year values.");
+            alert(
+                "Please enter valid season and release-year values."
+            );
             return;
         }
 
         payload = {
             title: value("title"),
+
             category: value("category") || null,
-            year: year === null ? null : String(year),
+
+            year: year === null
+                ? null
+                : String(year),
+
             total_seasons: totalSeasons,
+
             description: value("description") || null,
+
             overview: value("overview") || null,
+
             poster: value("poster") || null,
+
             backdrop: value("backdrop") || null,
+
             is_active: active,
+
             updated_at: new Date().toISOString()
         };
 
     } else {
+
+        /* =====================================
+           EPISODE PAYLOAD
+        ===================================== */
+
         const season = number("season");
         const episode = number("episode");
 
         if (
-            !Number.isInteger(season) || season < 1 ||
-            !Number.isInteger(episode) || episode < 1
+            !Number.isInteger(season) ||
+            season < 1 ||
+            !Number.isInteger(episode) ||
+            episode < 1
         ) {
-            alert("Season and episode numbers must be positive whole numbers.");
+            alert(
+                "Season and episode numbers must be positive whole numbers."
+            );
+            return;
+        }
+
+        if (!selectedSeriesId) {
+            alert(
+                "Please select a series before saving this episode."
+            );
             return;
         }
 
         const description = value("description") || null;
         const duration = value("duration") || null;
+        const downloadUrl = value("download_url") || null;
+        const videoUrl = value("video_url") || null;
 
         payload = {
             series_id: selectedSeriesId,
 
-            // Both column pairs are populated because the
-            // database requires season and episode to be NOT NULL.
+            // Required database columns.
             season,
             episode,
+
+            // Compatibility columns.
             season_number: season,
             episode_number: episode,
 
             title: value("title"),
+
             description,
             overview: description,
+
             duration,
+
             thumbnail: value("thumbnail") || null,
 
             // Playback and download remain independent.
-            video_url: value("video_url") || null,
-            download_url: value("download_url") || null,
-            download_link: value("download_url") || null,
+            video_url: videoUrl,
 
-            is_final: form.elements.namedItem("is_final").checked,
+            download_url: downloadUrl,
+
+            download_link: downloadUrl,
+
+            is_final: Boolean(
+                form.elements.namedItem("is_final")?.checked
+            ),
+
             is_active: active,
+
             updated_at: new Date().toISOString()
         };
     }
+
+    /* =====================================
+       VALIDATE TITLE
+    ===================================== */
 
     if (!payload.title) {
         alert("A title is required.");
         return;
     }
 
+    /* =====================================
+       SAVE TO SUPABASE
+    ===================================== */
+
+    form.dataset.saving = "true";
+
     saveButton.disabled = true;
-    saveButton.textContent = contentId ? "Updating..." : "Saving...";
+
+    saveButton.textContent = contentId
+        ? "Updating..."
+        : "Saving...";
 
     try {
         let response;
 
-        const table = isSeries ? "series" : "episodes";
+        const table = isSeries
+            ? "series"
+            : "episodes";
 
         if (contentId) {
+            // UPDATE EXISTING RECORD.
             response = await supabase
                 .from(table)
                 .update(payload)
                 .eq("id", contentId);
+
         } else {
+            // INSERT NEW RECORD.
             response = await supabase
                 .from(table)
                 .insert(payload);
         }
 
-        if (response.error) throw response.error;
+        if (response.error) {
+            throw response.error;
+        }
+
+        /* =================================
+           CLOSE FORM AFTER SUCCESS
+        ================================= */
 
         closeContentForm();
 
         alert(
             contentId
-                ? (isSeries ? "Series updated successfully." : "Episode updated successfully.")
-                : (isSeries ? "Series added successfully." : "Episode added successfully.")
+                ? (
+                    isSeries
+                        ? "Series updated successfully."
+                        : "Episode updated successfully."
+                )
+                : (
+                    isSeries
+                        ? "Series added successfully."
+                        : "Episode added successfully."
+                )
         );
+
+        /* =================================
+           REFRESH DASHBOARD
+        ================================= */
 
         if (isSeries) {
             await refreshContent();
@@ -1454,20 +1837,29 @@ async function saveContentForm(event) {
         }
 
     } catch (error) {
-        console.error("Series/Episode save error:", error);
+        console.error(
+            "Series/Episode save error:",
+            error
+        );
 
         alert(
-            "Unable to save " + (isSeries ? "series" : "episode") +
-            ".\n\n" + (error.message || "Please try again.")
+            "Unable to save " +
+            (isSeries ? "series" : "episode") +
+            ".\n\n" +
+            (error.message || "Please try again.")
         );
 
     } finally {
+        // Always restore the save button.
+        delete form.dataset.saving;
+
         saveButton.disabled = false;
-        saveButton.textContent = contentId ? "Update" : "Save";
+
+        saveButton.textContent = contentId
+            ? "Update"
+            : "Save";
     }
 }
-
-
 /* =========================================
    AUTOMATIC ADD BUTTONS
    No dashboard HTML changes required.
@@ -1523,7 +1915,753 @@ function initializeSeriesEpisodeForms() {
     );
 }
 
+/* =========================================
+   CINEVA PRO — BULK MOVIE & EPISODE UPLOAD
+   Maximum 10 records per batch.
+   Each record is validated and saved separately.
+========================================= */
 
+let bulkUploadModal = null;
+let bulkUploadBusy = false;
+let bulkCancelRequested = false;
+let bulkUploadKind = null;
+
+const BULK_UPLOAD_LIMIT = 10;
+
+
+/* -----------------------------------------
+   BULK MODAL STYLES AND STRUCTURE
+----------------------------------------- */
+
+function createBulkUploadModal() {
+    if (bulkUploadModal) return bulkUploadModal;
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .cineva-bulk-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(0,0,0,.86);
+            backdrop-filter: blur(9px);
+            overflow-y: auto;
+        }
+
+        .cineva-bulk-modal[hidden] {
+            display: none;
+        }
+
+        .cineva-bulk-card {
+            width: 100%;
+            max-width: 1050px;
+            max-height: 94vh;
+            overflow-y: auto;
+            padding: 23px;
+            color: #fff;
+            background: #121221;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 15px;
+        }
+
+        .cineva-bulk-heading {
+            margin-bottom: 20px;
+        }
+
+        .cineva-bulk-heading h2 {
+            margin: 0 0 8px;
+            font-size: 21px;
+        }
+
+        .cineva-bulk-heading p {
+            margin: 0;
+            color: #aaaabd;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .cineva-bulk-items {
+            display: grid;
+            gap: 15px;
+        }
+
+        .cineva-bulk-item {
+            padding: 16px;
+            background: #0b0b17;
+            border: 1px solid #303047;
+            border-radius: 11px;
+        }
+
+        .cineva-bulk-item-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 13px;
+        }
+
+        .cineva-bulk-item-head strong {
+            color: #c9a7ff;
+            font-size: 14px;
+        }
+
+        .cineva-bulk-status {
+            font-size: 12px;
+            color: #aaaabd;
+            font-weight: 700;
+        }
+
+        .cineva-bulk-status[data-status="saved"] {
+            color: #4ade80;
+        }
+
+        .cineva-bulk-status[data-status="failed"] {
+            color: #fb7185;
+        }
+
+        .cineva-bulk-status[data-status="uploading"] {
+            color: #c9a7ff;
+        }
+
+        .cineva-bulk-fields {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 12px;
+        }
+
+        .cineva-bulk-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .cineva-bulk-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .cineva-bulk-field label {
+            color: #c6c6d7;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .cineva-bulk-field input,
+        .cineva-bulk-field textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            color: white;
+            background: #121221;
+            border: 1px solid #303047;
+            border-radius: 7px;
+            outline: none;
+            font: inherit;
+        }
+
+        .cineva-bulk-field input:focus,
+        .cineva-bulk-field textarea:focus {
+            border-color: #8b35f5;
+        }
+
+        .cineva-bulk-error {
+            display: none;
+            margin-top: 12px;
+            color: #fb7185;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .cineva-bulk-error.visible {
+            display: block;
+        }
+
+        .cineva-bulk-actions {
+            position: sticky;
+            bottom: -23px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin: 20px -23px -23px;
+            padding: 16px 23px;
+            background: #121221;
+            border-top: 1px solid #303047;
+        }
+
+        .cineva-bulk-actions button {
+            padding: 12px 19px;
+            border: 0;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cineva-bulk-cancel {
+            background: #29293c;
+        }
+
+        .cineva-bulk-submit {
+            background: linear-gradient(135deg,#8b35f5,#ef315e);
+        }
+
+        .cineva-bulk-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        @media(max-width:600px) {
+            .cineva-bulk-card {
+                padding: 15px;
+            }
+
+            .cineva-bulk-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .cineva-bulk-actions {
+                bottom: -15px;
+                margin: 18px -15px -15px;
+                padding: 13px 15px;
+            }
+
+            .cineva-bulk-actions button {
+                flex: 1;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+
+    bulkUploadModal = document.createElement("div");
+    bulkUploadModal.className = "cineva-bulk-modal";
+    bulkUploadModal.hidden = true;
+
+    bulkUploadModal.innerHTML = `
+        <div class="cineva-bulk-card">
+
+            <div class="cineva-bulk-heading">
+                <h2 id="bulkUploadTitle">Bulk Upload</h2>
+                <p id="bulkUploadDescription"></p>
+            </div>
+
+            <form id="bulkUploadForm">
+
+                <div
+                    id="bulkUploadItems"
+                    class="cineva-bulk-items">
+                </div>
+
+                <div class="cineva-bulk-actions">
+
+                    <button
+                        type="button"
+                        class="cineva-bulk-cancel"
+                        id="bulkUploadCancel">
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="cineva-bulk-submit"
+                        id="bulkUploadSubmit">
+                        Upload All
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(bulkUploadModal);
+
+    bulkUploadModal.querySelector("#bulkUploadCancel")
+        .addEventListener("click", requestCloseBulkUpload);
+
+    bulkUploadModal.querySelector("#bulkUploadForm")
+        .addEventListener("submit", processBulkUpload);
+
+    return bulkUploadModal;
+}
+
+
+/* -----------------------------------------
+   CREATE ONE BULK ITEM
+----------------------------------------- */
+
+function createBulkItem(index, kind) {
+    const item = document.createElement("section");
+
+    item.className = "cineva-bulk-item";
+    item.dataset.index = String(index);
+
+    const heading = document.createElement("div");
+    heading.className = "cineva-bulk-item-head";
+
+    const number = document.createElement("strong");
+    number.textContent = `${kind === "movie" ? "Movie" : "Episode"} ${index + 1}`;
+
+    const status = document.createElement("span");
+    status.className = "cineva-bulk-status";
+    status.dataset.status = "pending";
+    status.textContent = "Pending";
+
+    heading.append(number, status);
+
+    const fieldsContainer = document.createElement("div");
+    fieldsContainer.className = "cineva-bulk-fields";
+
+    const fields = kind === "movie"
+        ? [
+            ["title", "Movie Title *", "text", true],
+            ["category", "Category", "text", false],
+            ["year", "Release Year", "number", false],
+            ["poster_path", "Poster Image URL", "url", true],
+            ["video_url", "Movie Watch URL", "url", true],
+            ["download_url", "Movie Download URL", "url", true]
+        ]
+        : [
+            ["season", "Season Number *", "number", false],
+            ["episode", "Episode Number *", "number", false],
+            ["title", "Episode Title *", "text", true],
+            ["duration", "Duration", "text", false],
+            ["thumbnail", "Thumbnail URL", "url", true],
+            ["video_url", "Episode Watch URL", "url", true],
+            ["download_url", "Episode Download URL", "url", true],
+            ["description", "Description", "text", true]
+        ];
+
+    fields.forEach(([name, labelText, type, full]) => {
+        const wrapper = document.createElement("div");
+
+        wrapper.className =
+            "cineva-bulk-field" + (full ? " full" : "");
+
+        const label = document.createElement("label");
+        label.textContent = labelText;
+
+        const input = document.createElement("input");
+
+        input.type = type;
+        input.name = name;
+        input.autocomplete = "off";
+
+        if (type === "url") {
+            input.placeholder = "https://example.com/...";
+        }
+
+        if (type === "number") {
+            input.step = "1";
+            input.min = "1";
+        }
+
+        wrapper.append(label, input);
+        fieldsContainer.appendChild(wrapper);
+    });
+
+    const error = document.createElement("div");
+    error.className = "cineva-bulk-error";
+    error.dataset.error = "true";
+
+    item.append(heading, fieldsContainer, error);
+
+    return item;
+}
+
+
+/* -----------------------------------------
+   OPEN BULK UPLOAD
+----------------------------------------- */
+
+function openBulkUpload(kind) {
+    if (!["movie", "episode"].includes(kind)) return;
+
+    if (kind === "episode" && selectedSeriesId === null) {
+        alert("Open a series before bulk uploading episodes.");
+        return;
+    }
+
+    createBulkUploadModal();
+
+    bulkUploadKind = kind;
+    bulkCancelRequested = false;
+
+    const items = bulkUploadModal.querySelector("#bulkUploadItems");
+    const title = bulkUploadModal.querySelector("#bulkUploadTitle");
+    const description = bulkUploadModal.querySelector("#bulkUploadDescription");
+    const submit = bulkUploadModal.querySelector("#bulkUploadSubmit");
+
+    items.replaceChildren();
+
+    title.textContent = kind === "movie"
+        ? "Bulk Add Movies"
+        : `Bulk Add Episodes — ${selectedSeriesName}`;
+
+    description.textContent = kind === "movie"
+        ? "Enter up to 10 movies. Each movie is validated and saved independently. Watch and Download URLs are separate."
+        : "Enter up to 10 episodes for this series. Each episode is validated and saved independently.";
+
+    submit.textContent = kind === "movie"
+        ? "Upload Movies"
+        : "Upload Episodes";
+
+    submit.disabled = false;
+
+    for (let index = 0; index < BULK_UPLOAD_LIMIT; index++) {
+        items.appendChild(createBulkItem(index, kind));
+    }
+
+    bulkUploadModal.hidden = false;
+
+    items.querySelector('input[name="title"]')?.focus();
+}
+
+
+/* -----------------------------------------
+   BULK FIELD HELPERS
+----------------------------------------- */
+
+function getBulkItemValues(item) {
+    const values = {};
+
+    item.querySelectorAll("input").forEach(input => {
+        values[input.name] = input.value.trim();
+    });
+
+    return values;
+}
+
+
+function isBulkItemEmpty(values) {
+    return Object.values(values).every(value => value === "");
+}
+
+
+function validateBulkURL(value, label) {
+    if (!value) return;
+
+    let parsed;
+
+    try {
+        parsed = new URL(value);
+    } catch {
+        throw new Error(`${label} must be a valid URL.`);
+    }
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+        throw new Error(`${label} must use HTTP or HTTPS.`);
+    }
+}
+
+
+function setBulkItemStatus(item, status, message = "") {
+    const statusElement = item.querySelector(".cineva-bulk-status");
+    const errorElement = item.querySelector("[data-error]");
+
+    if (statusElement) {
+        statusElement.dataset.status = status;
+
+        const labels = {
+            pending: "Pending",
+            uploading: "Uploading...",
+            saved: "Saved successfully",
+            failed: "Failed",
+            skipped: "Skipped"
+        };
+
+        statusElement.textContent = labels[status] || status;
+    }
+
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.toggle("visible", Boolean(message));
+    }
+}
+
+
+/* -----------------------------------------
+   VALIDATE AND BUILD PAYLOAD
+----------------------------------------- */
+
+function buildBulkPayload(values, kind) {
+    if (!values.title) {
+        throw new Error("Title is required.");
+    }
+
+    validateBulkURL(values.video_url, "Watch URL");
+    validateBulkURL(values.download_url, "Download URL");
+
+    if (kind === "movie") {
+        const year = values.year === ""
+            ? null
+            : Number(values.year);
+
+        if (
+            year !== null &&
+            (!Number.isInteger(year) || year < 1800 || year > 2200)
+        ) {
+            throw new Error("Release year must be between 1800 and 2200.");
+        }
+
+        validateBulkURL(values.poster_path, "Poster URL");
+
+        return {
+            title: values.title,
+            category: values.category || null,
+            year,
+            poster_path: values.poster_path || null,
+
+            // Watch and download are never interchangeable.
+            video_url: values.video_url || null,
+            download_url: values.download_url || null,
+
+            // Keep existing JSON structures valid.
+            download_links: [],
+            parts: [],
+
+            quality: "HD",
+            is_active: true,
+            is_featured: false,
+            updated_at: new Date().toISOString()
+        };
+    }
+
+    const season = Number(values.season);
+    const episode = Number(values.episode);
+
+    if (!Number.isInteger(season) || season < 1) {
+        throw new Error("Season must be a positive whole number.");
+    }
+
+    if (!Number.isInteger(episode) || episode < 1) {
+        throw new Error("Episode must be a positive whole number.");
+    }
+
+    validateBulkURL(values.thumbnail, "Thumbnail URL");
+
+    return {
+        series_id: selectedSeriesId,
+
+        // Required database columns and their aliases.
+        season,
+        episode,
+        season_number: season,
+        episode_number: episode,
+
+        title: values.title,
+        duration: values.duration || null,
+        thumbnail: values.thumbnail || null,
+        description: values.description || null,
+        overview: values.description || null,
+
+        // Independent playback and download fields.
+        video_url: values.video_url || null,
+        download_url: values.download_url || null,
+        download_link: values.download_url || null,
+
+        is_active: true,
+        is_final: false,
+        updated_at: new Date().toISOString()
+    };
+}
+
+
+/* -----------------------------------------
+   CLOSE BULK UPLOAD
+----------------------------------------- */
+
+function requestCloseBulkUpload() {
+    if (!bulkUploadModal) return;
+
+    if (bulkUploadBusy) {
+        const confirmed = confirm(
+            "Bulk upload is still running.\n\n" +
+            "Stop the remaining uploads?\n\n" +
+            "Items already saved will remain in your database."
+        );
+
+        if (!confirmed) return;
+
+        bulkCancelRequested = true;
+        bulkUploadModal.hidden = true;
+
+        return;
+    }
+
+    bulkUploadModal.hidden = true;
+}
+
+
+/* -----------------------------------------
+   PROCESS BULK UPLOAD
+----------------------------------------- */
+
+async function processBulkUpload(event) {
+    event.preventDefault();
+
+    if (bulkUploadBusy || !bulkUploadKind) return;
+
+    const kind = bulkUploadKind;
+    const items = [
+        ...bulkUploadModal.querySelectorAll(".cineva-bulk-item")
+    ];
+
+    const submit = bulkUploadModal.querySelector("#bulkUploadSubmit");
+
+    const prepared = [];
+    let filledCount = 0;
+
+    // Validate every row before beginning database requests.
+    items.forEach(item => {
+        const values = getBulkItemValues(item);
+
+        if (isBulkItemEmpty(values)) {
+            setBulkItemStatus(item, "skipped");
+            return;
+        }
+
+        filledCount++;
+
+        try {
+            const payload = buildBulkPayload(values, kind);
+
+            prepared.push({
+                item,
+                payload
+            });
+
+        } catch (error) {
+            setBulkItemStatus(item, "failed", error.message);
+        }
+    });
+
+    if (filledCount === 0) {
+        alert("Enter at least one item before uploading.");
+        return;
+    }
+
+    if (prepared.length === 0) {
+        alert("No valid items to upload. Please correct the failed rows.");
+        return;
+    }
+
+    bulkUploadBusy = true;
+    bulkCancelRequested = false;
+
+    submit.disabled = true;
+    submit.textContent = "Uploading...";
+
+    let savedCount = 0;
+    let failedCount = filledCount - prepared.length;
+
+    try {
+        for (const entry of prepared) {
+            if (bulkCancelRequested) break;
+
+            setBulkItemStatus(entry.item, "uploading");
+
+            try {
+                const table = kind === "movie" ? "movies" : "episodes";
+
+                const { error } = await supabase
+                    .from(table)
+                    .insert(entry.payload);
+
+                if (error) throw error;
+
+                savedCount++;
+
+                setBulkItemStatus(entry.item, "saved");
+
+            } catch (error) {
+                failedCount++;
+
+                console.error(
+                    `CINEVA bulk ${kind} upload failed:`,
+                    error
+                );
+
+                setBulkItemStatus(
+                    entry.item,
+                    "failed",
+                    error.message || "Database insert failed."
+                );
+            }
+        }
+
+    } finally {
+        bulkUploadBusy = false;
+
+        submit.disabled = false;
+        submit.textContent = kind === "movie"
+            ? "Upload Movies"
+            : "Upload Episodes";
+
+        if (savedCount > 0) {
+            if (kind === "movie") {
+                await refreshContent();
+            } else {
+                await loadEpisodes();
+            }
+        }
+
+        if (!bulkCancelRequested) {
+            alert(
+                "Bulk upload finished.\n\n" +
+                `Saved: ${savedCount}\n` +
+                `Failed: ${failedCount}\n` +
+                `Skipped: ${BULK_UPLOAD_LIMIT - filledCount}`
+            );
+        } else {
+            console.info(
+                `CINEVA bulk upload stopped. ${savedCount} item(s) saved.`
+            );
+        }
+
+        bulkCancelRequested = false;
+    }
+}
+
+
+/* -----------------------------------------
+   BULK BUTTONS
+----------------------------------------- */
+
+function initializeBulkUploadButtons() {
+    // Movies bulk button.
+    if (!$("bulkAddMoviesBtn")) {
+        const addMovieButton = $("addMovieBtn");
+
+        if (addMovieButton) {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.id = "bulkAddMoviesBtn";
+            button.className =
+                addMovieButton.className || "cineva-add-content-button";
+
+            button.textContent = "+ Bulk Add Movies";
+
+            button.addEventListener("click", () => {
+                openBulkUpload("movie");
+            });
+
+            addMovieButton.insertAdjacentElement("afterend", button);
+        }
+    }
+
+    // Episodes bulk button.
+    createManagementButton(
+        "bulkAddEpisodesBtn",
+        "+ Bulk Add 10 Episodes",
+        "episodesTable",
+        () => openBulkUpload("episode")
+    );
+}
 /* =========================================
    END SERIES & EPISODE FORMS
 ========================================= */
@@ -1623,6 +2761,23 @@ function closeMovieForm() {
 
     movieModal.hidden = true;
 }
+   document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+
+    const contentOpen =
+        contentFormModal && !contentFormModal.hidden;
+
+    const movieOpen =
+        movieModal && !movieModal.hidden;
+
+    const bulkOpen =
+        bulkUploadModal && !bulkUploadModal.hidden;
+
+    if (contentOpen || movieOpen || bulkOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+}, true);
 /* =========================================
    SEARCH AND FILTERS
 ========================================= */
@@ -1804,6 +2959,7 @@ showDashboard();
 
 initializeNavigation();
 initializeSeriesEpisodeForms();
+initializeBulkUploadButtons();
 
 bind("logoutButton", "click", logout);
 
