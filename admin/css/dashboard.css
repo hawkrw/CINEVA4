@@ -1083,140 +1083,287 @@ td {
 }
 
 /* =========================================
-   CINEVA PRO — PREMIUM SERIES FORM
+   CINEVA PRO — PREMIUM CONTENT MODAL
+   MOVIES • SERIES • EPISODES
 ========================================= */
 
-/* Form layout */
-.content-form-modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    color: #f5f3ff;
-    font-family: Inter, sans-serif;
+/* Background overlay */
+.cineva-content-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 24px !important;
+
+    background: rgba(3, 3, 10, 0.82) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Modal card */
+.cineva-content-modal .cineva-content-card {
+    width: 100% !important;
+    max-width: 760px !important;
+    max-height: calc(100vh - 48px) !important;
+
+    overflow-y: auto !important;
+
+    padding: 28px !important;
+
+    background: #121221 !important;
+    color: #f5f3ff !important;
+
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    border-radius: 19px !important;
+
+    box-shadow:
+        0 25px 90px rgba(0, 0, 0, 0.65),
+        0 0 35px rgba(139, 53, 245, 0.10) !important;
+
+    animation: cinevaModalEnter .3s ease;
+}
+
+/* Modal animation */
+@keyframes cinevaModalEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal heading */
+.cineva-content-card h2,
+.cineva-content-card h3 {
+    color: #ffffff !important;
+    font-family:;
+    font-size: 21px !important;
+    font-weight: 800 !important;
+    letter-spacing: -.4px;
+}
+
+/* Form */
+#contentForm {
+    width: 100%;
+    font-family:;
+}
+
+/* Fields grid */
+#contentFormFields.cineva-content-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 20px 24px !important;
+    margin-top: 23px;
+}
+
+/* Individual fields */
+.cineva-content-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 9px !important;
+    min-width: 0;
+}
+
+/* Full-width fields */
+.cineva-content-field.full {
+    grid-column: 1 / -1 !important;
 }
 
 /* Labels */
-.content-form-modal label {
-    color: #ded8ed;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
+.cineva-content-field label {
+    display: block;
+    color: #d8d2e7 !important;
+    font-family:;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.5;
 }
 
-/* Inputs and textareas */
-.content-form-modal input:not([type="checkbox"]),
-.content-form-modal select,
-.content-form-modal textarea {
-    width: 100%;
+/* Input controls */
+.cineva-content-field input:not([type="checkbox"]),
+.cineva-content-field select,
+.cineva-content-field textarea {
+    display: block;
+    width: 100% !important;
     min-width: 0;
-    box-sizing: border-box;
-    padding: 12px 14px;
+    min-height: 44px;
 
-    background: #090914;
-    color: #ffffff;
+    padding: 11px 13px !important;
 
-    border: 1px solid #343047;
-    border-radius: 9px;
+    background: #090914 !important;
+    color: #ffffff !important;
+
+    border: 1px solid #343047 !important;
+    border-radius: 9px !important;
 
     font-family:;
-    font-size: 13px;
+    font-size: 12px !important;
 
-    outline: none;
-    transition: border-color 0.2s ease,
-                box-shadow 0.2s ease,
-                background 0.2s ease;
+    outline: none !important;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease !important;
 }
 
 /* Placeholder */
-.content-form-modal input::placeholder,
-.content-form-modal textarea::placeholder {
-    color: #777187;
+.cineva-content-field input::placeholder,
+.cineva-content-field textarea::placeholder {
+    color: #777187 !important;
 }
 
 /* Focus */
-.content-form-modal input:focus,
-.content-form-modal select:focus,
-.content-form-modal textarea:focus {
-    border-color: #a855f7;
-    background: #111020;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.14);
+.cineva-content-field input:focus,
+.cineva-content-field select:focus,
+.cineva-content-field textarea:focus {
+    border-color: #a855f7 !important;
+    background: #111020 !important;
+
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, .14) !important;
 }
 
 /* Textareas */
-.content-form-modal textarea {
+.cineva-content-field textarea {
     min-height: 105px;
     resize: vertical;
-    line-height: 1.6;
+    line-height: 1.65;
 }
 
-/* Checkbox */
-.content-form-modal input[type="checkbox"] {
-    width: 17px;
-    height: 17px;
-    accent-color: #a855f7;
+/* Select options */
+.cineva-content-field select option {
+    background: #121221;
+    color: white;
+}
+
+/* Checkbox field */
+.cineva-content-check {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+
+    color: #ded8ed !important;
+    font-size: 13px !important;
+}
+
+.cineva-content-check input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #963cff;
     cursor: pointer;
 }
 
-/* Footer divider */
-.content-form-modal .form-footer {
-    border-top: 1px solid #292638;
-    padding-top: 20px;
-    margin-top: 12px;
+/* Modal footer */
+.cineva-content-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+
+    margin-top: 25px !important;
+    padding-top: 19px !important;
+
+    border-top: 1px solid rgba(255, 255, 255, .09) !important;
 }
 
-/* Buttons */
-.content-form-modal button {
-    min-height: 42px;
-    padding: 10px 22px;
-    border-radius: 10px;
-    font-family:;
-    font-size: 13px;
-    font-weight: 700;
+/* Modal buttons */
+.cineva-content-actions button {
+    min-width: 110px;
+    min-height: 43px;
+
+    padding: 11px 22px !important;
+
+    border-radius: 10px !important;
+
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+
     cursor: pointer;
-    transition: 0.25s ease;
+    transition: all .23s ease !important;
 }
 
-/* Save button */
-.content-form-modal button[type="submit"] {
-    color: #ffffff;
-    background: linear-gradient(135deg, #a855f7, #812cf0);
-    border: 1px solid #b56aff;
-    box-shadow: 0 5px 18px rgba(139, 53, 245, 0.2);
+/* Cancel */
+#cancelContentForm {
+    background: #292638 !important;
+    color: #e4dff0 !important;
+    border: 1px solid #39354b !important;
 }
 
-.content-form-modal button[type="submit"]:hover {
-    background: linear-gradient(135deg, #bd70ff, #9333ea);
-    box-shadow: 0 7px 22px rgba(168, 85, 247, 0.35);
+#cancelContentForm:hover {
+    background: #383248 !important;
+    border-color: #66517f !important;
+}
+
+/* Save */
+#saveContentButton {
+    background: linear-gradient(120deg, #963cff, #bd42e9) !important;
+    color: #ffffff !important;
+
+    border: 1px solid rgba(198, 125, 255, .5) !important;
+
+    box-shadow: 0 5px 18px rgba(150, 60, 255, .22);
+}
+
+#saveContentButton:hover {
+    background: linear-gradient(120deg, #a957ff, #d04df5) !important;
+
+    box-shadow: 0 7px 23px rgba(150, 60, 255, .4);
+
     transform: translateY(-2px);
 }
 
-/* Cancel button */
-.content-form-modal button[type="button"] {
-    color: #e4dff0;
-    background: #292638;
-    border: 1px solid #39354b;
+#saveContentButton:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
 }
 
-.content-form-modal button[type="button"]:hover {
-    background: #383248;
-    border-color: #66517f;
+/* Scrollbar */
+.cineva-content-card::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* Responsive */
-@media (max-width: 650px) {
-    .content-form-modal {
-        width: calc(100% - 24px) !important;
-        max-width: none !important;
+.cineva-content-card::-webkit-scrollbar-thumb {
+    background: #51316e;
+    border-radius: 10px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .cineva-content-modal {
+        padding: 12px !important;
+    }
+
+    .cineva-content-modal .cineva-content-card {
+        max-height: calc(100vh - 24px) !important;
         padding: 20px !important;
+        border-radius: 14px !important;
     }
 
-    .content-form-modal form {
-        gap: 15px;
+    #contentFormFields.cineva-content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
     }
 
-    .content-form-modal input:not([type="checkbox"]),
-    .content-form-modal select,
-    .content-form-modal textarea {
-        width: 100%;
+    .cineva-content-field.full {
+        grid-column: auto !important;
+    }
+
+    .cineva-content-actions {
+        flex-direction: column-reverse !important;
+        align-items: stretch !important;
+    }
+
+    .cineva-content-actions button {
+        width: 100% !important;
     }
 }
