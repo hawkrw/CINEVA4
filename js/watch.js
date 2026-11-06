@@ -826,15 +826,16 @@ function renderParts(parts) {
                     </button>
 
                     <button
-                        class="part-download-btn"
-                        type="button"
-                        data-action="download-part"
-                        data-index="${index}"
-                        ${downloadUrl ? "" : "disabled"}
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Download
-                    </button>
+    class="part-download-btn"
+    type="button"
+    data-action="download-part"
+    data-index="${index}"
+    title="Download"
+    aria-label="Download"
+    ${downloadUrl ? "" : "disabled"}
+>
+    <i class="fa-solid fa-download"></i>
+</button>
 
                 </div>
 
