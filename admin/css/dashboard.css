@@ -1017,3 +1017,67 @@ td {
     transform: none;
     box-shadow: none;
 }
+
+/* =========================================
+   CINEVA PRO — PREMIUM MANAGEMENT BUTTONS
+========================================= */
+
+.cineva-add-content-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 43px;
+    margin: 12px 0;
+    padding: 11px 20px;
+
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        #8b35f5 0%,
+        #6424c9 100%
+    );
+
+    color: #ffffff;
+
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 18px rgba(139, 53, 245, 0.22);
+
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.cineva-add-content-button:hover {
+    background: linear-gradient(
+        135deg,
+        #a855f7 0%,
+        #7c3aed 100%
+    );
+
+    border-color: #c084fc;
+
+    box-shadow: 0 8px 25px rgba(139, 53, 245, 0.38);
+
+    transform: translateY(-2px);
+}
+
+.cineva-add-content-button:active {
+    transform: translateY(0);
+}
+
+.cineva-add-content-button:focus-visible {
+    outline: 2px solid #c084fc;
+    outline-offset: 3px;
+}
