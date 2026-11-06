@@ -830,7 +830,6 @@ function renderParts(parts) {
     type="button"
     data-action="download-part"
     data-index="${index}"
-    title="Download"
     aria-label="Download"
     ${downloadUrl ? "" : "disabled"}
 >
