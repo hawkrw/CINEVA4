@@ -920,6 +920,12 @@ async function deleteEpisode(id) {
     await loadEpisodes();
 }
 /* =========================================
+   CINEVA PRO — CONTENT FORM MODAL STATE
+========================================= */
+
+let contentFormModal = null;
+
+/* =========================================
    CINEVA PRO — CONTENT FORM MODAL
    SERIES & EPISODE MANAGEMENT
 ========================================= */
