@@ -1303,57 +1303,6 @@ elements.retryButton?.addEventListener(
         loadContent();
     }
 );
-
-
-// =========================================================
-// GLOBAL HEADER SEARCH COMPATIBILITY
-// =========================================================
-
-const siteSearch = document.getElementById("search-form");
-
-if (siteSearch) {
-
-    // Prevent duplicate event registration.
-    if (!siteSearch.dataset.genreSearchBound) {
-
-        siteSearch.dataset.genreSearchBound = "true";
-
-        siteSearch.addEventListener("submit", (event) => {
-            event.preventDefault();
-
-            const input = document.getElementById("search-input");
-            const value = input?.value?.trim() || "";
-
-            if (!value) {
-                input?.focus();
-                return;
-            }
-
-            // Synchronize global search with discovery search.
-            state.search = value;
-            state.currentPage = 1;
-
-            if (elements.search) {
-                elements.search.value = value;
-            }
-
-            // Cancel pending searches and invalidate old requests.
-            clearTimeout(searchTimer);
-            state.requestId++;
-
-            // Load matching movies and series.
-            loadContent();
-
-            // Bring results into view.
-            elements.genreContent?.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-
-        });
-    }
-}
-
 /* =========================================
    INITIALIZATION
 ========================================= */
