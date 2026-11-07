@@ -1,16 +1,18 @@
 
 /* =========================================================
-   CINEVA — PREMIUM GENRE / DISCOVERY CONTROLLER
+   CINEVA PRO — PREMIUM DISCOVERY CONTROLLER
    File: js/genre.js
 
-   Features:
-   - Loads active movies and series from Supabase
-   - Genre, type and search filters
-   - Latest, rating, popularity and A-Z sorting
-   - Pagination
-   - URL query parameter support
-   - Safe DOM rendering
-   - Poster fallbacks
+   Performance upgrades:
+   - Uses the cineva_discovery Supabase view
+   - Server-side filtering and sorting
+   - Server-side pagination (10 records per request)
+   - Exact result count
+   - Debounced search
+   - Prevents outdated requests overwriting newer results
+   - Reduced database payload
+   - Lazy-loaded posters
+   - Preserves existing URL parameters and watch links
 ========================================================= */
 
 import { supabase } from "./config.js";
@@ -20,11 +22,38 @@ import { supabase } from "./config.js";
 ========================================= */
 
 const GENRE_CONFIG = {
-    moviesTable: "movies",
-    seriesTable: "series",
+    table: "cineva_discovery",
     pageSize: 10,
+
+    // Only fetch fields needed by discovery cards.
+    selectFields: [
+        "id",
+        "content_type",
+        "title",
+        "category",
+        "genres_text",
+        "translator",
+        "overview",
+        "poster_path",
+        "poster",
+        "thumbnail",
+        "image",
+        "release_date",
+        "first_air_date",
+        "year",
+        "created_at",
+        "updated_at",
+        "activity_at",
+        "views",
+        "rating",
+        "popularity",
+        "is_active"
+    ].join(","),
+
     fallbackPoster:
-        "https://placehold.co/400x600/151522/ffffff?text=CINEVA"
+        "https://placehold.co/400x600/151522/ffffff?text=CINEVA",
+
+    searchDelay: 300
 };
 
 /* =========================================
@@ -32,15 +61,20 @@ const GENRE_CONFIG = {
 ========================================= */
 
 const state = {
-    allContent: [],
     content: [],
+    totalCount: 0,
+
     type: "all",
     genre: "",
     sort: "latest",
     search: "",
+
     currentPage: 1,
-    loading: false
+    loading: false,
+    requestId: 0
 };
+
+let searchTimer = null;
 
 /* =========================================
    DOM ELEMENTS
@@ -60,6 +94,7 @@ const elements = {
 
     contentFilter: document.getElementById("content-filter"),
     sortFilter: document.getElementById("sort-filter"),
+
     resetButton: document.getElementById("genre-reset"),
     emptyReset: document.getElementById("empty-reset"),
 
@@ -68,16 +103,21 @@ const elements = {
     grid: document.getElementById("genre-grid"),
     loading: document.getElementById("genre-loading"),
     empty: document.getElementById("genre-empty"),
+
     error: document.getElementById("genre-error"),
     errorText: document.getElementById("genre-error-text"),
     retryButton: document.getElementById("genre-retry"),
+
     pagination: document.getElementById("genre-pagination"),
 
-    footerYear: document.getElementById("currentYear")
+    footerYear: document.getElementById("currentYear"),
+
+    pageLoader: document.getElementById("pageLoader"),
+    genreContent: document.getElementById("genreContent")
 };
 
 /* =========================================
-   HELPERS
+   GENERAL HELPERS
 ========================================= */
 
 function normalizeText(value = "") {
@@ -92,63 +132,48 @@ function normalizeText(value = "") {
 }
 
 function getContentType(item) {
-    return item._contentType || item.content_type || "movie";
+    return item.content_type || "movie";
 }
 
 function getTitle(item) {
-    return item.title || item.name || "Untitled";
+    return item.title || "Untitled";
 }
 
 function getRating(item) {
-    const value = Number(
-        item.vote_average ??
-        item.rating ??
-        item.tmdb_rating ??
-        0
-    );
+    const value = Number(item.rating ?? 0);
 
-    return Number.isFinite(value) ? value : 0;
-}
-
-function getViews(item) {
-    const value = Number(item.views ?? item.view_count ?? 0);
     return Number.isFinite(value) ? value : 0;
 }
 
 function getReleaseYear(item) {
-    const date =
+    const value =
         item.release_date ||
         item.first_air_date ||
         item.year ||
         item.created_at;
 
-    if (!date) return "";
+    if (!value) return "";
 
-    const match = String(date).match(/\b(19|20)\d{2}\b/);
+    const match = String(value).match(/\b(19|20)\d{2}\b/);
+
     return match ? match[0] : "";
 }
 
-function getLatestDate(item) {
-    const date =
-        getContentType(item) === "series"
-            ? item.updated_at || item.created_at || item.release_date
-            : item.created_at || item.release_date;
-
-    const timestamp = date ? new Date(date).getTime() : 0;
-
-    return Number.isFinite(timestamp) ? timestamp : 0;
-}
+/* =========================================
+   POSTER HANDLING
+========================================= */
 
 function getPoster(item) {
     const poster =
         item.poster_path ||
-        item.poster_url ||
         item.poster ||
         item.thumbnail ||
         item.image ||
         "";
 
-    if (!poster) return GENRE_CONFIG.fallbackPoster;
+    if (!poster) {
+        return GENRE_CONFIG.fallbackPoster;
+    }
 
     const value = String(poster).trim();
 
@@ -156,8 +181,13 @@ function getPoster(item) {
         return value;
     }
 
-    if (value.startsWith("/assets/") || value.startsWith("assets/")) {
-        return value.startsWith("/") ? value : `/${value}`;
+    if (
+        value.startsWith("/assets/") ||
+        value.startsWith("assets/")
+    ) {
+        return value.startsWith("/")
+            ? value
+            : `/${value}`;
     }
 
     if (value.startsWith("/")) {
@@ -167,85 +197,70 @@ function getPoster(item) {
     return value;
 }
 
-function parseGenreValues(value) {
-    if (!value) return [];
+/* =========================================
+   FILTER SANITIZATION
 
-    if (Array.isArray(value)) {
-        return value.flatMap((entry) => {
-            if (typeof entry === "string") {
-                return entry.split(",").map((part) => part.trim()).filter(Boolean);
-            }
+   Prevents user-entered search text from
+   breaking PostgREST .or() filter syntax.
+========================================= */
 
-            if (entry && typeof entry === "object") {
-                const name = entry.name || entry.title || entry.genre;
-                return name ? [String(name)] : [];
-            }
-
-            return [];
-        });
-    }
-
-    if (typeof value === "string") {
-        const trimmed = value.trim();
-
-        if (!trimmed) return [];
-
-        // Support JSON arrays stored as text.
-        if (
-            (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
-            (trimmed.startsWith("{") && trimmed.endsWith("}"))
-        ) {
-            try {
-                const parsed = JSON.parse(trimmed);
-                if (parsed !== value) return parseGenreValues(parsed);
-            } catch {
-                // Continue as a normal text value.
-            }
-        }
-
-        return trimmed
-            .split(/[,|]/)
-            .map((part) => part.trim())
-            .filter(Boolean);
-    }
-
-    return [];
+function sanitizeFilterValue(value) {
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9\s-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 100);
 }
 
-function getItemGenres(item) {
-    const values = [
-        ...parseGenreValues(item.genres),
-        ...parseGenreValues(item.genre),
-        ...parseGenreValues(item.category)
-    ];
+/* =========================================
+   GENRE ALIASES
+========================================= */
 
-    return [...new Set(values.map(normalizeText).filter(Boolean))];
-}
-
-function matchesGenre(item, requestedGenre) {
-    if (!requestedGenre) return true;
-
-    const genres = getItemGenres(item);
-
+function getGenreAliases(genre) {
     const aliases = {
-        "high-school": ["highschool", "high-school", "school"],
-        highschool: ["highschool", "high-school", "school"],
-        "sci-fi": ["sci-fi", "science-fiction", "scifi"],
-        scifi: ["sci-fi", "science-fiction", "scifi"],
-        animation: ["animation", "animated"],
-        romance: ["romance", "erotic"],
-        erotic: ["erotic", "romance"]
+        "high-school": [
+            "highschool",
+            "high-school",
+            "school"
+        ],
+
+        highschool: [
+            "highschool",
+            "high-school",
+            "school"
+        ],
+
+        "sci-fi": [
+            "sci-fi",
+            "science-fiction",
+            "scifi"
+        ],
+
+        scifi: [
+            "sci-fi",
+            "science-fiction",
+            "scifi"
+        ],
+
+        animation: [
+            "animation",
+            "animated"
+        ],
+
+        romance: [
+            "romance",
+            "erotic"
+        ],
+
+        erotic: [
+            "erotic",
+            "romance"
+        ]
     };
 
-    const accepted = aliases[requestedGenre] || [requestedGenre];
-
-    return genres.some((genre) =>
-        accepted.some((alias) =>
-            genre === alias ||
-            genre.includes(alias) ||
-            alias.includes(genre)
-        )
-    );
+    return aliases[genre] || [genre];
 }
 
 /* =========================================
@@ -253,16 +268,27 @@ function matchesGenre(item, requestedGenre) {
 ========================================= */
 
 function readUrlState() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(
+        window.location.search
+    );
 
-    const requestedType = params.get("type") || "all";
-    state.type = ["all", "movie", "series"].includes(requestedType)
+    const requestedType =
+        params.get("type") || "all";
+
+    state.type = [
+        "all",
+        "movie",
+        "series"
+    ].includes(requestedType)
         ? requestedType
         : "all";
 
-    state.genre = normalizeText(params.get("genre") || "");
+    state.genre = normalizeText(
+        params.get("genre") || ""
+    );
 
-    const requestedSort = params.get("sort") || "latest";
+    const requestedSort =
+        params.get("sort") || "latest";
 
     const sortAliases = {
         trending: "popular",
@@ -270,22 +296,42 @@ function readUrlState() {
         newest: "latest"
     };
 
-    const normalizedSort = sortAliases[requestedSort] || requestedSort;
+    const normalizedSort =
+        sortAliases[requestedSort] || requestedSort;
 
-    state.sort = ["latest", "rating", "popular", "title"].includes(normalizedSort)
+    state.sort = [
+        "latest",
+        "rating",
+        "popular",
+        "title"
+    ].includes(normalizedSort)
         ? normalizedSort
         : "latest";
 
     state.search = params.get("search") || "";
 
-    const requestedPage = Number.parseInt(params.get("page") || "1", 10);
-    state.currentPage = Number.isFinite(requestedPage) && requestedPage > 0
-        ? requestedPage
-        : 1;
+    const requestedPage = Number.parseInt(
+        params.get("page") || "1",
+        10
+    );
 
-    elements.contentFilter.value = state.type;
-    elements.sortFilter.value = state.sort;
-    elements.search.value = state.search;
+    state.currentPage =
+        Number.isFinite(requestedPage) &&
+        requestedPage > 0
+            ? requestedPage
+            : 1;
+
+    if (elements.contentFilter) {
+        elements.contentFilter.value = state.type;
+    }
+
+    if (elements.sortFilter) {
+        elements.sortFilter.value = state.sort;
+    }
+
+    if (elements.search) {
+        elements.search.value = state.search;
+    }
 }
 
 function updateUrl() {
@@ -312,152 +358,12 @@ function updateUrl() {
     }
 
     const query = params.toString();
+
     const newUrl = query
         ? `${window.location.pathname}?${query}`
         : window.location.pathname;
 
     window.history.replaceState({}, "", newUrl);
-}
-
-/* =========================================
-   FETCH CONTENT
-========================================= */
-
-async function fetchTable(tableName, contentType) {
-    const { data, error } = await supabase
-        .from(tableName)
-        .select("*")
-        .eq("is_active", true);
-
-    if (error) {
-        throw new Error(`${tableName}: ${error.message}`);
-    }
-
-    return (data || []).map((item) => ({
-        ...item,
-        _contentType: contentType
-    }));
-}
-
-async function loadContent() {
-    if (state.loading) return;
-
-    state.loading = true;
-    showLoading();
-
-    try {
-        const [movies, series] = await Promise.all([
-            fetchTable(GENRE_CONFIG.moviesTable, "movie"),
-            fetchTable(GENRE_CONFIG.seriesTable, "series")
-        ]);
-
-        state.allContent = [...movies, ...series];
-
-        applyFilters();
-        updatePageHeader();
-    } catch (error) {
-        console.error("CINEVA genre loading error:", error);
-
-        elements.loading.hidden = true;
-        elements.grid.replaceChildren();
-        elements.pagination.replaceChildren();
-        elements.empty.hidden = true;
-        elements.error.hidden = false;
-
-        elements.errorText.textContent =
-            error.message || "Please check your connection and try again.";
-    } finally {
-        state.loading = false;
-    }
-}
-const pageLoader = document.getElementById("pageLoader");
-
-if (pageLoader) {
-    pageLoader.style.opacity = "0";
-    pageLoader.style.pointerEvents = "none";
-
-    setTimeout(() => {
-        pageLoader.style.display = "none";
-    }, 350);
-}
-/* =========================================
-   FILTERING AND SORTING
-========================================= */
-
-function applyFilters() {
-    let result = [...state.allContent];
-
-    // Movie / series filter
-    if (state.type !== "all") {
-        result = result.filter(
-            (item) => getContentType(item) === state.type
-        );
-    }
-
-    // Genre filter
-    if (state.genre) {
-        result = result.filter(
-            (item) => matchesGenre(item, state.genre)
-        );
-    }
-
-    // Search filter
-    const searchTerm = normalizeText(state.search);
-
-    if (searchTerm) {
-        result = result.filter((item) => {
-            const searchable = [
-                getTitle(item),
-                item.overview,
-                item.description,
-                item.translator,
-                item.category,
-                ...parseGenreValues(item.genres),
-                ...parseGenreValues(item.genre)
-            ]
-                .filter(Boolean)
-                .join(" ");
-
-            return normalizeText(searchable).includes(searchTerm);
-        });
-    }
-
-    // Sorting
-    switch (state.sort) {
-        case "rating":
-            result.sort((a, b) => getRating(b) - getRating(a));
-            break;
-
-        case "popular":
-            result.sort((a, b) => getViews(b) - getViews(a));
-            break;
-
-        case "title":
-            result.sort((a, b) =>
-                getTitle(a).localeCompare(getTitle(b), undefined, {
-                    sensitivity: "base"
-                })
-            );
-            break;
-
-        case "latest":
-        default:
-            result.sort((a, b) => getLatestDate(b) - getLatestDate(a));
-            break;
-    }
-
-    state.content = result;
-
-    const totalPages = Math.max(
-        1,
-        Math.ceil(result.length / GENRE_CONFIG.pageSize)
-    );
-
-    state.currentPage = Math.min(state.currentPage, totalPages);
-
-    renderResults();
-    updateActiveFilters();
-    updateUrl();
 }
 
 /* =========================================
@@ -468,100 +374,469 @@ function titleCase(value) {
     return String(value)
         .split(/[-\s]+/)
         .filter(Boolean)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .map((word) =>
+            word.charAt(0).toUpperCase() +
+            word.slice(1)
+        )
         .join(" ");
 }
 
 function updatePageHeader() {
     let title = "Explore CINEVA";
+
     let description =
         "Discover movies and series, explore different genres and find your next favorite story.";
 
     if (state.genre) {
         title = `${titleCase(state.genre)} Collection`;
+
         description =
             `Explore ${titleCase(state.genre)} movies and series selected for your entertainment.`;
     } else if (state.type === "movie") {
         title = "Explore Movies";
-        description = "Discover movies across different genres and stories.";
+
+        description =
+            "Discover movies across different genres and stories.";
     } else if (state.type === "series") {
         title = "Explore TV Series";
-        description = "Find your next favorite series and follow every story.";
+
+        description =
+            "Find your next favorite series and follow every story.";
     }
 
     if (state.sort === "rating") {
         title = state.genre
             ? `Top Rated ${titleCase(state.genre)}`
             : "Top Rated Collection";
-        description = "Explore the highest-rated titles in the CINEVA collection.";
+
+        description =
+            "Explore the highest-rated titles in the CINEVA collection.";
     } else if (state.sort === "popular") {
         title = "Trending Collection";
-        description = "Explore the most viewed movies and series on CINEVA.";
-    } else if (state.sort === "latest" && !state.genre && state.type === "all") {
+
+        description =
+            "Explore the most viewed movies and series on CINEVA.";
+    } else if (
+        state.sort === "latest" &&
+        !state.genre &&
+        state.type === "all"
+    ) {
         title = "Latest Added";
-        description = "Discover the newest movies and series added to CINEVA.";
+
+        description =
+            "Discover the newest movies and series added to CINEVA.";
     }
 
-    elements.pageTitle.textContent = title;
-    elements.pageDescription.textContent = description;
-    elements.resultsHeading.textContent = title;
+    if (elements.pageTitle) {
+        elements.pageTitle.textContent = title;
+    }
+
+    if (elements.pageDescription) {
+        elements.pageDescription.textContent = description;
+    }
+
+    if (elements.resultsHeading) {
+        elements.resultsHeading.textContent = title;
+    }
+
     document.title = `${title} | CINEVA`;
+}
+
+/* =========================================
+   DATABASE QUERY BUILDER
+========================================= */
+
+function buildDiscoveryQuery() {
+    let query = supabase
+        .from(GENRE_CONFIG.table)
+        .select(
+            GENRE_CONFIG.selectFields,
+            { count: "exact" }
+        )
+        .eq("is_active", true);
+
+    // Movie / series filter
+    if (state.type !== "all") {
+        query = query.eq(
+            "content_type",
+            state.type
+        );
+    }
+
+    // Genre filter
+    if (state.genre) {
+        const aliases = getGenreAliases(
+            state.genre
+        );
+
+        const genreFilters = aliases
+            .map((alias) => sanitizeFilterValue(alias))
+            .filter(Boolean);
+
+        if (genreFilters.length) {
+            const conditions = genreFilters.flatMap(
+                (genre) => [
+                    `category.ilike.%${genre}%`,
+                    `genres_text.ilike.%${genre}%`
+                ]
+            );
+
+            query = query.or(
+                conditions.join(",")
+            );
+        }
+    }
+
+    // Search filter
+    const searchTerm = sanitizeFilterValue(
+        state.search
+    );
+
+    if (searchTerm) {
+        const searchFields = [
+            "title",
+            "overview",
+            "translator",
+            "category",
+            "genres_text"
+        ];
+
+        const conditions = searchFields.map(
+            (field) =>
+                `${field}.ilike.%${searchTerm}%`
+        );
+
+        query = query.or(
+            conditions.join(",")
+        );
+    }
+
+    // Server-side sorting
+    switch (state.sort) {
+        case "rating":
+            query = query
+                .order("rating", {
+                    ascending: false,
+                    nullsFirst: false
+                })
+                .order("created_at", {
+                    ascending: false,
+                    nullsFirst: false
+                });
+            break;
+
+        case "popular":
+            query = query
+                .order("views", {
+                    ascending: false,
+                    nullsFirst: false
+                })
+                .order("created_at", {
+                    ascending: false,
+                    nullsFirst: false
+                });
+            break;
+
+        case "title":
+            query = query
+                .order("title", {
+                    ascending: true,
+                    nullsFirst: false
+                });
+            break;
+
+        case "latest":
+        default:
+            query = query
+                .order("activity_at", {
+                    ascending: false,
+                    nullsFirst: false
+                })
+                .order("created_at", {
+                    ascending: false,
+                    nullsFirst: false
+                });
+            break;
+    }
+
+    return query;
+}
+
+/* =========================================
+   LOADING UI
+========================================= */
+
+function showLoading() {
+    state.loading = true;
+
+    if (elements.loading) {
+        elements.loading.hidden = false;
+    }
+
+    if (elements.grid) {
+        elements.grid.replaceChildren();
+        elements.grid.setAttribute(
+            "aria-busy",
+            "true"
+        );
+    }
+
+    if (elements.empty) {
+        elements.empty.hidden = true;
+    }
+
+    if (elements.error) {
+        elements.error.hidden = true;
+    }
+
+    if (elements.pagination) {
+        elements.pagination.replaceChildren();
+    }
+
+    if (elements.activeFilters) {
+        elements.activeFilters.hidden = true;
+    }
+}
+
+function hidePageLoader() {
+    if (!elements.pageLoader) return;
+
+    elements.pageLoader.style.opacity = "0";
+    elements.pageLoader.style.pointerEvents = "none";
+    elements.pageLoader.style.display = "none";
+    elements.pageLoader.hidden = true;
+}
+
+function showError(error) {
+    if (elements.loading) {
+        elements.loading.hidden = true;
+    }
+
+    if (elements.grid) {
+        elements.grid.replaceChildren();
+        elements.grid.setAttribute(
+            "aria-busy",
+            "false"
+        );
+    }
+
+    if (elements.empty) {
+        elements.empty.hidden = true;
+    }
+
+    if (elements.pagination) {
+        elements.pagination.replaceChildren();
+    }
+
+    if (elements.error) {
+        elements.error.hidden = false;
+    }
+
+    if (elements.errorText) {
+        elements.errorText.textContent =
+            error?.message ||
+            "Please check your connection and try again.";
+    }
+}
+
+/* =========================================
+   LOAD DISCOVERY CONTENT
+
+   Each request loads only one page.
+   Old requests are ignored if a newer
+   request has already started.
+========================================= */
+
+async function loadContent() {
+    const requestId = ++state.requestId;
+
+    showLoading();
+    updateUrl();
+
+    try {
+        const start =
+            (state.currentPage - 1) *
+            GENRE_CONFIG.pageSize;
+
+        const end =
+            start + GENRE_CONFIG.pageSize - 1;
+
+        let query = buildDiscoveryQuery();
+
+        let response = await query.range(
+            start,
+            end
+        );
+
+        if (response.error) {
+            throw response.error;
+        }
+
+        // Ignore outdated requests.
+        if (requestId !== state.requestId) {
+            return;
+        }
+
+        const total = response.count || 0;
+
+        const totalPages = Math.max(
+            1,
+            Math.ceil(
+                total / GENRE_CONFIG.pageSize
+            )
+        );
+
+        // If the URL requested a page that no
+        // longer exists, move to the last page.
+        if (
+            total > 0 &&
+            state.currentPage > totalPages
+        ) {
+            state.currentPage = totalPages;
+
+            const correctedStart =
+                (state.currentPage - 1) *
+                GENRE_CONFIG.pageSize;
+
+            const correctedEnd =
+                correctedStart +
+                GENRE_CONFIG.pageSize - 1;
+
+            response = await buildDiscoveryQuery()
+                .range(
+                    correctedStart,
+                    correctedEnd
+                );
+
+            if (response.error) {
+                throw response.error;
+            }
+
+            if (requestId !== state.requestId) {
+                return;
+            }
+        }
+
+        state.content = response.data || [];
+        state.totalCount = response.count || 0;
+
+        updatePageHeader();
+        renderResults();
+        updateActiveFilters();
+        updateUrl();
+
+    } catch (error) {
+        if (requestId !== state.requestId) {
+            return;
+        }
+
+        console.error(
+            "CINEVA discovery error:",
+            error
+        );
+
+        showError(error);
+
+    } finally {
+        if (requestId === state.requestId) {
+            state.loading = false;
+
+            hidePageLoader();
+
+            if (elements.grid) {
+                elements.grid.setAttribute(
+                    "aria-busy",
+                    "false"
+                );
+            }
+        }
+    }
 }
 
 /* =========================================
    RENDER RESULTS
 ========================================= */
 
-function showLoading() {
-    elements.loading.hidden = false;
-    elements.grid.replaceChildren();
-    elements.empty.hidden = true;
-    elements.error.hidden = true;
-    elements.pagination.replaceChildren();
-    elements.activeFilters.hidden = true;
-}
-
 function renderResults() {
-    elements.loading.hidden = true;
-    elements.error.hidden = true;
+    const total = state.totalCount;
 
-    const total = state.content.length;
     const totalPages = Math.max(
         1,
-        Math.ceil(total / GENRE_CONFIG.pageSize)
+        Math.ceil(
+            total / GENRE_CONFIG.pageSize
+        )
     );
 
-    const start = (state.currentPage - 1) * GENRE_CONFIG.pageSize;
-    const pageItems = state.content.slice(
-        start,
-        start + GENRE_CONFIG.pageSize
+    const start =
+        total > 0
+            ? (state.currentPage - 1) *
+              GENRE_CONFIG.pageSize
+            : 0;
+
+    const end = Math.min(
+        start + state.content.length,
+        total
     );
 
-    elements.resultsCount.textContent = total.toLocaleString();
-    elements.resultsStatus.textContent = total
-        ? `Showing ${start + 1}–${Math.min(start + pageItems.length, total)} of ${total} titles`
-        : "No matching titles";
+    if (elements.loading) {
+        elements.loading.hidden = true;
+    }
 
-    elements.pageIndicator.textContent = total
-        ? `Page ${state.currentPage} of ${totalPages}`
-        : "";
+    if (elements.error) {
+        elements.error.hidden = true;
+    }
 
-    elements.clearSearch.hidden = !state.search;
+    if (elements.resultsCount) {
+        elements.resultsCount.textContent =
+            total.toLocaleString();
+    }
 
-    elements.grid.replaceChildren();
+    if (elements.resultsStatus) {
+        elements.resultsStatus.textContent =
+            total
+                ? `Showing ${start + 1}–${end} of ${total.toLocaleString()} titles`
+                : "No matching titles";
+    }
 
-    if (!pageItems.length) {
-        elements.empty.hidden = false;
-        elements.pagination.replaceChildren();
+    if (elements.pageIndicator) {
+        elements.pageIndicator.textContent =
+            total
+                ? `Page ${state.currentPage} of ${totalPages}`
+                : "";
+    }
+
+    if (elements.clearSearch) {
+        elements.clearSearch.hidden =
+            !state.search;
+    }
+
+    if (elements.grid) {
+        elements.grid.replaceChildren();
+    }
+
+    if (!state.content.length) {
+        if (elements.empty) {
+            elements.empty.hidden = false;
+        }
+
+        if (elements.pagination) {
+            elements.pagination.replaceChildren();
+        }
+
         return;
     }
 
-    elements.empty.hidden = true;
+    if (elements.empty) {
+        elements.empty.hidden = true;
+    }
 
-    const fragment = document.createDocumentFragment();
+    const fragment =
+        document.createDocumentFragment();
 
-    pageItems.forEach((item) => {
-        fragment.appendChild(createMovieCard(item));
+    state.content.forEach((item) => {
+        fragment.appendChild(
+            createMovieCard(item)
+        );
     });
 
     elements.grid.appendChild(fragment);
@@ -581,48 +856,75 @@ function createMovieCard(item) {
     const poster = getPoster(item);
 
     const card = document.createElement("article");
-    card.className = "movie-card genre-movie-card";
+    card.className =
+        "movie-card genre-movie-card";
 
     const link = document.createElement("a");
+
     link.className = "movie-card-link";
+
     link.href =
         `watch.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(type)}`;
-    link.setAttribute("aria-label", `Watch ${title}`);
 
-    const posterWrap = document.createElement("div");
+    link.setAttribute(
+        "aria-label",
+        `Watch ${title}`
+    );
+
+    const posterWrap =
+        document.createElement("div");
+
     posterWrap.className = "movie-poster";
 
     const image = document.createElement("img");
+
     image.src = poster;
     image.alt = title;
     image.loading = "lazy";
     image.decoding = "async";
+    image.fetchPriority = "low";
+
     image.onerror = () => {
         image.onerror = null;
         image.src = GENRE_CONFIG.fallbackPoster;
     };
 
-    const typeBadge = document.createElement("span");
-    typeBadge.className = "movie-type-badge";
-    typeBadge.textContent = type === "series" ? "SERIES" : "MOVIE";
+    const typeBadge =
+        document.createElement("span");
 
-    const overlay = document.createElement("div");
+    typeBadge.className = "movie-type-badge";
+
+    typeBadge.textContent =
+        type === "series" ? "SERIES" : "MOVIE";
+
+    const overlay =
+        document.createElement("div");
+
     overlay.className = "movie-card-overlay";
 
-    const playIcon = document.createElement("span");
+    const playIcon =
+        document.createElement("span");
+
     playIcon.className = "movie-play-icon";
 
     const play = document.createElement("i");
+
     play.className = "fa-solid fa-play";
+
     playIcon.appendChild(play);
     overlay.appendChild(playIcon);
 
-    posterWrap.append(image, typeBadge, overlay);
+    posterWrap.append(
+        image,
+        typeBadge,
+        overlay
+    );
 
     const info = document.createElement("div");
     info.className = "movie-info";
 
     const heading = document.createElement("h3");
+
     heading.className = "movie-title";
     heading.textContent = title;
     heading.title = title;
@@ -631,19 +933,25 @@ function createMovieCard(item) {
     meta.className = "movie-meta";
 
     if (year) {
-        const yearText = document.createElement("span");
+        const yearText =
+            document.createElement("span");
+
         yearText.textContent = year;
         meta.appendChild(yearText);
     }
 
     if (rating > 0) {
-        const ratingText = document.createElement("span");
+        const ratingText =
+            document.createElement("span");
+
         ratingText.className = "movie-rating";
 
         const star = document.createElement("i");
         star.className = "fa-solid fa-star";
 
-        const score = document.createElement("span");
+        const score =
+            document.createElement("span");
+
         score.textContent = rating.toFixed(1);
 
         ratingText.append(star, score);
@@ -651,13 +959,19 @@ function createMovieCard(item) {
     }
 
     if (item.translator) {
-        const translator = document.createElement("span");
+        const translator =
+            document.createElement("span");
+
         translator.className = "movie-translator";
-        translator.textContent = String(item.translator);
+
+        translator.textContent =
+            String(item.translator);
+
         meta.appendChild(translator);
     }
 
     info.append(heading, meta);
+
     link.append(posterWrap, info);
     card.appendChild(link);
 
@@ -668,27 +982,50 @@ function createMovieCard(item) {
    PAGINATION
 ========================================= */
 
-function createPageButton(label, page, options = {}) {
-    const button = document.createElement("button");
+function createPageButton(
+    label,
+    page,
+    options = {}
+) {
+    const button =
+        document.createElement("button");
 
     button.type = "button";
     button.className = "genre-page-btn";
     button.textContent = label;
-    button.disabled = Boolean(options.disabled);
+
+    button.disabled =
+        Boolean(options.disabled);
 
     if (options.active) {
         button.classList.add("active");
-        button.setAttribute("aria-current", "page");
+
+        button.setAttribute(
+            "aria-current",
+            "page"
+        );
     }
 
+    button.setAttribute(
+        "aria-label",
+        options.label ||
+        `Go to page ${page}`
+    );
+
     button.addEventListener("click", () => {
-        if (page === state.currentPage || button.disabled) return;
+        if (
+            page === state.currentPage ||
+            button.disabled ||
+            page < 1
+        ) {
+            return;
+        }
 
         state.currentPage = page;
-        renderResults();
-        updateUrl();
 
-        document.getElementById("genreContent").scrollIntoView({
+        loadContent();
+
+        elements.genreContent?.scrollIntoView({
             behavior: "smooth",
             block: "start"
         });
@@ -698,14 +1035,21 @@ function createPageButton(label, page, options = {}) {
 }
 
 function renderPagination(totalPages) {
+    if (!elements.pagination) return;
+
     elements.pagination.replaceChildren();
 
     if (totalPages <= 1) return;
 
     elements.pagination.appendChild(
-        createPageButton("‹", state.currentPage - 1, {
-            disabled: state.currentPage === 1
-        })
+        createPageButton(
+            "‹",
+            state.currentPage - 1,
+            {
+                disabled: state.currentPage === 1,
+                label: "Previous page"
+            }
+        )
     );
 
     const pages = new Set([
@@ -717,32 +1061,53 @@ function renderPagination(totalPages) {
     ]);
 
     const sortedPages = [...pages]
-        .filter((page) => page >= 1 && page <= totalPages)
+        .filter(
+            (page) =>
+                page >= 1 &&
+                page <= totalPages
+        )
         .sort((a, b) => a - b);
 
     let previous = 0;
 
     sortedPages.forEach((page) => {
-        if (previous && page - previous > 1) {
-            const dots = document.createElement("span");
+        if (
+            previous &&
+            page - previous > 1
+        ) {
+            const dots =
+                document.createElement("span");
+
             dots.className = "genre-page-dots";
             dots.textContent = "…";
+
             elements.pagination.appendChild(dots);
         }
 
         elements.pagination.appendChild(
-            createPageButton(String(page), page, {
-                active: page === state.currentPage
-            })
+            createPageButton(
+                String(page),
+                page,
+                {
+                    active:
+                        page === state.currentPage
+                }
+            )
         );
 
         previous = page;
     });
 
     elements.pagination.appendChild(
-        createPageButton("›", state.currentPage + 1, {
-            disabled: state.currentPage === totalPages
-        })
+        createPageButton(
+            "›",
+            state.currentPage + 1,
+            {
+                disabled:
+                    state.currentPage === totalPages,
+                label: "Next page"
+            }
+        )
     );
 }
 
@@ -751,20 +1116,32 @@ function renderPagination(totalPages) {
 ========================================= */
 
 function updateActiveFilters() {
+    if (!elements.activeFilters) return;
+
     elements.activeFilters.replaceChildren();
 
     const filters = [];
 
     if (state.genre) {
-        filters.push(`Genre: ${titleCase(state.genre)}`);
+        filters.push(
+            `Genre: ${titleCase(state.genre)}`
+        );
     }
 
     if (state.type !== "all") {
-        filters.push(`Type: ${state.type === "movie" ? "Movies" : "Series"}`);
+        filters.push(
+            `Type: ${
+                state.type === "movie"
+                    ? "Movies"
+                    : "Series"
+            }`
+        );
     }
 
     if (state.search.trim()) {
-        filters.push(`Search: ${state.search.trim()}`);
+        filters.push(
+            `Search: ${state.search.trim()}`
+        );
     }
 
     if (state.sort !== "latest") {
@@ -774,7 +1151,9 @@ function updateActiveFilters() {
             title: "A – Z"
         };
 
-        filters.push(`Sort: ${labels[state.sort] || state.sort}`);
+        filters.push(
+            `Sort: ${labels[state.sort] || state.sort}`
+        );
     }
 
     if (!filters.length) {
@@ -785,19 +1164,28 @@ function updateActiveFilters() {
     elements.activeFilters.hidden = false;
 
     filters.forEach((label) => {
-        const chip = document.createElement("span");
+        const chip =
+            document.createElement("span");
+
         chip.className = "genre-filter-chip";
 
-        const icon = document.createElement("i");
-        icon.className = "fa-solid fa-filter";
+        const icon =
+            document.createElement("i");
 
-        chip.append(icon, document.createTextNode(label));
+        icon.className =
+            "fa-solid fa-filter";
+
+        chip.append(
+            icon,
+            document.createTextNode(label)
+        );
+
         elements.activeFilters.appendChild(chip);
     });
 }
 
 /* =========================================
-   RESET
+   RESET FILTERS
 ========================================= */
 
 function resetFilters() {
@@ -807,12 +1195,22 @@ function resetFilters() {
     state.search = "";
     state.currentPage = 1;
 
-    elements.contentFilter.value = "all";
-    elements.sortFilter.value = "latest";
-    elements.search.value = "";
+    if (elements.contentFilter) {
+        elements.contentFilter.value = "all";
+    }
+
+    if (elements.sortFilter) {
+        elements.sortFilter.value = "latest";
+    }
+
+    if (elements.search) {
+        elements.search.value = "";
+    }
+
+    clearTimeout(searchTimer);
 
     updatePageHeader();
-    applyFilters();
+    loadContent();
 }
 
 /* =========================================
@@ -820,91 +1218,157 @@ function resetFilters() {
 ========================================= */
 
 function bindEvents() {
-    elements.contentFilter.addEventListener("change", () => {
-        state.type = elements.contentFilter.value;
-        state.currentPage = 1;
-        updatePageHeader();
-        applyFilters();
-    });
+    elements.contentFilter?.addEventListener(
+        "change",
+        () => {
+            state.type =
+                elements.contentFilter.value;
 
-    elements.sortFilter.addEventListener("change", () => {
-        state.sort = elements.sortFilter.value;
-        state.currentPage = 1;
-        updatePageHeader();
-        applyFilters();
-    });
+            state.currentPage = 1;
 
-    elements.search.addEventListener("input", () => {
-        state.search = elements.search.value;
-        state.currentPage = 1;
-        applyFilters();
-    });
+            updatePageHeader();
+            loadContent();
+        }
+    );
 
-    elements.clearSearch.addEventListener("click", () => {
-        elements.search.value = "";
-        state.search = "";
-        state.currentPage = 1;
-        applyFilters();
-        elements.search.focus();
-    });
+    elements.sortFilter?.addEventListener(
+        "change",
+        () => {
+            state.sort =
+                elements.sortFilter.value;
 
-    elements.resetButton.addEventListener("click", resetFilters);
-    elements.emptyReset.addEventListener("click", resetFilters);
+            state.currentPage = 1;
 
-    elements.retryButton.addEventListener("click", () => {
-        loadContent();
-    });
+            updatePageHeader();
+            loadContent();
+        }
+    );
 
-    // Keep the homepage search system compatible with this page.
-    const siteSearch = document.getElementById("search-form");
+    // Debounced search avoids sending a database
+    // request for every individual keystroke.
+    elements.search?.addEventListener(
+        "input",
+        () => {
+            state.search =
+                elements.search.value;
+
+            state.currentPage = 1;
+
+            clearTimeout(searchTimer);
+
+            searchTimer = setTimeout(
+                () => {
+                    loadContent();
+                },
+                GENRE_CONFIG.searchDelay
+            );
+        }
+    );
+
+    elements.clearSearch?.addEventListener(
+        "click",
+        () => {
+            if (elements.search) {
+                elements.search.value = "";
+                elements.search.focus();
+            }
+
+            state.search = "";
+            state.currentPage = 1;
+
+            clearTimeout(searchTimer);
+
+            loadContent();
+        }
+    );
+
+    elements.resetButton?.addEventListener(
+        "click",
+        resetFilters
+    );
+
+    elements.emptyReset?.addEventListener(
+        "click",
+        resetFilters
+    );
+
+    elements.retryButton?.addEventListener(
+        "click",
+        loadContent
+    );
+
+    // Compatibility with the site's global search.
+    const siteSearch =
+        document.getElementById("search-form");
 
     if (siteSearch) {
-        siteSearch.addEventListener("submit", (event) => {
-            event.preventDefault();
+        siteSearch.addEventListener(
+            "submit",
+            (event) => {
+                event.preventDefault();
 
-            const input = document.getElementById("search-input");
-            const value = input?.value?.trim();
+                const input =
+                    document.getElementById(
+                        "search-input"
+                    );
 
-            if (!value) return;
+                const value =
+                    input?.value?.trim();
 
-            state.search = value;
-            state.currentPage = 1;
-            elements.search.value = value;
+                if (!value) return;
 
-            applyFilters();
+                state.search = value;
+                state.currentPage = 1;
 
-            document.getElementById("genreContent").scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        });
+                if (elements.search) {
+                    elements.search.value = value;
+                }
+
+                clearTimeout(searchTimer);
+
+                loadContent();
+
+                elements.genreContent?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        );
     }
 }
 
 /* =========================================
-   INITIALIZE
+   INITIALIZATION
 ========================================= */
 
 function initializeGenrePage() {
     if (!elements.grid) {
-        console.error("CINEVA: genre grid was not found.");
+        console.error(
+            "CINEVA: genre grid was not found."
+        );
+
+        hidePageLoader();
         return;
     }
 
     if (elements.footerYear) {
-        elements.footerYear.textContent = new Date().getFullYear();
+        elements.footerYear.textContent =
+            new Date().getFullYear();
     }
 
     readUrlState();
     bindEvents();
     updatePageHeader();
+
     loadContent();
 }
 
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeGenrePage, {
-        once: true
-    });
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeGenrePage,
+        { once: true }
+    );
 } else {
     initializeGenrePage();
 }
