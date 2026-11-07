@@ -1,57 +1,66 @@
 
 /* =========================================================
    CINEVA PRO — PREMIUM WATCH PAGE
-   Unified Homepage Design System
-   Violet / Dark Navy / Premium Streaming
-   Version 2.0
+   Complete Responsive Redesign
+   Compatible with Existing CINEVA Frontend
+   Desktop • Tablet • Android • Mobile
 ========================================================= */
 
-
 /* =========================================================
-   01. WATCH VARIABLES
+   01. DESIGN SYSTEM
 ========================================================= */
 
 :root {
     --watch-bg: #080812;
     --watch-bg-soft: #0d0d19;
     --watch-card: #121221;
-    --watch-card-light: #19192b;
-
-    --watch-border: rgba(255,255,255,.08);
-    --watch-border-hover: rgba(168,85,247,.5);
-
-    --watch-text: #f5f5fa;
-    --watch-muted: #9292a8;
+    --watch-card-2: #171729;
+    --watch-card-3: #1d1d32;
 
     --watch-primary: #8b35f5;
     --watch-primary-light: #a855f7;
     --watch-primary-dark: #6420c9;
-
     --watch-pink: #ef315e;
+
     --watch-green: #10b981;
     --watch-green-light: #34d399;
     --watch-gold: #f5bd4f;
     --watch-red: #ef4444;
 
-    --watch-radius: 16px;
-    --watch-transition: .3s ease;
+    --watch-white: #ffffff;
+    --watch-text: #f1f0f8;
+    --watch-muted: #9695aa;
+    --watch-muted-2: #727187;
+
+    --watch-border: rgba(255,255,255,.075);
+    --watch-border-strong: rgba(255,255,255,.12);
+    --watch-purple-border: rgba(168,85,247,.32);
+
+    --watch-radius-sm: 9px;
+    --watch-radius: 15px;
+    --watch-radius-lg: 21px;
 
     --watch-shadow:
-        0 15px 45px rgba(0,0,0,.25);
+        0 18px 55px rgba(0,0,0,.28);
+
+    --watch-glow:
+        0 0 30px rgba(139,53,245,.12);
+
+    --watch-transition: .28s ease;
 }
 
-
 /* =========================================================
-   02. WATCH PAGE BASE
+   02. PAGE FOUNDATION
 ========================================================= */
 
 .watch-page {
     width: min(1440px, calc(100% - 48px));
     min-height: 70vh;
     margin: 0 auto;
-    padding: 30px 0 75px;
+    padding: 32px 0 80px;
     color: var(--watch-text);
     font-family: 'Inter', sans-serif;
+    overflow: visible;
 }
 
 .watch-page *,
@@ -60,11 +69,15 @@
     box-sizing: border-box;
 }
 
+.watch-page img {
+    max-width: 100%;
+}
+
 .watch-page button,
 .watch-page input,
 .watch-page textarea,
 .watch-page select {
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
 }
 
 .watch-page button {
@@ -78,32 +91,37 @@
 
 .watch-content {
     display: block;
+    width: 100%;
     min-width: 0;
-    animation: watchFadeIn .5s ease;
+    animation: watchReveal .45s ease both;
 }
 
-.watch-content[hidden] {
+.watch-content[hidden],
+.movie-parts-section[hidden],
+.episodes-section[hidden],
+.player-empty[hidden],
+.watch-error[hidden] {
     display: none !important;
 }
 
-@keyframes watchFadeIn {
+@keyframes watchReveal {
     from {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-
 /* =========================================================
-   03. LOADING
+   03. LOADING SCREEN
 ========================================================= */
 
 .watch-loading {
-    min-height: 65vh;
+    min-height: 68vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -113,20 +131,20 @@
     text-align: center;
 }
 
-.loader-logo {
-    color: #fff;
+.watch-loading .loader-logo {
+    color: white;
     font-family: 'Outfit', sans-serif;
-    font-size: 27px;
+    font-size: 30px;
     font-weight: 900;
     letter-spacing: 4px;
     text-shadow:
-        0 0 15px rgba(168,85,247,.65),
+        0 0 15px rgba(168,85,247,.7),
         0 0 35px rgba(139,53,245,.35);
 }
 
-.loader-spinner {
-    width: 43px;
-    height: 43px;
+.watch-loading .loader-spinner {
+    width: 45px;
+    height: 45px;
     border: 3px solid rgba(168,85,247,.15);
     border-top-color: var(--watch-primary-light);
     border-right-color: var(--watch-pink);
@@ -145,7 +163,6 @@
     }
 }
 
-
 /* =========================================================
    04. ERROR STATE
 ========================================================= */
@@ -153,16 +170,12 @@
 .watch-error {
     max-width: 650px;
     min-height: 55vh;
-    margin: 0 auto;
-    padding: 60px 25px;
+    margin: auto;
+    padding: 45px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-}
-
-.watch-error[hidden] {
-    display: none !important;
 }
 
 .watch-error-content {
@@ -171,12 +184,12 @@
     background:
         radial-gradient(
             circle at top,
-            rgba(139,53,245,.13),
+            rgba(139,53,245,.17),
             transparent 65%
         ),
         var(--watch-card);
     border: 1px solid var(--watch-border);
-    border-radius: 20px;
+    border-radius: var(--watch-radius-lg);
 }
 
 .watch-error-content > i {
@@ -188,7 +201,7 @@
     margin: 18px 0 10px;
     color: white;
     font-family: 'Outfit', sans-serif;
-    font-size: 25px;
+    font-size: 26px;
 }
 
 .watch-error p {
@@ -199,13 +212,13 @@
 }
 
 .watch-back-btn {
-    min-height: 45px;
+    min-height: 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
-    margin-top: 22px;
-    padding: 0 22px;
+    margin-top: 23px;
+    padding: 0 23px;
     color: white !important;
     background: linear-gradient(
         120deg,
@@ -223,30 +236,51 @@
     box-shadow: 0 8px 25px rgba(139,53,245,.3);
 }
 
-
 /* =========================================================
-   05. MOVIE / SERIES DETAILS
+   05. MOVIE / SERIES INFORMATION
 ========================================================= */
 
 .watch-details-section {
-    margin: 5px 0 35px;
+    margin: 0 0 35px;
 }
 
 .watch-details {
+    position: relative;
     display: grid;
-    grid-template-columns: 185px minmax(0,1fr);
+    grid-template-columns: 190px minmax(0,1fr);
     align-items: start;
-    gap: 27px;
-    padding: 24px;
+    gap: 30px;
+    padding: 25px;
+    overflow: hidden;
     background:
+        radial-gradient(
+            ellipse at 10% 0%,
+            rgba(139,53,245,.12),
+            transparent 48%
+        ),
         linear-gradient(
             135deg,
-            rgba(26,26,43,.95),
-            rgba(13,13,25,.98)
+            #171729,
+            #0e0e1c 75%
         );
     border: 1px solid var(--watch-border);
-    border-radius: var(--watch-radius);
+    border-radius: var(--watch-radius-lg);
     box-shadow: var(--watch-shadow);
+}
+
+.watch-details::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        var(--watch-primary-light),
+        var(--watch-pink)
+    );
+    opacity: .85;
 }
 
 .watch-poster {
@@ -254,10 +288,10 @@
     width: 100%;
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    background: #191927;
-    border: 1px solid var(--watch-border);
-    border-radius: 12px;
-    box-shadow: 0 12px 35px rgba(0,0,0,.35);
+    background: #1a1a2a;
+    border: 1px solid var(--watch-border-strong);
+    border-radius: 13px;
+    box-shadow: 0 14px 35px rgba(0,0,0,.38);
 }
 
 .watch-poster img {
@@ -267,10 +301,15 @@
     object-fit: cover;
 }
 
-.watch-type {
+.watch-type,
+.watch-type-badge {
     position: absolute;
     left: 10px;
     bottom: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 6px 10px;
     color: white;
     background: linear-gradient(
@@ -278,45 +317,59 @@
         var(--watch-primary-dark),
         var(--watch-primary)
     );
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     border-radius: 6px;
     font-size: 9px;
     font-weight: 900;
-    letter-spacing: 1px;
+    letter-spacing: .8px;
 }
 
 .watch-information {
     min-width: 0;
+    padding: 5px 0;
 }
 
-.watch-title-area {
-    margin-bottom: 16px;
+.watch-title-area,
+.watch-title-row {
+    margin-bottom: 15px;
 }
 
-.watch-label {
+.watch-label,
+.watch-small-label {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     margin-bottom: 10px;
     color: var(--watch-primary-light);
     font-size: 9px;
     font-weight: 900;
     letter-spacing: 1.7px;
-}
-
-.watch-label i {
-    font-size: 11px;
+    text-transform: uppercase;
 }
 
 .watch-information h1 {
     margin: 0;
     color: #fff;
     font-family: 'Outfit', sans-serif;
-    font-size: clamp(27px,4vw,43px);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -.8px;
+    font-size: clamp(27px, 4vw, 45px);
+    font-weight: 850;
+    line-height: 1.14;
+    letter-spacing: -.9px;
     overflow-wrap: anywhere;
+}
+
+.watch-quality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 10px;
+    color: var(--watch-green-light);
+    background: rgba(16,185,129,.09);
+    border: 1px solid rgba(16,185,129,.2);
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 900;
 }
 
 .watch-meta {
@@ -328,13 +381,14 @@
 }
 
 .watch-meta span {
+    min-height: 31px;
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    padding: 8px 11px;
+    padding: 7px 11px;
     color: #d0cfe0;
     background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.055);
     border-radius: 7px;
     font-size: 11px;
     font-weight: 600;
@@ -357,7 +411,7 @@
 }
 
 .watch-description h3 {
-    margin: 0 0 8px;
+    margin: 0 0 9px;
     color: white;
     font-family: 'Outfit', sans-serif;
     font-size: 14px;
@@ -394,14 +448,14 @@
     color: var(--watch-primary-light);
 }
 
-
 /* =========================================================
-   06. PLAYER SECTION
+   06. PLAYER HEADER
 ========================================================= */
 
 .player-section {
+    width: 100%;
     min-width: 0;
-    margin: 0 0 38px;
+    margin: 0 0 40px;
 }
 
 .player-topbar {
@@ -409,7 +463,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 15px;
-    margin-bottom: 14px;
+    margin-bottom: 15px;
 }
 
 .player-breadcrumb {
@@ -437,15 +491,13 @@
 }
 
 #player-breadcrumb-title {
+    max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .player-quality {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
     flex-shrink: 0;
     color: var(--watch-primary-light);
     font-size: 9px;
@@ -453,23 +505,23 @@
     letter-spacing: 1.4px;
 }
 
-.player-quality i {
-    font-size: 12px;
-}
+/* =========================================================
+   07. VIDEO PLAYER
+========================================================= */
 
 .video-player-wrapper {
     position: relative;
     isolation: isolate;
     width: 100%;
     aspect-ratio: 16 / 9;
-    max-height: 760px;
+    max-height: 780px;
     overflow: hidden;
     background: #000;
-    border: 1px solid rgba(168,85,247,.3);
-    border-radius: 16px;
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 17px;
     box-shadow:
-        0 20px 60px rgba(0,0,0,.4),
-        0 0 30px rgba(139,53,245,.08);
+        0 22px 60px rgba(0,0,0,.45),
+        0 0 35px rgba(139,53,245,.09);
 }
 
 .video-player {
@@ -478,6 +530,10 @@
     height: 100%;
     object-fit: contain;
     background: #000;
+}
+
+.video-player:focus {
+    outline: none;
 }
 
 .player-empty {
@@ -491,28 +547,24 @@
     background:
         radial-gradient(
             circle at center,
-            rgba(139,53,245,.2),
-            transparent 60%
+            rgba(139,53,245,.22),
+            transparent 62%
         ),
         #080812;
     text-align: center;
 }
 
-.player-empty[hidden] {
-    display: none !important;
-}
-
 .player-empty-content {
-    max-width: 420px;
+    max-width: 440px;
 }
 
 .player-empty-icon {
-    width: 65px;
-    height: 65px;
+    width: 68px;
+    height: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 16px;
+    margin: 0 auto 17px;
     color: white;
     background: linear-gradient(
         135deg,
@@ -520,8 +572,8 @@
         var(--watch-primary)
     );
     border-radius: 50%;
-    box-shadow: 0 0 35px rgba(139,53,245,.3);
-    font-size: 22px;
+    box-shadow: 0 0 35px rgba(139,53,245,.35);
+    font-size: 23px;
 }
 
 .player-empty h3 {
@@ -536,7 +588,7 @@
     margin: 0;
     color: var(--watch-muted);
     font-size: 12px;
-    line-height: 1.7;
+    line-height: 1.8;
 }
 
 .player-empty-brand {
@@ -548,12 +600,13 @@
     letter-spacing: 2px;
 }
 
-
 /* =========================================================
-   07. PLAYER ACTIONS
+   08. PLAYER ACTION BAR
+   Supports both existing selector versions
 ========================================================= */
 
-.player-actions {
+.player-actions,
+.player-action-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -561,13 +614,20 @@
     gap: 13px;
     margin-top: 15px;
     padding: 15px 17px;
-    background: var(--watch-card);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(25,25,43,.98),
+            rgba(16,16,29,.98)
+        );
     border: 1px solid var(--watch-border);
-    border-radius: 12px;
+    border-radius: 13px;
 }
 
 .player-primary-actions,
-.player-secondary-actions {
+.player-action-left,
+.player-secondary-actions,
+.player-action-right {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -575,21 +635,24 @@
 }
 
 .main-watch-btn,
-.main-download-btn {
-    min-height: 44px;
+.primary-watch-btn,
+.main-download-btn,
+.download-watch-btn {
+    min-height: 45px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
     padding: 0 21px;
     border: 0;
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 850;
     transition: var(--watch-transition);
 }
 
-.main-watch-btn {
+.main-watch-btn,
+.primary-watch-btn {
     color: white;
     background: linear-gradient(
         120deg,
@@ -599,23 +662,28 @@
     box-shadow: 0 5px 18px rgba(139,53,245,.2);
 }
 
-.main-watch-btn:hover {
+.main-watch-btn:hover,
+.primary-watch-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(139,53,245,.35);
+    box-shadow: 0 9px 25px rgba(139,53,245,.35);
 }
 
-.main-download-btn {
+.main-download-btn,
+.download-watch-btn {
     color: #042c20;
     background: var(--watch-green);
 }
 
-.main-download-btn:hover {
+.main-download-btn:hover,
+.download-watch-btn:hover {
     background: var(--watch-green-light);
     transform: translateY(-2px);
 }
 
 .main-watch-btn:disabled,
-.main-download-btn:disabled {
+.primary-watch-btn:disabled,
+.main-download-btn:disabled,
+.download-watch-btn:disabled {
     opacity: .45;
     cursor: not-allowed;
     transform: none;
@@ -623,16 +691,16 @@
 
 .player-action-btn {
     min-width: 43px;
-    min-height: 42px;
+    min-height: 43px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     padding: 0 12px;
     color: var(--watch-muted);
-    background: rgba(255,255,255,.035);
+    background: rgba(255,255,255,.04);
     border: 1px solid var(--watch-border);
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 12px;
     font-weight: 700;
     transition: var(--watch-transition);
@@ -640,7 +708,7 @@
 
 .player-action-btn:hover {
     color: white;
-    background: rgba(168,85,247,.12);
+    background: rgba(168,85,247,.13);
     border-color: var(--watch-primary);
 }
 
@@ -659,9 +727,8 @@
     background: rgba(251,113,133,.09);
 }
 
-
 /* =========================================================
-   08. SHARED SECTION HEADINGS
+   09. SHARED SECTION HEADINGS
 ========================================================= */
 
 .watch-section-heading {
@@ -687,17 +754,13 @@
     letter-spacing: 1.7px;
 }
 
-.watch-section-label i {
-    font-size: 12px;
-}
-
 .watch-section-heading h2 {
     margin: 0;
     color: white;
     font-family: 'Outfit', sans-serif;
-    font-size: clamp(22px,3vw,29px);
-    font-weight: 800;
-    letter-spacing: -.4px;
+    font-size: clamp(22px,3vw,30px);
+    font-weight: 850;
+    letter-spacing: -.5px;
 }
 
 .watch-section-heading p {
@@ -707,57 +770,58 @@
     line-height: 1.7;
 }
 
-
 /* =========================================================
-   09. MOVIE PARTS
+   10. MOVIE PARTS
 ========================================================= */
 
-.movie-parts-section {
+.movie-parts-section,
+.episodes-section {
     margin: 40px 0;
-    padding: 23px;
+    padding: 25px;
     background:
+        radial-gradient(
+            ellipse at top left,
+            rgba(139,53,245,.09),
+            transparent 45%
+        ),
         linear-gradient(
             145deg,
-            rgba(20,20,35,.95),
-            rgba(13,13,25,.95)
+            #151526,
+            #0e0e1c
         );
     border: 1px solid var(--watch-border);
-    border-radius: var(--watch-radius);
-}
-
-.movie-parts-section[hidden],
-.episodes-section[hidden] {
-    display: none !important;
+    border-radius: var(--watch-radius-lg);
 }
 
 .movie-parts-grid {
     display: grid;
     grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 12px;
+    gap: 13px;
 }
 
 .movie-part-card {
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px;
-    background: var(--watch-card);
+    gap: 13px;
+    padding: 15px;
+    background: rgba(18,18,33,.9);
     border: 1px solid var(--watch-border);
-    border-radius: 11px;
+    border-radius: 12px;
     transition: var(--watch-transition);
 }
 
 .movie-part-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     border-color: var(--watch-border-hover);
-    background: var(--watch-card-light);
+    background: var(--watch-card-2);
+    box-shadow: 0 10px 25px rgba(0,0,0,.2);
 }
 
 .movie-part-number,
 .episode-number {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -768,7 +832,7 @@
         var(--watch-primary-dark),
         var(--watch-primary)
     );
-    border-radius: 9px;
+    border-radius: 10px;
     font-family: 'Outfit', sans-serif;
     font-size: 13px;
     font-weight: 900;
@@ -782,8 +846,8 @@
 
 .movie-part-info h3,
 .episode-information h3 {
-    overflow: hidden;
     margin: 0;
+    overflow: hidden;
     color: white;
     font-family: 'Outfit', sans-serif;
     font-size: 12px;
@@ -811,14 +875,14 @@
 .part-download-btn,
 .episode-watch-btn,
 .episode-download-btn {
-    min-height: 37px;
+    min-height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    padding: 0 11px;
+    padding: 0 12px;
     border: 0;
-    border-radius: 7px;
+    border-radius: 8px;
     font-size: 10px;
     font-weight: 900;
     transition: var(--watch-transition);
@@ -837,10 +901,9 @@
 
 .part-download-btn,
 .episode-download-btn {
-    width: 38px;
-    min-width: 38px;
-    max-width: 38px;
-    height: 37px;
+    width: 39px;
+    min-width: 39px;
+    max-width: 39px;
     padding: 0;
     color: #042c20;
     background: var(--watch-green);
@@ -859,46 +922,35 @@
     transform: none;
 }
 
-
 /* =========================================================
-   10. SERIES EPISODES
+   11. SERIES EPISODES
 ========================================================= */
 
-.episodes-section {
-    margin: 40px 0;
-    padding: 23px;
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20,20,35,.95),
-            rgba(13,13,25,.95)
-        );
-    border: 1px solid var(--watch-border);
-    border-radius: var(--watch-radius);
-}
-
-.episode-count {
+.episode-count,
+.episode-total {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
     padding: 8px 12px;
     color: var(--watch-primary-light);
     background: rgba(168,85,247,.1);
-    border: 1px solid rgba(168,85,247,.2);
+    border: 1px solid rgba(168,85,247,.22);
     border-radius: 8px;
     font-size: 10px;
-    font-weight: 800;
+    font-weight: 850;
 }
 
-.season-selector-wrapper {
+.season-selector-wrapper,
+.season-filter-wrapper {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
-.season-selector-wrapper label {
+.season-selector-wrapper label,
+.season-filter-wrapper label {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -907,36 +959,36 @@
     font-weight: 700;
 }
 
-.season-selector-wrapper label i {
-    color: var(--watch-primary-light);
-}
-
-#season-selector {
+#season-selector,
+.season-selector {
     min-width: 165px;
-    min-height: 40px;
-    padding: 0 12px;
+    min-height: 41px;
+    padding: 0 13px;
     color: white;
     background: var(--watch-card);
-    border: 1px solid var(--watch-border);
+    border: 1px solid var(--watch-border-strong);
     border-radius: 8px;
     outline: none;
     font-size: 11px;
     cursor: pointer;
 }
 
-#season-selector:focus {
+#season-selector:focus,
+.season-selector:focus {
     border-color: var(--watch-primary);
+    box-shadow: 0 0 0 3px rgba(139,53,245,.1);
 }
 
-#season-selector option {
+#season-selector option,
+.season-selector option {
     color: white;
     background: var(--watch-card);
 }
 
 .episodes-grid {
     display: grid;
-    grid-template-columns: repeat(5,minmax(0,1fr));
-    gap: 12px;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 13px;
     width: 100%;
     min-width: 0;
 }
@@ -946,22 +998,22 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 11px;
-    padding: 12px;
-    background: #10101c;
+    gap: 12px;
+    padding: 14px;
+    background: #10101d;
     border: 1px solid var(--watch-border);
-    border-radius: 11px;
+    border-radius: 12px;
     transition: var(--watch-transition);
 }
 
 .episode-card:hover {
     transform: translateY(-3px);
     border-color: var(--watch-border-hover);
-    box-shadow: 0 8px 20px rgba(0,0,0,.2);
+    box-shadow: 0 9px 22px rgba(0,0,0,.22);
 }
 
 .episode-card.active {
-    background: rgba(139,53,245,.09);
+    background: rgba(139,53,245,.1);
     border-color: var(--watch-primary);
 }
 
@@ -973,9 +1025,9 @@
 }
 
 .episode-card .episode-number {
-    width: 33px;
-    height: 33px;
-    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
     font-size: 11px;
 }
 
@@ -994,7 +1046,7 @@
     margin: 0;
     color: var(--watch-muted);
     font-size: 10px;
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
@@ -1012,10 +1064,10 @@
 }
 
 .episode-download-btn {
-    flex: 0 0 36px;
-    width: 36px;
-    min-width: 36px;
-    max-width: 36px;
+    flex: 0 0 37px;
+    width: 37px;
+    min-width: 37px;
+    max-width: 37px;
 }
 
 .episode-card.active .episode-number {
@@ -1023,9 +1075,8 @@
     background: var(--watch-green);
 }
 
-
 /* =========================================================
-   11. EPISODE PARTS
+   12. EPISODE PARTS
 ========================================================= */
 
 .episode-parts {
@@ -1047,11 +1098,11 @@
 }
 
 .episode-part-select {
-    min-height: 34px;
+    min-height: 35px;
     padding: 7px 12px;
     color: #ddd;
     background: var(--watch-card);
-    border: 1px solid rgba(168,85,247,.25);
+    border: 1px solid var(--watch-purple-border);
     border-radius: 7px;
     font-size: 10px;
     font-weight: 800;
@@ -1073,7 +1124,7 @@
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 9px;
-    padding: 11px;
+    padding: 12px;
     background: rgba(255,255,255,.035);
     border: 1px solid var(--watch-border);
     border-radius: 9px;
@@ -1091,9 +1142,8 @@
     width: auto;
 }
 
-
 /* =========================================================
-   12. COMMENTS
+   13. COMMENTS
 ========================================================= */
 
 .comments-section {
@@ -1107,11 +1157,17 @@
     font-weight: 700;
 }
 
-.comment-form {
-    padding: 22px;
-    background: var(--watch-card);
+.comment-form,
+.comment-form-card {
+    padding: 23px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(24,24,42,.95),
+            rgba(16,16,29,.98)
+        );
     border: 1px solid var(--watch-border);
-    border-radius: 13px;
+    border-radius: 14px;
 }
 
 .comment-form-top {
@@ -1120,12 +1176,14 @@
     gap: 14px;
 }
 
-.comment-input-group {
+.comment-input-group,
+.comment-field {
     min-width: 0;
     margin-bottom: 16px;
 }
 
-.comment-input-group label {
+.comment-input-group label,
+.comment-field label {
     display: block;
     margin-bottom: 8px;
     color: #d8d8e5;
@@ -1134,36 +1192,45 @@
 }
 
 .comment-input-group input,
-.comment-input-group textarea {
+.comment-input-group textarea,
+.comment-field input,
+.comment-field textarea {
     display: block;
     width: 100%;
+    min-width: 0;
     padding: 13px 14px;
     color: white;
     background: #0c0c17;
-    border: 1px solid var(--watch-border);
-    border-radius: 8px;
+    border: 1px solid var(--watch-border-strong);
+    border-radius: 9px;
     outline: none;
     font-size: 12px;
     transition: var(--watch-transition);
 }
 
-.comment-input-group input {
-    min-height: 44px;
+.comment-input-group input,
+.comment-field input {
+    min-height: 46px;
 }
 
-.comment-input-group textarea {
+.comment-input-group textarea,
+.comment-field textarea {
     min-height: 115px;
     resize: vertical;
     line-height: 1.7;
 }
 
 .comment-input-group input::placeholder,
-.comment-input-group textarea::placeholder {
+.comment-input-group textarea::placeholder,
+.comment-field input::placeholder,
+.comment-field textarea::placeholder {
     color: #73738a;
 }
 
 .comment-input-group input:focus,
-.comment-input-group textarea:focus {
+.comment-input-group textarea:focus,
+.comment-field input:focus,
+.comment-field textarea:focus {
     border-color: var(--watch-primary);
     box-shadow: 0 0 0 3px rgba(139,53,245,.1);
 }
@@ -1196,13 +1263,14 @@
     color: #fb7185;
 }
 
-#post-comment-btn {
-    min-height: 43px;
+#post-comment-btn,
+.post-comment-btn {
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
-    padding: 0 19px;
+    padding: 0 20px;
     color: white;
     background: linear-gradient(
         120deg,
@@ -1210,23 +1278,24 @@
         var(--watch-primary)
     );
     border: 0;
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 11px;
     font-weight: 900;
     transition: var(--watch-transition);
 }
 
-#post-comment-btn:hover {
+#post-comment-btn:hover,
+.post-comment-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 7px 20px rgba(139,53,245,.25);
 }
 
-#post-comment-btn:disabled {
+#post-comment-btn:disabled,
+.post-comment-btn:disabled {
     opacity: .5;
     cursor: not-allowed;
     transform: none;
 }
-
 
 /* Comments list */
 
@@ -1241,15 +1310,20 @@
     display: flex;
     align-items: flex-start;
     gap: 13px;
-    padding: 17px;
+    padding: 18px;
     background: var(--watch-bg-soft);
     border: 1px solid var(--watch-border);
-    border-radius: 11px;
+    border-radius: 12px;
+    transition: var(--watch-transition);
+}
+
+.comment-item:hover {
+    border-color: rgba(168,85,247,.2);
 }
 
 .comment-avatar {
-    width: 41px;
-    height: 41px;
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1299,18 +1373,17 @@
 }
 
 .comments-empty {
-    padding: 28px 15px;
+    padding: 30px 15px;
     color: var(--watch-muted);
     background: var(--watch-bg-soft);
-    border: 1px dashed var(--watch-border);
-    border-radius: 10px;
+    border: 1px dashed var(--watch-border-strong);
+    border-radius: 11px;
     text-align: center;
     font-size: 12px;
 }
 
-
 /* =========================================================
-   13. RELATED CONTENT
+   14. RELATED MOVIES AND SERIES
 ========================================================= */
 
 .related-section {
@@ -1332,16 +1405,18 @@
     margin-bottom: 0;
 }
 
-.related-controls {
+.related-controls,
+.related-arrows {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
 }
 
-.related-controls button {
-    width: 37px;
-    height: 37px;
+.related-controls button,
+.related-arrow {
+    width: 39px;
+    height: 39px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1352,17 +1427,20 @@
     transition: var(--watch-transition);
 }
 
-.related-controls button:hover {
+.related-controls button:hover,
+.related-arrow:hover {
     background: var(--watch-primary);
     border-color: var(--watch-primary);
 }
 
-.related-controls button:disabled {
+.related-controls button:disabled,
+.related-arrow:disabled {
     opacity: .35;
     cursor: not-allowed;
 }
 
-.related-grid {
+.related-grid,
+.related-horizontal-grid {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 280px;
@@ -1377,16 +1455,19 @@
     scrollbar-color: #45405d transparent;
 }
 
-.related-grid::-webkit-scrollbar {
+.related-grid::-webkit-scrollbar,
+.related-horizontal-grid::-webkit-scrollbar {
     height: 5px;
 }
 
-.related-grid::-webkit-scrollbar-thumb {
+.related-grid::-webkit-scrollbar-thumb,
+.related-horizontal-grid::-webkit-scrollbar-thumb {
     background: #45405d;
     border-radius: 20px;
 }
 
-.related-grid .movie-card {
+.related-grid .movie-card,
+.related-horizontal-grid .movie-card {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1402,23 +1483,26 @@
     transition: var(--watch-transition);
 }
 
-.related-grid .movie-card:hover {
+.related-grid .movie-card:hover,
+.related-horizontal-grid .movie-card:hover {
     transform: translateY(-3px);
-    background: var(--watch-card-light);
+    background: var(--watch-card-2);
     border-color: var(--watch-border-hover);
 }
 
-.related-grid .movie-poster {
+.related-grid .movie-poster,
+.related-horizontal-grid .movie-poster {
     position: relative;
-    flex: 0 0 72px;
-    width: 72px;
-    height: 102px;
+    flex: 0 0 75px;
+    width: 75px;
+    height: 105px;
     overflow: hidden;
     background: #202438;
     border-radius: 8px;
 }
 
-.related-grid .movie-poster img {
+.related-grid .movie-poster img,
+.related-horizontal-grid .movie-poster img {
     display: block;
     width: 100%;
     height: 100%;
@@ -1426,11 +1510,13 @@
     transition: transform .4s ease;
 }
 
-.related-grid .movie-card:hover .movie-poster img {
+.related-grid .movie-card:hover .movie-poster img,
+.related-horizontal-grid .movie-card:hover .movie-poster img {
     transform: scale(1.07);
 }
 
-.related-grid .movie-info {
+.related-grid .movie-info,
+.related-horizontal-grid .movie-info {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -1439,7 +1525,8 @@
     min-width: 0;
 }
 
-.related-grid .movie-info h3 {
+.related-grid .movie-info h3,
+.related-horizontal-grid .movie-info h3 {
     display: -webkit-box;
     overflow: hidden;
     margin: 0;
@@ -1451,18 +1538,19 @@
     -webkit-box-orient: vertical;
 }
 
-.related-grid .movie-info span {
+.related-grid .movie-info span,
+.related-horizontal-grid .movie-info span {
     color: var(--watch-muted);
     font-size: 10px;
 }
 
-.related-grid .movie-overlay {
+.related-grid .movie-overlay,
+.related-horizontal-grid .movie-overlay {
     display: none;
 }
 
-
 /* =========================================================
-   14. BACK TO TOP
+   15. BACK TO TOP
 ========================================================= */
 
 .scroll-top {
@@ -1470,8 +1558,8 @@
     right: 24px;
     bottom: 24px;
     z-index: 900;
-    width: 45px;
-    height: 45px;
+    width: 46px;
+    height: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1501,18 +1589,18 @@
     box-shadow: 0 8px 22px rgba(139,53,245,.3);
 }
 
-
 /* =========================================================
-   15. TABLET
+   16. LARGE TABLETS / SMALL LAPTOPS
 ========================================================= */
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .episodes-grid {
-        grid-template-columns: repeat(4,minmax(0,1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr));
     }
 
     .watch-details {
-        grid-template-columns: 155px minmax(0,1fr);
+        grid-template-columns: 165px minmax(0,1fr);
+        gap: 23px;
     }
 }
 
@@ -1521,26 +1609,29 @@
         width: calc(100% - 36px);
     }
 
+    .watch-details {
+        padding: 20px;
+    }
+
     .episodes-grid {
         grid-template-columns: repeat(3,minmax(0,1fr));
     }
 
     .movie-parts-section,
     .episodes-section {
-        padding: 19px;
+        padding: 20px;
     }
 }
 
-
 /* =========================================================
-   16. MOBILE
+   17. MOBILE DEVICES
 ========================================================= */
 
 @media (max-width: 700px) {
     .watch-page {
         width: calc(100% - 28px);
         padding-top: 19px;
-        padding-bottom: 50px;
+        padding-bottom: 55px;
     }
 
     .watch-details-section {
@@ -1548,29 +1639,35 @@
     }
 
     .watch-details {
-        grid-template-columns: 105px minmax(0,1fr);
-        gap: 14px;
+        grid-template-columns: 112px minmax(0,1fr);
+        gap: 15px;
         padding: 14px;
-        border-radius: 13px;
+        border-radius: 14px;
+    }
+
+    .watch-information {
+        padding: 1px 0;
     }
 
     .watch-information h1 {
-        font-size: 21px;
+        font-size: clamp(18px, 4.5vw, 23px);
         letter-spacing: -.4px;
     }
 
-    .watch-label {
+    .watch-label,
+    .watch-small-label {
         margin-bottom: 7px;
         font-size: 8px;
         letter-spacing: 1px;
     }
 
     .watch-meta {
-        gap: 5px;
-        margin: 10px 0;
+        gap: 6px;
+        margin: 11px 0;
     }
 
     .watch-meta span {
+        min-height: 27px;
         gap: 5px;
         padding: 5px 7px;
         font-size: 9px;
@@ -1612,12 +1709,12 @@
 
     .video-player-wrapper {
         aspect-ratio: 16 / 9;
-        border-radius: 10px;
+        border-radius: 11px;
     }
 
     .player-empty-icon {
-        width: 48px;
-        height: 48px;
+        width: 49px;
+        height: 49px;
         margin-bottom: 10px;
         font-size: 17px;
     }
@@ -1630,33 +1727,38 @@
         font-size: 10px;
     }
 
-    .player-actions {
+    .player-actions,
+    .player-action-bar {
         align-items: stretch;
         gap: 10px;
         padding: 11px;
     }
 
-    .player-primary-actions {
+    .player-primary-actions,
+    .player-action-left {
         display: grid;
         grid-template-columns: repeat(2,minmax(0,1fr));
         width: 100%;
     }
 
     .main-watch-btn,
-    .main-download-btn {
+    .primary-watch-btn,
+    .main-download-btn,
+    .download-watch-btn {
         min-width: 0;
-        min-height: 41px;
+        min-height: 42px;
         padding: 0 7px;
         font-size: 10px;
     }
 
-    .player-secondary-actions {
+    .player-secondary-actions,
+    .player-action-right {
         width: 100%;
         justify-content: flex-start;
     }
 
     .player-action-btn {
-        min-height: 37px;
+        min-height: 38px;
         padding: 0 11px;
         font-size: 10px;
     }
@@ -1678,8 +1780,8 @@
     .movie-parts-section,
     .episodes-section {
         margin: 28px 0;
-        padding: 14px;
-        border-radius: 12px;
+        padding: 15px;
+        border-radius: 14px;
     }
 
     .movie-parts-grid {
@@ -1689,12 +1791,12 @@
 
     .movie-part-card {
         gap: 9px;
-        padding: 10px;
+        padding: 11px;
     }
 
     .movie-part-number {
-        width: 33px;
-        height: 33px;
+        width: 34px;
+        height: 34px;
         font-size: 11px;
     }
 
@@ -1707,46 +1809,50 @@
     }
 
     .part-watch-btn {
-        min-height: 34px;
-        padding: 0 8px;
+        min-height: 35px;
+        padding: 0 9px;
         font-size: 9px;
     }
 
     .part-download-btn {
-        width: 34px;
-        min-width: 34px;
-        max-width: 34px;
-        height: 34px;
+        width: 35px;
+        min-width: 35px;
+        max-width: 35px;
+        height: 35px;
     }
 
-    .episode-count {
+    .episode-count,
+    .episode-total {
         padding: 6px 8px;
         font-size: 8px;
     }
 
-    .season-selector-wrapper {
+    .season-selector-wrapper,
+    .season-filter-wrapper {
         gap: 8px;
         margin-bottom: 14px;
     }
 
-    .season-selector-wrapper label {
+    .season-selector-wrapper label,
+    .season-filter-wrapper label {
         font-size: 10px;
     }
 
-    #season-selector {
+    #season-selector,
+    .season-selector {
         min-width: 130px;
-        min-height: 36px;
+        min-height: 37px;
         font-size: 10px;
     }
 
     .episodes-grid {
         grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 8px;
+        gap: 9px;
     }
 
     .episode-card {
         gap: 9px;
-        padding: 9px;
+        padding: 10px;
     }
 
     .episode-top {
@@ -1754,8 +1860,8 @@
     }
 
     .episode-card .episode-number {
-        width: 29px;
-        height: 29px;
+        width: 30px;
+        height: 30px;
         font-size: 10px;
     }
 
@@ -1776,17 +1882,17 @@
     }
 
     .episode-watch-btn {
-        min-height: 33px;
+        min-height: 34px;
         padding: 0 5px;
         font-size: 9px;
     }
 
     .episode-download-btn {
-        flex: 0 0 32px;
-        width: 32px;
-        min-width: 32px;
-        max-width: 32px;
-        height: 33px;
+        flex: 0 0 33px;
+        width: 33px;
+        min-width: 33px;
+        max-width: 33px;
+        height: 34px;
     }
 
     .episode-part-item {
@@ -1802,16 +1908,20 @@
         margin: 42px 0;
     }
 
-    .comment-form {
-        padding: 14px;
+    .comment-form,
+    .comment-form-card {
+        padding: 15px;
     }
 
-    .comment-input-group label {
+    .comment-input-group label,
+    .comment-field label {
         font-size: 10px;
     }
 
     .comment-input-group input,
-    .comment-input-group textarea {
+    .comment-input-group textarea,
+    .comment-field input,
+    .comment-field textarea {
         font-size: 11px;
     }
 
@@ -1820,7 +1930,8 @@
         flex-direction: column;
     }
 
-    #post-comment-btn {
+    #post-comment-btn,
+    .post-comment-btn {
         width: 100%;
     }
 
@@ -1830,8 +1941,8 @@
     }
 
     .comment-avatar {
-        width: 34px;
-        height: 34px;
+        width: 35px;
+        height: 35px;
         font-size: 11px;
     }
 
@@ -1851,62 +1962,70 @@
         align-items: flex-end;
     }
 
-    .related-controls button {
-        width: 32px;
-        height: 32px;
+    .related-controls button,
+    .related-arrow {
+        width: 33px;
+        height: 33px;
     }
 
-    .related-grid {
+    .related-grid,
+    .related-horizontal-grid {
         grid-auto-columns: 245px;
         gap: 10px;
     }
 
-    .related-grid .movie-card {
+    .related-grid .movie-card,
+    .related-horizontal-grid .movie-card {
         width: 245px;
         gap: 9px;
         padding: 8px;
     }
 
-    .related-grid .movie-poster {
+    .related-grid .movie-poster,
+    .related-horizontal-grid .movie-poster {
         flex-basis: 63px;
         width: 63px;
         height: 90px;
     }
 
-    .related-grid .movie-info h3 {
+    .related-grid .movie-info h3,
+    .related-horizontal-grid .movie-info h3 {
         font-size: 11px;
     }
 
     .scroll-top {
         right: 13px;
         bottom: 75px;
-        width: 39px;
-        height: 39px;
+        width: 40px;
+        height: 40px;
     }
 }
 
-
 /* =========================================================
-   17. SMALL PHONES
+   18. SMALL ANDROID PHONES
 ========================================================= */
 
-@media (max-width: 380px) {
+@media (max-width: 420px) {
     .watch-page {
         width: calc(100% - 20px);
     }
 
     .watch-details {
-        grid-template-columns: 84px minmax(0,1fr);
-        gap: 10px;
-        padding: 10px;
+        grid-template-columns: 91px minmax(0,1fr);
+        gap: 11px;
+        padding: 11px;
     }
 
     .watch-information h1 {
-        font-size: 17px;
+        font-size: 18px;
+    }
+
+    .watch-meta {
+        gap: 4px;
     }
 
     .watch-meta span {
-        padding: 4px 5px;
+        padding: 4px 6px;
         font-size: 8px;
     }
 
@@ -1939,10 +2058,10 @@
     }
 
     .episode-download-btn {
-        flex-basis: 29px;
-        width: 29px;
-        min-width: 29px;
-        max-width: 29px;
+        flex-basis: 30px;
+        width: 30px;
+        min-width: 30px;
+        max-width: 30px;
     }
 
     .movie-part-card {
@@ -1951,7 +2070,7 @@
     }
 
     .part-watch-btn {
-        min-height: 32px;
+        min-height: 33px;
         padding: 0 6px;
         font-size: 8px;
     }
@@ -1960,21 +2079,131 @@
         width: 32px;
         min-width: 32px;
         max-width: 32px;
-        height: 32px;
+        height: 33px;
     }
 
-    .related-grid {
+    .related-grid,
+    .related-horizontal-grid {
         grid-auto-columns: 225px;
     }
 
-    .related-grid .movie-card {
+    .related-grid .movie-card,
+    .related-horizontal-grid .movie-card {
         width: 225px;
     }
 }
 
+/* =========================================================
+   19. VERY NARROW PHONES
+========================================================= */
+
+@media (max-width: 340px) {
+    .watch-page {
+        width: calc(100% - 16px);
+    }
+
+    .watch-details {
+        grid-template-columns: 75px minmax(0,1fr);
+        gap: 9px;
+        padding: 9px;
+    }
+
+    .watch-information h1 {
+        font-size: 16px;
+    }
+
+    .watch-meta span {
+        font-size: 7px;
+    }
+
+    .player-actions,
+    .player-action-bar {
+        padding: 8px;
+    }
+
+    .main-watch-btn,
+    .primary-watch-btn,
+    .main-download-btn,
+    .download-watch-btn {
+        gap: 5px;
+        font-size: 9px;
+    }
+
+    .movie-parts-section,
+    .episodes-section {
+        padding: 11px;
+    }
+
+    .episode-card {
+        padding: 7px;
+    }
+
+    .episode-card .episode-number {
+        width: 26px;
+        height: 26px;
+    }
+
+    .episode-watch-btn {
+        font-size: 7px;
+    }
+
+    .related-grid,
+    .related-horizontal-grid {
+        grid-auto-columns: 210px;
+    }
+
+    .related-grid .movie-card,
+    .related-horizontal-grid .movie-card {
+        width: 210px;
+    }
+}
 
 /* =========================================================
-   18. ACCESSIBILITY
+   20. WIDE SCREENS
+========================================================= */
+
+@media (min-width: 1600px) {
+    .watch-page {
+        width: min(1500px, calc(100% - 100px));
+    }
+
+    .video-player-wrapper {
+        max-height: 850px;
+    }
+
+    .episodes-grid {
+        grid-template-columns: repeat(5,minmax(0,1fr));
+    }
+}
+
+/* =========================================================
+   21. CATEGORY COMPATIBILITY
+   Category names do not change the layout or functionality.
+========================================================= */
+
+.watch-page [class*="category"],
+.watch-page [class*="genre"] {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.watch-page .category-badge,
+.watch-page .genre-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 6px 10px;
+    color: #d9c4ff;
+    background: rgba(139,53,245,.12);
+    border: 1px solid rgba(168,85,247,.22);
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   22. ACCESSIBILITY AND SAFETY
 ========================================================= */
 
 .watch-page button:focus-visible,
@@ -1990,15 +2219,28 @@
     cursor: not-allowed;
 }
 
-@media (hover:none) {
+.watch-page input,
+.watch-page textarea,
+.watch-page select {
+    max-width: 100%;
+}
+
+.watch-page .movie-card,
+.watch-page .movie-part-card,
+.watch-page .episode-card {
+    min-width: 0;
+}
+
+@media (hover: none) {
     .movie-part-card:hover,
     .episode-card:hover,
-    .related-grid .movie-card:hover {
+    .related-grid .movie-card:hover,
+    .related-horizontal-grid .movie-card:hover {
         transform: none;
     }
 }
 
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
     .watch-page *,
     .watch-page *::before,
     .watch-page *::after {
