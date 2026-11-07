@@ -1,125 +1,164 @@
 
-import { supabase } from "./config.js";
-
 /* =========================================================
-   CINEVA PRO — DISCOVER / GENRE SYSTEM
-   Supabase view: cineva_discovery
-   Responsive page support: desktop, tablet and mobile
+   CINEVA — PREMIUM GENRE / DISCOVERY CONTROLLER
+   File: js/genre.js
+
+   Features:
+   - Loads active movies and series from Supabase
+   - Genre, type and search filters
+   - Latest, rating, popularity and A-Z sorting
+   - Pagination
+   - URL query parameter support
+   - Safe DOM rendering
+   - Poster fallbacks
 ========================================================= */
 
+import { supabase } from "./config.js";
+
+/* =========================================
+   CONFIGURATION
+========================================= */
+
 const GENRE_CONFIG = {
-    table: "cineva_discovery",
+    moviesTable: "movies",
+    seriesTable: "series",
     pageSize: 10,
-    searchDelay: 300,
-    placeholder: "assets/images/movie-placeholder.jpg"
+    fallbackPoster:
+        "https://placehold.co/400x600/151522/ffffff?text=CINEVA"
 };
 
+/* =========================================
+   STATE
+========================================= */
+
 const state = {
+    allContent: [],
+    content: [],
     type: "all",
     genre: "",
     sort: "latest",
     search: "",
     currentPage: 1,
-    totalItems: 0,
-    totalPages: 1,
-    requestId: 0,
-    searchTimer: null
+    loading: false
 };
 
-const elements = {};
+/* =========================================
+   DOM ELEMENTS
+========================================= */
 
-const SORT_OPTIONS = {
-    latest: { column: "activity_at", ascending: false },
-    oldest: { column: "activity_at", ascending: true },
-    title: { column: "title", ascending: true },
-    rating: { column: "rating", ascending: false },
-    popular: { column: "views", ascending: false }
+const elements = {
+    pageTitle: document.getElementById("page-title"),
+    pageDescription: document.getElementById("page-description"),
+
+    resultsHeading: document.getElementById("results-heading"),
+    resultsCount: document.getElementById("results-count"),
+    resultsStatus: document.getElementById("results-status"),
+    pageIndicator: document.getElementById("page-indicator"),
+
+    search: document.getElementById("genre-search"),
+    clearSearch: document.getElementById("clear-search"),
+
+    contentFilter: document.getElementById("content-filter"),
+    sortFilter: document.getElementById("sort-filter"),
+    resetButton: document.getElementById("genre-reset"),
+    emptyReset: document.getElementById("empty-reset"),
+
+    activeFilters: document.getElementById("active-filters"),
+
+    grid: document.getElementById("genre-grid"),
+    loading: document.getElementById("genre-loading"),
+    empty: document.getElementById("genre-empty"),
+    error: document.getElementById("genre-error"),
+    errorText: document.getElementById("genre-error-text"),
+    retryButton: document.getElementById("genre-retry"),
+    pagination: document.getElementById("genre-pagination"),
+
+    footerYear: document.getElementById("currentYear")
 };
 
-
-/* =========================================================
+/* =========================================
    HELPERS
-========================================================= */
+========================================= */
 
-function getElement(id) {
-    return document.getElementById(id);
-}
-
-function escapeHTML(value = "") {
-    return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-    })[char]);
-}
-
-function normalizeText(value) {
-    return String(value ?? "").trim();
-}
-
-function normalizeType(value) {
-    const type = normalizeText(value).toLowerCase();
-
-    if (["movie", "movies", "film"].includes(type)) return "movie";
-    if (["series", "tv", "show"].includes(type)) return "series";
-
-    return "all";
+function normalizeText(value = "") {
+    return String(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 }
 
 function getContentType(item) {
-    return normalizeType(item.content_type || item.type);
+    return item._contentType || item.content_type || "movie";
 }
 
-function getItemTitle(item) {
-    return normalizeText(item.title || item.name || "Untitled");
+function getTitle(item) {
+    return item.title || item.name || "Untitled";
 }
 
-function getItemCategory(item) {
-    return normalizeText(item.category || item.genre || "");
-}
-
-function getItemYear(item) {
-    if (item.year) return String(item.year);
-
-    const date = item.release_date || item.first_air_date;
-
-    if (date) {
-        const year = new Date(date).getFullYear();
-        if (!Number.isNaN(year)) return String(year);
-    }
-
-    return "";
-}
-
-function getItemRating(item) {
-    const rating = Number(item.rating);
-
-    return Number.isFinite(rating) && rating > 0
-        ? rating.toFixed(1)
-        : "";
-}
-
-function getPosterUrl(item) {
-    const candidates = [
-        item.poster_path,
-        item.poster,
-        item.thumbnail,
-        item.image
-    ];
-
-    const poster = candidates.find(value =>
-        typeof value === "string" && value.trim()
+function getRating(item) {
+    const value = Number(
+        item.vote_average ??
+        item.rating ??
+        item.tmdb_rating ??
+        0
     );
 
-    if (!poster) return GENRE_CONFIG.placeholder;
+    return Number.isFinite(value) ? value : 0;
+}
 
-    const value = poster.trim();
+function getViews(item) {
+    const value = Number(item.views ?? item.view_count ?? 0);
+    return Number.isFinite(value) ? value : 0;
+}
 
-    if (/^https?:\/\//i.test(value)) return value;
+function getReleaseYear(item) {
+    const date =
+        item.release_date ||
+        item.first_air_date ||
+        item.year ||
+        item.created_at;
 
-    if (value.startsWith("//")) return `https:${value}`;
+    if (!date) return "";
+
+    const match = String(date).match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : "";
+}
+
+function getLatestDate(item) {
+    const date =
+        getContentType(item) === "series"
+            ? item.updated_at || item.created_at || item.release_date
+            : item.created_at || item.release_date;
+
+    const timestamp = date ? new Date(date).getTime() : 0;
+
+    return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function getPoster(item) {
+    const poster =
+        item.poster_path ||
+        item.poster_url ||
+        item.poster ||
+        item.thumbnail ||
+        item.image ||
+        "";
+
+    if (!poster) return GENRE_CONFIG.fallbackPoster;
+
+    const value = String(poster).trim();
+
+    if (/^https?:\/\//i.test(value)) {
+        return value;
+    }
+
+    if (value.startsWith("/assets/") || value.startsWith("assets/")) {
+        return value.startsWith("/") ? value : `/${value}`;
+    }
 
     if (value.startsWith("/")) {
         return `https://image.tmdb.org/t/p/w500${value}`;
@@ -128,119 +167,151 @@ function getPosterUrl(item) {
     return value;
 }
 
-function getWatchUrl(item) {
-    const id = item.id;
+function parseGenreValues(value) {
+    if (!value) return [];
 
-    if (!id) return "watch.html";
+    if (Array.isArray(value)) {
+        return value.flatMap((entry) => {
+            if (typeof entry === "string") {
+                return entry.split(",").map((part) => part.trim()).filter(Boolean);
+            }
 
-    const type = getContentType(item) === "series"
-        ? "series"
-        : "movie";
+            if (entry && typeof entry === "object") {
+                const name = entry.name || entry.title || entry.genre;
+                return name ? [String(name)] : [];
+            }
 
-    const params = new URLSearchParams({
-        id: String(id),
-        type
-    });
-
-    return `watch.html?${params.toString()}`;
-}
-
-function setHidden(element, hidden) {
-    if (element) element.hidden = hidden;
-}
-
-function setLoading(isLoading) {
-    setHidden(elements.loading, !isLoading);
-
-    if (elements.grid) {
-        elements.grid.setAttribute(
-            "aria-busy",
-            isLoading ? "true" : "false"
-        );
+            return [];
+        });
     }
 
-    if (isLoading) {
-        setHidden(elements.empty, true);
-        setHidden(elements.error, true);
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+
+        if (!trimmed) return [];
+
+        // Support JSON arrays stored as text.
+        if (
+            (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+            (trimmed.startsWith("{") && trimmed.endsWith("}"))
+        ) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed !== value) return parseGenreValues(parsed);
+            } catch {
+                // Continue as a normal text value.
+            }
+        }
+
+        return trimmed
+            .split(/[,|]/)
+            .map((part) => part.trim())
+            .filter(Boolean);
     }
+
+    return [];
 }
 
-function setError(message) {
-    setLoading(false);
-    setHidden(elements.grid, true);
-    setHidden(elements.pagination, true);
-    setHidden(elements.empty, true);
-    setHidden(elements.error, false);
+function getItemGenres(item) {
+    const values = [
+        ...parseGenreValues(item.genres),
+        ...parseGenreValues(item.genre),
+        ...parseGenreValues(item.category)
+    ];
 
-    const paragraph = elements.error?.querySelector("p");
-
-    if (paragraph && message) {
-        paragraph.textContent = message;
-    }
+    return [...new Set(values.map(normalizeText).filter(Boolean))];
 }
 
-function setEmpty() {
-    setLoading(false);
-    setHidden(elements.grid, true);
-    setHidden(elements.empty, false);
-    setHidden(elements.error, true);
-    setHidden(elements.pagination, true);
+function matchesGenre(item, requestedGenre) {
+    if (!requestedGenre) return true;
+
+    const genres = getItemGenres(item);
+
+    const aliases = {
+        "high-school": ["highschool", "high-school", "school"],
+        highschool: ["highschool", "high-school", "school"],
+        "sci-fi": ["sci-fi", "science-fiction", "scifi"],
+        scifi: ["sci-fi", "science-fiction", "scifi"],
+        animation: ["animation", "animated"],
+        romance: ["romance", "erotic"],
+        erotic: ["erotic", "romance"]
+    };
+
+    const accepted = aliases[requestedGenre] || [requestedGenre];
+
+    return genres.some((genre) =>
+        accepted.some((alias) =>
+            genre === alias ||
+            genre.includes(alias) ||
+            alias.includes(genre)
+        )
+    );
 }
 
-function setResultsVisible() {
-    setLoading(false);
-    setHidden(elements.grid, false);
-    setHidden(elements.empty, true);
-    setHidden(elements.error, true);
-}
-
-
-/* =========================================================
+/* =========================================
    URL STATE
-========================================================= */
+========================================= */
 
 function readUrlState() {
     const params = new URLSearchParams(window.location.search);
 
-    state.type = normalizeType(params.get("type"));
-    state.genre = normalizeText(params.get("genre"));
-    state.sort = params.get("sort") || "latest";
-    state.search = normalizeText(params.get("search"));
+    const requestedType = params.get("type") || "all";
+    state.type = ["all", "movie", "series"].includes(requestedType)
+        ? requestedType
+        : "all";
 
-    const page = Number.parseInt(params.get("page") || "1", 10);
+    state.genre = normalizeText(params.get("genre") || "");
 
-    state.currentPage = Number.isFinite(page) && page > 0
-        ? page
+    const requestedSort = params.get("sort") || "latest";
+
+    const sortAliases = {
+        trending: "popular",
+        "top-rated": "rating",
+        newest: "latest"
+    };
+
+    const normalizedSort = sortAliases[requestedSort] || requestedSort;
+
+    state.sort = ["latest", "rating", "popular", "title"].includes(normalizedSort)
+        ? normalizedSort
+        : "latest";
+
+    state.search = params.get("search") || "";
+
+    const requestedPage = Number.parseInt(params.get("page") || "1", 10);
+    state.currentPage = Number.isFinite(requestedPage) && requestedPage > 0
+        ? requestedPage
         : 1;
 
-    if (!SORT_OPTIONS[state.sort]) {
-        state.sort = "latest";
-    }
+    elements.contentFilter.value = state.type;
+    elements.sortFilter.value = state.sort;
+    elements.search.value = state.search;
 }
 
 function updateUrl() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams();
 
-    const values = {
-        type: state.type === "all" ? "" : state.type,
-        genre: state.genre,
-        sort: state.sort === "latest" ? "" : state.sort,
-        search: state.search.trim(),
-        page: state.currentPage > 1
-            ? String(state.currentPage)
-            : ""
-    };
+    if (state.type !== "all") {
+        params.set("type", state.type);
+    }
 
-    Object.entries(values).forEach(([key, value]) => {
-        if (value) {
-            params.set(key, value);
-        } else {
-            params.delete(key);
-        }
-    });
+    if (state.genre) {
+        params.set("genre", state.genre);
+    }
+
+    if (state.sort !== "latest") {
+        params.set("sort", state.sort);
+    }
+
+    if (state.search.trim()) {
+        params.set("search", state.search.trim());
+    }
+
+    if (state.currentPage > 1) {
+        params.set("page", String(state.currentPage));
+    }
 
     const query = params.toString();
-
     const newUrl = query
         ? `${window.location.pathname}?${query}`
         : window.location.pathname;
@@ -248,557 +319,586 @@ function updateUrl() {
     window.history.replaceState({}, "", newUrl);
 }
 
-function syncControlsFromState() {
-    if (elements.type) elements.type.value = state.type;
-    if (elements.genre) elements.genre.value = state.genre;
-    if (elements.sort) elements.sort.value = state.sort;
-    if (elements.search) elements.search.value = state.search;
+/* =========================================
+   FETCH CONTENT
+========================================= */
 
-    updateGenreChips();
+async function fetchTable(tableName, contentType) {
+    const { data, error } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("is_active", true);
+
+    if (error) {
+        throw new Error(`${tableName}: ${error.message}`);
+    }
+
+    return (data || []).map((item) => ({
+        ...item,
+        _contentType: contentType
+    }));
 }
 
+async function loadContent() {
+    if (state.loading) return;
 
-/* =========================================================
-   SUPABASE QUERY
-========================================================= */
+    state.loading = true;
+    showLoading();
 
-function buildQuery() {
-    const from = (state.currentPage - 1) * GENRE_CONFIG.pageSize;
-    const to = from + GENRE_CONFIG.pageSize - 1;
+    try {
+        const [movies, series] = await Promise.all([
+            fetchTable(GENRE_CONFIG.moviesTable, "movie"),
+            fetchTable(GENRE_CONFIG.seriesTable, "series")
+        ]);
 
-    let query = supabase
-        .from(GENRE_CONFIG.table)
-        .select("*", { count: "exact" });
+        state.allContent = [...movies, ...series];
 
-    // Content type
+        applyFilters();
+        updatePageHeader();
+    } catch (error) {
+        console.error("CINEVA genre loading error:", error);
+
+        elements.loading.hidden = true;
+        elements.grid.replaceChildren();
+        elements.pagination.replaceChildren();
+        elements.empty.hidden = true;
+        elements.error.hidden = false;
+
+        elements.errorText.textContent =
+            error.message || "Please check your connection and try again.";
+    } finally {
+        state.loading = false;
+    }
+}
+const pageLoader = document.getElementById("pageLoader");
+
+if (pageLoader) {
+    pageLoader.style.opacity = "0";
+    pageLoader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+        pageLoader.style.display = "none";
+    }, 350);
+}
+/* =========================================
+   FILTERING AND SORTING
+========================================= */
+
+function applyFilters() {
+    let result = [...state.allContent];
+
+    // Movie / series filter
     if (state.type !== "all") {
-        query = query.eq("content_type", state.type);
+        result = result.filter(
+            (item) => getContentType(item) === state.type
+        );
     }
 
     // Genre filter
     if (state.genre) {
-        const genre = state.genre.replace(/[%_]/g, "");
-
-        query = query.or(
-            `category.ilike.%${genre}%,genres_text.ilike.%${genre}%`
+        result = result.filter(
+            (item) => matchesGenre(item, state.genre)
         );
     }
 
     // Search filter
-    if (state.search) {
-        const search = state.search
-            .replace(/[%_]/g, "")
-            .replace(/[(),]/g, " ")
-            .trim();
+    const searchTerm = normalizeText(state.search);
 
-        if (search) {
-            query = query.or(
-                `title.ilike.%${search}%,overview.ilike.%${search}%,translator.ilike.%${search}%`
-            );
-        }
+    if (searchTerm) {
+        result = result.filter((item) => {
+            const searchable = [
+                getTitle(item),
+                item.overview,
+                item.description,
+                item.translator,
+                item.category,
+                ...parseGenreValues(item.genres),
+                ...parseGenreValues(item.genre)
+            ]
+                .filter(Boolean)
+                .join(" ");
+
+            return normalizeText(searchable).includes(searchTerm);
+        });
     }
 
     // Sorting
-    const sort = SORT_OPTIONS[state.sort] || SORT_OPTIONS.latest;
+    switch (state.sort) {
+        case "rating":
+            result.sort((a, b) => getRating(b) - getRating(a));
+            break;
 
-    query = query.order(sort.column, {
-        ascending: sort.ascending,
-        nullsFirst: false
-    });
+        case "popular":
+            result.sort((a, b) => getViews(b) - getViews(a));
+            break;
 
-    // Stable secondary order
-    if (sort.column !== "title") {
-        query = query.order("title", { ascending: true });
+        case "title":
+            result.sort((a, b) =>
+                getTitle(a).localeCompare(getTitle(b), undefined, {
+                    sensitivity: "base"
+                })
+            );
+            break;
+
+        case "latest":
+        default:
+            result.sort((a, b) => getLatestDate(b) - getLatestDate(a));
+            break;
     }
 
-    return query.range(from, to);
+    state.content = result;
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(result.length / GENRE_CONFIG.pageSize)
+    );
+
+    state.currentPage = Math.min(state.currentPage, totalPages);
+
+    renderResults();
+    updateActiveFilters();
+    updateUrl();
 }
 
+/* =========================================
+   PAGE HEADER
+========================================= */
 
-/* =========================================================
-   CARD RENDERING
-========================================================= */
+function titleCase(value) {
+    return String(value)
+        .split(/[-\s]+/)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
 
-function createCard(item) {
-    const title = getItemTitle(item);
-    const poster = getPosterUrl(item);
-    const year = getItemYear(item);
-    const rating = getItemRating(item);
-    const category = getItemCategory(item);
+function updatePageHeader() {
+    let title = "Explore CINEVA";
+    let description =
+        "Discover movies and series, explore different genres and find your next favorite story.";
+
+    if (state.genre) {
+        title = `${titleCase(state.genre)} Collection`;
+        description =
+            `Explore ${titleCase(state.genre)} movies and series selected for your entertainment.`;
+    } else if (state.type === "movie") {
+        title = "Explore Movies";
+        description = "Discover movies across different genres and stories.";
+    } else if (state.type === "series") {
+        title = "Explore TV Series";
+        description = "Find your next favorite series and follow every story.";
+    }
+
+    if (state.sort === "rating") {
+        title = state.genre
+            ? `Top Rated ${titleCase(state.genre)}`
+            : "Top Rated Collection";
+        description = "Explore the highest-rated titles in the CINEVA collection.";
+    } else if (state.sort === "popular") {
+        title = "Trending Collection";
+        description = "Explore the most viewed movies and series on CINEVA.";
+    } else if (state.sort === "latest" && !state.genre && state.type === "all") {
+        title = "Latest Added";
+        description = "Discover the newest movies and series added to CINEVA.";
+    }
+
+    elements.pageTitle.textContent = title;
+    elements.pageDescription.textContent = description;
+    elements.resultsHeading.textContent = title;
+    document.title = `${title} | CINEVA`;
+}
+
+/* =========================================
+   RENDER RESULTS
+========================================= */
+
+function showLoading() {
+    elements.loading.hidden = false;
+    elements.grid.replaceChildren();
+    elements.empty.hidden = true;
+    elements.error.hidden = true;
+    elements.pagination.replaceChildren();
+    elements.activeFilters.hidden = true;
+}
+
+function renderResults() {
+    elements.loading.hidden = true;
+    elements.error.hidden = true;
+
+    const total = state.content.length;
+    const totalPages = Math.max(
+        1,
+        Math.ceil(total / GENRE_CONFIG.pageSize)
+    );
+
+    const start = (state.currentPage - 1) * GENRE_CONFIG.pageSize;
+    const pageItems = state.content.slice(
+        start,
+        start + GENRE_CONFIG.pageSize
+    );
+
+    elements.resultsCount.textContent = total.toLocaleString();
+    elements.resultsStatus.textContent = total
+        ? `Showing ${start + 1}–${Math.min(start + pageItems.length, total)} of ${total} titles`
+        : "No matching titles";
+
+    elements.pageIndicator.textContent = total
+        ? `Page ${state.currentPage} of ${totalPages}`
+        : "";
+
+    elements.clearSearch.hidden = !state.search;
+
+    elements.grid.replaceChildren();
+
+    if (!pageItems.length) {
+        elements.empty.hidden = false;
+        elements.pagination.replaceChildren();
+        return;
+    }
+
+    elements.empty.hidden = true;
+
+    const fragment = document.createDocumentFragment();
+
+    pageItems.forEach((item) => {
+        fragment.appendChild(createMovieCard(item));
+    });
+
+    elements.grid.appendChild(fragment);
+
+    renderPagination(totalPages);
+}
+
+/* =========================================
+   SAFE CARD CREATION
+========================================= */
+
+function createMovieCard(item) {
     const type = getContentType(item);
-    const watchUrl = getWatchUrl(item);
-
-    const typeLabel = type === "series" ? "SERIES" : "MOVIE";
+    const title = getTitle(item);
+    const rating = getRating(item);
+    const year = getReleaseYear(item);
+    const poster = getPoster(item);
 
     const card = document.createElement("article");
-    card.className = "movie-card";
+    card.className = "movie-card genre-movie-card";
 
-    card.innerHTML = `
-        <a
-            class="movie-card-link"
-            href="${escapeHTML(watchUrl)}"
-            aria-label="Watch ${escapeHTML(title)}"
-        >
-            <div class="movie-poster">
-                <img
-                    src="${escapeHTML(poster)}"
-                    alt="${escapeHTML(title)} poster"
-                    loading="lazy"
-                    decoding="async"
-                >
+    const link = document.createElement("a");
+    link.className = "movie-card-link";
+    link.href =
+        `watch.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(type)}`;
+    link.setAttribute("aria-label", `Watch ${title}`);
 
-                <span class="movie-type-badge">
-                    ${typeLabel}
-                </span>
+    const posterWrap = document.createElement("div");
+    posterWrap.className = "movie-poster";
 
-                ${rating ? `
-                    <span class="movie-rating">
-                        <i class="fas fa-star"></i>
-                        ${escapeHTML(rating)}
-                    </span>
-                ` : ""}
+    const image = document.createElement("img");
+    image.src = poster;
+    image.alt = title;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.onerror = () => {
+        image.onerror = null;
+        image.src = GENRE_CONFIG.fallbackPoster;
+    };
 
-                <div class="movie-card-overlay">
-                    <span class="movie-play-button">
-                        <i class="fas fa-play"></i>
-                    </span>
-                    <span class="movie-watch-label">View Details</span>
-                </div>
-            </div>
+    const typeBadge = document.createElement("span");
+    typeBadge.className = "movie-type-badge";
+    typeBadge.textContent = type === "series" ? "SERIES" : "MOVIE";
 
-            <div class="movie-info">
-                <h3 class="movie-title">
-                    ${escapeHTML(title)}
-                </h3>
+    const overlay = document.createElement("div");
+    overlay.className = "movie-card-overlay";
 
-                <div class="movie-meta">
-                    ${year ? `<span>${escapeHTML(year)}</span>` : ""}
-                    ${year && category ? `<span class="meta-separator">•</span>` : ""}
-                    ${category ? `<span>${escapeHTML(category)}</span>` : ""}
-                </div>
-            </div>
-        </a>
-    `;
+    const playIcon = document.createElement("span");
+    playIcon.className = "movie-play-icon";
 
-    const image = card.querySelector("img");
+    const play = document.createElement("i");
+    play.className = "fa-solid fa-play";
+    playIcon.appendChild(play);
+    overlay.appendChild(playIcon);
 
-    image?.addEventListener("error", () => {
-        if (image.src.includes(GENRE_CONFIG.placeholder)) return;
-        image.src = GENRE_CONFIG.placeholder;
-    }, { once: true });
+    posterWrap.append(image, typeBadge, overlay);
+
+    const info = document.createElement("div");
+    info.className = "movie-info";
+
+    const heading = document.createElement("h3");
+    heading.className = "movie-title";
+    heading.textContent = title;
+    heading.title = title;
+
+    const meta = document.createElement("div");
+    meta.className = "movie-meta";
+
+    if (year) {
+        const yearText = document.createElement("span");
+        yearText.textContent = year;
+        meta.appendChild(yearText);
+    }
+
+    if (rating > 0) {
+        const ratingText = document.createElement("span");
+        ratingText.className = "movie-rating";
+
+        const star = document.createElement("i");
+        star.className = "fa-solid fa-star";
+
+        const score = document.createElement("span");
+        score.textContent = rating.toFixed(1);
+
+        ratingText.append(star, score);
+        meta.appendChild(ratingText);
+    }
+
+    if (item.translator) {
+        const translator = document.createElement("span");
+        translator.className = "movie-translator";
+        translator.textContent = String(item.translator);
+        meta.appendChild(translator);
+    }
+
+    info.append(heading, meta);
+    link.append(posterWrap, info);
+    card.appendChild(link);
 
     return card;
 }
 
-function renderCards(items) {
-    if (!elements.grid) return;
-
-    elements.grid.replaceChildren();
-
-    const fragment = document.createDocumentFragment();
-
-    items.forEach(item => {
-        fragment.appendChild(createCard(item));
-    });
-
-    elements.grid.appendChild(fragment);
-}
-
-
-/* =========================================================
+/* =========================================
    PAGINATION
-========================================================= */
+========================================= */
 
-function renderPagination() {
-    if (!elements.pagination) return;
-
-    const totalPages = Math.max(1, state.totalPages);
-    const current = state.currentPage;
-
-    setHidden(elements.pagination, totalPages <= 1);
-
-    if (elements.prevPage) {
-        elements.prevPage.disabled = current <= 1;
-    }
-
-    if (elements.nextPage) {
-        elements.nextPage.disabled = current >= totalPages;
-    }
-
-    if (!elements.paginationPages) return;
-
-    elements.paginationPages.replaceChildren();
-
-    let start = Math.max(1, current - 2);
-    let end = Math.min(totalPages, current + 2);
-
-    if (current <= 2) {
-        end = Math.min(totalPages, 5);
-    }
-
-    if (current >= totalPages - 1) {
-        start = Math.max(1, totalPages - 4);
-    }
-
-    if (start > 1) {
-        addPageButton(1);
-
-        if (start > 2) {
-            addPageDots();
-        }
-    }
-
-    for (let page = start; page <= end; page++) {
-        addPageButton(page);
-    }
-
-    if (end < totalPages) {
-        if (end < totalPages - 1) {
-            addPageDots();
-        }
-
-        addPageButton(totalPages);
-    }
-}
-
-function addPageButton(page) {
+function createPageButton(label, page, options = {}) {
     const button = document.createElement("button");
 
     button.type = "button";
-    button.className = "pagination-page";
-    button.textContent = String(page);
-    button.setAttribute("aria-label", `Go to page ${page}`);
+    button.className = "genre-page-btn";
+    button.textContent = label;
+    button.disabled = Boolean(options.disabled);
 
-    if (page === state.currentPage) {
+    if (options.active) {
         button.classList.add("active");
         button.setAttribute("aria-current", "page");
     }
 
     button.addEventListener("click", () => {
-        if (page === state.currentPage) return;
+        if (page === state.currentPage || button.disabled) return;
 
         state.currentPage = page;
-        loadContent();
-        scrollToResults();
-    });
+        renderResults();
+        updateUrl();
 
-    elements.paginationPages.appendChild(button);
-}
-
-function addPageDots() {
-    const dots = document.createElement("span");
-
-    dots.className = "pagination-dots";
-    dots.textContent = "…";
-
-    elements.paginationPages.appendChild(dots);
-}
-
-function scrollToResults() {
-    const target = elements.grid || elements.resultsHeader;
-
-    if (!target) return;
-
-    target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-}
-
-
-/* =========================================================
-   FILTER DISPLAY
-========================================================= */
-
-function updateGenreChips() {
-    if (!elements.genreChips) return;
-
-    elements.genreChips
-        .querySelectorAll("[data-genre]")
-        .forEach(chip => {
-            const active = normalizeText(chip.dataset.genre) === state.genre;
-
-            chip.classList.toggle("active", active);
-            chip.setAttribute("aria-pressed", String(active));
+        document.getElementById("genreContent").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
         });
+    });
+
+    return button;
 }
+
+function renderPagination(totalPages) {
+    elements.pagination.replaceChildren();
+
+    if (totalPages <= 1) return;
+
+    elements.pagination.appendChild(
+        createPageButton("‹", state.currentPage - 1, {
+            disabled: state.currentPage === 1
+        })
+    );
+
+    const pages = new Set([
+        1,
+        totalPages,
+        state.currentPage,
+        state.currentPage - 1,
+        state.currentPage + 1
+    ]);
+
+    const sortedPages = [...pages]
+        .filter((page) => page >= 1 && page <= totalPages)
+        .sort((a, b) => a - b);
+
+    let previous = 0;
+
+    sortedPages.forEach((page) => {
+        if (previous && page - previous > 1) {
+            const dots = document.createElement("span");
+            dots.className = "genre-page-dots";
+            dots.textContent = "…";
+            elements.pagination.appendChild(dots);
+        }
+
+        elements.pagination.appendChild(
+            createPageButton(String(page), page, {
+                active: page === state.currentPage
+            })
+        );
+
+        previous = page;
+    });
+
+    elements.pagination.appendChild(
+        createPageButton("›", state.currentPage + 1, {
+            disabled: state.currentPage === totalPages
+        })
+    );
+}
+
+/* =========================================
+   ACTIVE FILTER DISPLAY
+========================================= */
 
 function updateActiveFilters() {
-    if (!elements.activeFilters || !elements.activeFilterTags) return;
-
-    elements.activeFilterTags.replaceChildren();
+    elements.activeFilters.replaceChildren();
 
     const filters = [];
 
-    if (state.type !== "all") {
-        filters.push(
-            state.type === "movie" ? "Movies" : "Series"
-        );
+    if (state.genre) {
+        filters.push(`Genre: ${titleCase(state.genre)}`);
     }
 
-    if (state.genre) filters.push(state.genre);
-    if (state.search) filters.push(`Search: ${state.search}`);
+    if (state.type !== "all") {
+        filters.push(`Type: ${state.type === "movie" ? "Movies" : "Series"}`);
+    }
 
-    setHidden(elements.activeFilters, filters.length === 0);
+    if (state.search.trim()) {
+        filters.push(`Search: ${state.search.trim()}`);
+    }
 
-    filters.forEach(filter => {
-        const tag = document.createElement("span");
+    if (state.sort !== "latest") {
+        const labels = {
+            rating: "Top rated",
+            popular: "Most viewed",
+            title: "A – Z"
+        };
 
-        tag.className = "active-filter-tag";
-        tag.textContent = filter;
+        filters.push(`Sort: ${labels[state.sort] || state.sort}`);
+    }
 
-        elements.activeFilterTags.appendChild(tag);
+    if (!filters.length) {
+        elements.activeFilters.hidden = true;
+        return;
+    }
+
+    elements.activeFilters.hidden = false;
+
+    filters.forEach((label) => {
+        const chip = document.createElement("span");
+        chip.className = "genre-filter-chip";
+
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-filter";
+
+        chip.append(icon, document.createTextNode(label));
+        elements.activeFilters.appendChild(chip);
     });
 }
 
-function updateHeadings() {
-    if (elements.resultsTitle) {
-        if (state.genre) {
-            elements.resultsTitle.textContent = state.genre;
-        } else if (state.type === "movie") {
-            elements.resultsTitle.textContent = "Movies";
-        } else if (state.type === "series") {
-            elements.resultsTitle.textContent = "Series";
-        } else {
-            elements.resultsTitle.textContent = "All Content";
-        }
-    }
-
-    if (elements.resultsSubtitle) {
-        elements.resultsSubtitle.textContent = state.search
-            ? `Search results for "${state.search}"`
-            : "Explore the latest movies and series.";
-    }
-
-    updateActiveFilters();
-    updateGenreChips();
-}
-
-function updateResultCount() {
-    if (!elements.resultCount) return;
-
-    const total = state.totalItems;
-
-    elements.resultCount.textContent =
-        `${total.toLocaleString()} ${total === 1 ? "title" : "titles"} found`;
-}
-
-
-/* =========================================================
-   LOAD CONTENT
-========================================================= */
-
-async function loadContent() {
-    const requestId = ++state.requestId;
-
-    updateUrl();
-    updateHeadings();
-    setLoading(true);
-
-    try {
-        const { data, error, count } = await buildQuery();
-
-        // Ignore stale responses
-        if (requestId !== state.requestId) return;
-
-        if (error) throw error;
-
-        const items = Array.isArray(data) ? data : [];
-
-        state.totalItems = count || 0;
-        state.totalPages = Math.max(
-            1,
-            Math.ceil(state.totalItems / GENRE_CONFIG.pageSize)
-        );
-
-        // If filters reduce the number of pages, return to a valid page.
-        if (state.currentPage > state.totalPages) {
-            state.currentPage = state.totalPages;
-            updateUrl();
-            return loadContent();
-        }
-
-        updateResultCount();
-
-        if (!items.length) {
-            if (elements.grid) {
-                elements.grid.replaceChildren();
-            }
-
-            setEmpty();
-            return;
-        }
-
-        renderCards(items);
-        renderPagination();
-        setResultsVisible();
-
-    } catch (error) {
-        if (requestId !== state.requestId) return;
-
-        console.error("CINEVA Discover error:", error);
-
-        setError(
-            "We couldn't load the collection. Please check your connection and try again."
-        );
-    }
-}
-
-
-/* =========================================================
-   FILTER EVENTS
-========================================================= */
+/* =========================================
+   RESET
+========================================= */
 
 function resetFilters() {
-    clearTimeout(state.searchTimer);
-
     state.type = "all";
     state.genre = "";
     state.sort = "latest";
     state.search = "";
     state.currentPage = 1;
 
-    syncControlsFromState();
-    loadContent();
+    elements.contentFilter.value = "all";
+    elements.sortFilter.value = "latest";
+    elements.search.value = "";
+
+    updatePageHeader();
+    applyFilters();
 }
+
+/* =========================================
+   EVENTS
+========================================= */
 
 function bindEvents() {
-
-    elements.type?.addEventListener("change", () => {
-        state.type = normalizeType(elements.type.value);
+    elements.contentFilter.addEventListener("change", () => {
+        state.type = elements.contentFilter.value;
         state.currentPage = 1;
+        updatePageHeader();
+        applyFilters();
+    });
+
+    elements.sortFilter.addEventListener("change", () => {
+        state.sort = elements.sortFilter.value;
+        state.currentPage = 1;
+        updatePageHeader();
+        applyFilters();
+    });
+
+    elements.search.addEventListener("input", () => {
+        state.search = elements.search.value;
+        state.currentPage = 1;
+        applyFilters();
+    });
+
+    elements.clearSearch.addEventListener("click", () => {
+        elements.search.value = "";
+        state.search = "";
+        state.currentPage = 1;
+        applyFilters();
+        elements.search.focus();
+    });
+
+    elements.resetButton.addEventListener("click", resetFilters);
+    elements.emptyReset.addEventListener("click", resetFilters);
+
+    elements.retryButton.addEventListener("click", () => {
         loadContent();
     });
 
-    elements.genre?.addEventListener("change", () => {
-        state.genre = normalizeText(elements.genre.value);
-        state.currentPage = 1;
-        loadContent();
-    });
+    // Keep the homepage search system compatible with this page.
+    const siteSearch = document.getElementById("search-form");
 
-    elements.sort?.addEventListener("change", () => {
-        state.sort = SORT_OPTIONS[elements.sort.value]
-            ? elements.sort.value
-            : "latest";
+    if (siteSearch) {
+        siteSearch.addEventListener("submit", (event) => {
+            event.preventDefault();
 
-        state.currentPage = 1;
-        loadContent();
-    });
+            const input = document.getElementById("search-input");
+            const value = input?.value?.trim();
 
-    elements.search?.addEventListener("input", () => {
-        state.search = normalizeText(elements.search.value);
-        state.currentPage = 1;
+            if (!value) return;
 
-        // Invalidate an older request immediately.
-        state.requestId++;
+            state.search = value;
+            state.currentPage = 1;
+            elements.search.value = value;
 
-        clearTimeout(state.searchTimer);
+            applyFilters();
 
-        state.searchTimer = setTimeout(() => {
-            loadContent();
-        }, GENRE_CONFIG.searchDelay);
-    });
-
-    elements.genreChips
-        ?.querySelectorAll("[data-genre]")
-        .forEach(chip => {
-            chip.addEventListener("click", () => {
-                state.genre = normalizeText(chip.dataset.genre);
-                state.currentPage = 1;
-
-                if (elements.genre) {
-                    elements.genre.value = state.genre;
-                }
-
-                updateGenreChips();
-                loadContent();
+            document.getElementById("genreContent").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
             });
         });
-
-    elements.clearFilters?.addEventListener("click", resetFilters);
-    elements.clearActiveFilters?.addEventListener("click", resetFilters);
-    elements.emptyReset?.addEventListener("click", resetFilters);
-
-    elements.retry?.addEventListener("click", () => {
-        loadContent();
-    });
-
-    elements.prevPage?.addEventListener("click", () => {
-        if (state.currentPage <= 1) return;
-
-        state.currentPage--;
-        loadContent();
-        scrollToResults();
-    });
-
-    elements.nextPage?.addEventListener("click", () => {
-        if (state.currentPage >= state.totalPages) return;
-
-        state.currentPage++;
-        loadContent();
-        scrollToResults();
-    });
-
-    // Keep the Discover filters synchronized with browser history.
-    window.addEventListener("popstate", () => {
-        readUrlState();
-        syncControlsFromState();
-        loadContent();
-    });
+    }
 }
 
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-function cacheElements() {
-    elements.type = getElement("content-type");
-    elements.genre = getElement("genre-filter");
-    elements.sort = getElement("sort-filter");
-    elements.search = getElement("search-input");
-
-    elements.genreChips = getElement("genre-chips");
-
-    elements.grid = getElement("genre-grid");
-    elements.loading = getElement("genre-loading");
-    elements.empty = getElement("genre-empty");
-    elements.error = getElement("genre-error");
-
-    elements.pagination = getElement("genre-pagination");
-    elements.paginationPages = getElement("pagination-pages");
-
-    elements.prevPage = getElement("prev-page");
-    elements.nextPage = getElement("next-page");
-
-    elements.clearFilters = getElement("clear-filters");
-    elements.clearActiveFilters = getElement("clear-active-filters");
-    elements.activeFilters = getElement("active-filters");
-    elements.activeFilterTags = getElement("active-filter-tags");
-
-    elements.emptyReset = getElement("empty-reset-btn");
-    elements.retry = getElement("retry-genre-btn");
-
-    elements.resultCount = getElement("result-count");
-    elements.resultsTitle = getElement("results-title");
-    elements.resultsSubtitle = getElement("results-subtitle");
-    elements.resultsHeader = document.querySelector(".genre-results-header");
-}
+/* =========================================
+   INITIALIZE
+========================================= */
 
 function initializeGenrePage() {
-    cacheElements();
-
     if (!elements.grid) {
-        console.warn("CINEVA: #genre-grid was not found.");
+        console.error("CINEVA: genre grid was not found.");
         return;
     }
 
-    readUrlState();
-    syncControlsFromState();
-    bindEvents();
-    loadContent();
+    if (elements.footerYear) {
+        elements.footerYear.textContent = new Date().getFullYear();
+    }
 
-    console.info("CINEVA Discover initialized.");
+    readUrlState();
+    bindEvents();
+    updatePageHeader();
+    loadContent();
 }
 
 if (document.readyState === "loading") {
