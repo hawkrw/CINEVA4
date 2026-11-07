@@ -27,7 +27,7 @@ const HOME_CONFIG = {
     latestLimit: 6,
     heroLimit: 10,
     categoryLimit: 6,
-   trendingLimit: 12,
+   trendingLimit: 6,
 
     // Automatically change hero every 4 seconds
     sliderInterval: 4000,
