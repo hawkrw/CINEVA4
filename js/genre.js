@@ -1,13 +1,35 @@
-import { supabase } from "./config.js";
 
 /* =========================================================
-   CINEVA — PREMIUM GENRE & DISCOVERY CONTROLLER
+   CINEVA — PREMIUM GENRE / DISCOVERY CONTROLLER
+   File: js/genre.js
+
+   Features:
+   - Loads active movies and series from Supabase
+   - Genre, type and search filters
+   - Latest, rating, popularity and A-Z sorting
+   - Pagination
+   - URL query parameter support
+   - Safe DOM rendering
+   - Poster fallbacks
 ========================================================= */
 
-const CONTENTS_PER_PAGE = 15;
+import { supabase } from "./config.js";
 
-const FALLBACK_POSTER =
-    "https://placehold.co/500x750/151522/ffffff?text=CINEVA";
+/* =========================================
+   CONFIGURATION
+========================================= */
+
+const GENRE_CONFIG = {
+    moviesTable: "movies",
+    seriesTable: "series",
+    pageSize: 20,
+    fallbackPoster:
+        "https://placehold.co/400x600/151522/ffffff?text=CINEVA"
+};
+
+/* =========================================
+   STATE
+========================================= */
 
 const state = {
     allContent: [],
@@ -20,161 +42,269 @@ const state = {
     loading: false
 };
 
+/* =========================================
+   DOM ELEMENTS
+========================================= */
+
 const elements = {
-    title: document.getElementById("page-title"),
-    description: document.getElementById("page-description"),
-    heading: document.getElementById("results-heading"),
-    count: document.getElementById("results-count"),
+    pageTitle: document.getElementById("page-title"),
+    pageDescription: document.getElementById("page-description"),
+
+    resultsHeading: document.getElementById("results-heading"),
+    resultsCount: document.getElementById("results-count"),
+    resultsStatus: document.getElementById("results-status"),
+    pageIndicator: document.getElementById("page-indicator"),
+
+    search: document.getElementById("genre-search"),
+    clearSearch: document.getElementById("clear-search"),
+
+    contentFilter: document.getElementById("content-filter"),
+    sortFilter: document.getElementById("sort-filter"),
+    resetButton: document.getElementById("genre-reset"),
+    emptyReset: document.getElementById("empty-reset"),
+
+    activeFilters: document.getElementById("active-filters"),
+
     grid: document.getElementById("genre-grid"),
     loading: document.getElementById("genre-loading"),
     empty: document.getElementById("genre-empty"),
     error: document.getElementById("genre-error"),
     errorText: document.getElementById("genre-error-text"),
-    typeFilter: document.getElementById("content-filter"),
-    sortFilter: document.getElementById("sort-filter"),
-    search: document.getElementById("genre-search"),
+    retryButton: document.getElementById("genre-retry"),
     pagination: document.getElementById("genre-pagination"),
-    resultsLabel: document.getElementById("genre-results-label"),
-    footerYear: document.getElementById("footer-year"),
-    resetButton: document.getElementById("genre-reset-btn"),
-    retryButton: document.getElementById("genre-retry-btn")
+
+    footerYear: document.getElementById("currentYear")
 };
 
-const GENRE_NAMES = {
-    action: "Action",
-    horror: "Horror",
-    drama: "Drama",
-    romance: "Romance",
-    animation: "Animation",
-    highschool: "High School",
-    "high-school": "High School",
-    comedy: "Comedy",
-    "sci-fi": "Sci-Fi",
-    scifi: "Sci-Fi",
-    adventure: "Adventure",
-    thriller: "Thriller",
-    fantasy: "Fantasy",
-    crime: "Crime",
-    documentary: "Documentary",
-    mystery: "Mystery",
-    family: "Family",
-    erotic: "Erotic"
-};
+/* =========================================
+   HELPERS
+========================================= */
 
-const GENRE_ALIASES = {
-    "sci-fi": ["science-fiction", "scifi", "science fiction"],
-    scifi: ["sci-fi", "science-fiction", "science fiction"],
-    "high-school": ["highschool", "school", "high school"],
-    highschool: ["high-school", "school", "high school"],
-    animation: ["animated"],
-    romance: ["romantic"]
-};
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-document.addEventListener("DOMContentLoaded", initializeGenrePage);
-
-async function initializeGenrePage() {
-    const missingElements = Object.entries(elements)
-        .filter(([key, element]) =>
-            key !== "footerYear" &&
-            key !== "resultsLabel" &&
-            key !== "resetButton" &&
-            key !== "retryButton" &&
-            !element
-        )
-        .map(([key]) => key);
-
-    if (missingElements.length) {
-        console.error(
-            "CINEVA: Required genre page elements are missing:",
-            missingElements
-        );
-        return;
-    }
-
-    if (elements.footerYear) {
-        elements.footerYear.textContent = new Date().getFullYear();
-    }
-
-    readUrlParameters();
-    updatePageInformation();
-    connectFilters();
-
-    await loadContent();
-
-    console.log("CINEVA: Premium discovery page initialized.");
+function normalizeText(value = "") {
+    return String(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 }
 
-/* =========================================================
-   URL PARAMETERS
-========================================================= */
+function getContentType(item) {
+    return item._contentType || item.content_type || "movie";
+}
 
-function readUrlParameters() {
+function getTitle(item) {
+    return item.title || item.name || "Untitled";
+}
+
+function getRating(item) {
+    const value = Number(
+        item.vote_average ??
+        item.rating ??
+        item.tmdb_rating ??
+        0
+    );
+
+    return Number.isFinite(value) ? value : 0;
+}
+
+function getViews(item) {
+    const value = Number(item.views ?? item.view_count ?? 0);
+    return Number.isFinite(value) ? value : 0;
+}
+
+function getReleaseYear(item) {
+    const date =
+        item.release_date ||
+        item.first_air_date ||
+        item.year ||
+        item.created_at;
+
+    if (!date) return "";
+
+    const match = String(date).match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : "";
+}
+
+function getLatestDate(item) {
+    const date =
+        getContentType(item) === "series"
+            ? item.updated_at || item.created_at || item.release_date
+            : item.created_at || item.release_date;
+
+    const timestamp = date ? new Date(date).getTime() : 0;
+
+    return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function getPoster(item) {
+    const poster =
+        item.poster_path ||
+        item.poster_url ||
+        item.poster ||
+        item.thumbnail ||
+        item.image ||
+        "";
+
+    if (!poster) return GENRE_CONFIG.fallbackPoster;
+
+    const value = String(poster).trim();
+
+    if (/^https?:\/\//i.test(value)) {
+        return value;
+    }
+
+    if (value.startsWith("/assets/") || value.startsWith("assets/")) {
+        return value.startsWith("/") ? value : `/${value}`;
+    }
+
+    if (value.startsWith("/")) {
+        return `https://image.tmdb.org/t/p/w500${value}`;
+    }
+
+    return value;
+}
+
+function parseGenreValues(value) {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+        return value.flatMap((entry) => {
+            if (typeof entry === "string") {
+                return entry.split(",").map((part) => part.trim()).filter(Boolean);
+            }
+
+            if (entry && typeof entry === "object") {
+                const name = entry.name || entry.title || entry.genre;
+                return name ? [String(name)] : [];
+            }
+
+            return [];
+        });
+    }
+
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+
+        if (!trimmed) return [];
+
+        // Support JSON arrays stored as text.
+        if (
+            (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+            (trimmed.startsWith("{") && trimmed.endsWith("}"))
+        ) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed !== value) return parseGenreValues(parsed);
+            } catch {
+                // Continue as a normal text value.
+            }
+        }
+
+        return trimmed
+            .split(/[,|]/)
+            .map((part) => part.trim())
+            .filter(Boolean);
+    }
+
+    return [];
+}
+
+function getItemGenres(item) {
+    const values = [
+        ...parseGenreValues(item.genres),
+        ...parseGenreValues(item.genre),
+        ...parseGenreValues(item.category)
+    ];
+
+    return [...new Set(values.map(normalizeText).filter(Boolean))];
+}
+
+function matchesGenre(item, requestedGenre) {
+    if (!requestedGenre) return true;
+
+    const genres = getItemGenres(item);
+
+    const aliases = {
+        "high-school": ["highschool", "high-school", "school"],
+        highschool: ["highschool", "high-school", "school"],
+        "sci-fi": ["sci-fi", "science-fiction", "scifi"],
+        scifi: ["sci-fi", "science-fiction", "scifi"],
+        animation: ["animation", "animated"],
+        romance: ["romance", "erotic"],
+        erotic: ["erotic", "romance"]
+    };
+
+    const accepted = aliases[requestedGenre] || [requestedGenre];
+
+    return genres.some((genre) =>
+        accepted.some((alias) =>
+            genre === alias ||
+            genre.includes(alias) ||
+            alias.includes(genre)
+        )
+    );
+}
+
+/* =========================================
+   URL STATE
+========================================= */
+
+function readUrlState() {
     const params = new URLSearchParams(window.location.search);
 
-    const requestedType = params.get("type")?.toLowerCase();
-    const requestedGenre = params.get("genre")?.toLowerCase();
-    const requestedSort = params.get("sort")?.toLowerCase();
-    const requestedPage = Number(params.get("page"));
-
-    state.type = ["movie", "series"].includes(requestedType)
+    const requestedType = params.get("type") || "all";
+    state.type = ["all", "movie", "series"].includes(requestedType)
         ? requestedType
         : "all";
 
-    state.genre = requestedGenre || "";
+    state.genre = normalizeText(params.get("genre") || "");
+
+    const requestedSort = params.get("sort") || "latest";
+
+    const sortAliases = {
+        trending: "popular",
+        "top-rated": "rating",
+        newest: "latest"
+    };
+
+    const normalizedSort = sortAliases[requestedSort] || requestedSort;
+
+    state.sort = ["latest", "rating", "popular", "title"].includes(normalizedSort)
+        ? normalizedSort
+        : "latest";
+
     state.search = params.get("search") || "";
-elements.search.value = state.search;
 
-    state.sort = [
-        "latest",
-        "rating",
-        "popular",
-        "title"
-    ].includes(requestedSort)
-        ? requestedSort
-        : requestedSort === "top-rated"
-            ? "rating"
-            : "latest";
+    const requestedPage = Number.parseInt(params.get("page") || "1", 10);
+    state.currentPage = Number.isFinite(requestedPage) && requestedPage > 0
+        ? requestedPage
+        : 1;
 
-    state.currentPage =
-        Number.isInteger(requestedPage) && requestedPage > 0
-            ? requestedPage
-            : 1;
-
-    elements.typeFilter.value = state.type;
+    elements.contentFilter.value = state.type;
     elements.sortFilter.value = state.sort;
-
-    if (elements.resultsLabel) {
-        elements.resultsLabel.textContent = state.genre
-            ? `${getGenreName(state.genre).toUpperCase()} COLLECTION`
-            : state.type === "movie"
-                ? "MOVIE COLLECTION"
-                : state.type === "series"
-                    ? "SERIES COLLECTION"
-                    : "ALL COLLECTIONS";
-    }
+    elements.search.value = state.search;
 }
 
-function updateBrowserUrl() {
+function updateUrl() {
     const params = new URLSearchParams();
-
-    if (state.genre) {
-        params.set("genre", state.genre);
-    }
 
     if (state.type !== "all") {
         params.set("type", state.type);
+    }
+
+    if (state.genre) {
+        params.set("genre", state.genre);
     }
 
     if (state.sort !== "latest") {
         params.set("sort", state.sort);
     }
 
-    if (state.search) {
-        params.set("search", state.search);
+    if (state.search.trim()) {
+        params.set("search", state.search.trim());
     }
 
     if (state.currentPage > 1) {
@@ -182,115 +312,33 @@ function updateBrowserUrl() {
     }
 
     const query = params.toString();
+    const newUrl = query
+        ? `${window.location.pathname}?${query}`
+        : window.location.pathname;
 
-    history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${query ? `?${query}` : ""}`
-    );
+    window.history.replaceState({}, "", newUrl);
 }
 
-/* =========================================================
-   PAGE INFORMATION
-========================================================= */
+/* =========================================
+   FETCH CONTENT
+========================================= */
 
-function updatePageInformation() {
-    let title = "Discover Movies & Series";
-    let description =
-        "Explore incredible stories, discover new favourites and find your next unforgettable experience.";
-    let heading = "Explore Content";
+async function fetchTable(tableName, contentType) {
+    const { data, error } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("is_active", true);
 
-    if (state.genre) {
-        const genreName = getGenreName(state.genre);
-
-        title = `${genreName} Collection`;
-        description =
-            `Explore ${genreName.toLowerCase()} movies and series from the CINEVA collection.`;
-        heading = `${genreName} Collection`;
-
-    } else if (state.type === "movie") {
-        title = "Explore Movies";
-        description =
-            "Discover movies from every category and explore your next favourite story.";
-        heading = "All Movies";
-
-    } else if (state.type === "series") {
-        title = "Explore Series";
-        description =
-            "Discover exciting series, unforgettable characters and amazing stories.";
-        heading = "All Series";
-
-    } else if (state.sort === "rating") {
-        title = "Top Rated Collection";
-        description =
-            "Explore the highest-rated movies and series in the CINEVA collection.";
-        heading = "Top Rated Content";
+    if (error) {
+        throw new Error(`${tableName}: ${error.message}`);
     }
 
-    elements.title.textContent = title;
-    elements.description.textContent = description;
-    elements.heading.textContent = heading;
-
-    document.title = `${title} | CINEVA`;
+    return (data || []).map((item) => ({
+        ...item,
+        _contentType: contentType
+    }));
 }
 
-function getGenreName(genre) {
-    const key = normalizeText(genre);
-
-    return GENRE_NAMES[key] ||
-        String(genre)
-            .replace(/[-_]/g, " ")
-            .replace(/\b\w/g, letter => letter.toUpperCase());
-}
-
-/* =========================================================
-   FILTER CONTROLS
-========================================================= */
-
-function connectFilters() {
-    elements.typeFilter.addEventListener("change", event => {
-        state.type = event.target.value;
-        state.currentPage = 1;
-
-        updatePageInformation();
-        applyFilters();
-    });
-
-    elements.sortFilter.addEventListener("change", event => {
-        state.sort = event.target.value;
-        state.currentPage = 1;
-
-        updatePageInformation();
-        applyFilters();
-    });
-
-    elements.search.addEventListener("input", event => {
-        state.search = event.target.value.trim().toLowerCase();
-        state.currentPage = 1;
-
-        applyFilters();
-    });
-
-    elements.resetButton?.addEventListener("click", () => {
-        state.search = "";
-        state.type = "all";
-        state.sort = "latest";
-        state.currentPage = 1;
-
-        elements.search.value = "";
-        elements.typeFilter.value = "all";
-        elements.sortFilter.value = "latest";
-
-        updatePageInformation();
-        applyFilters();
-    });
-
-    elements.retryButton?.addEventListener("click", loadContent);
-}
-
-/* =========================================================
-   FETCH SUPABASE CONTENT
-========================================================= */
 async function loadContent() {
     if (state.loading) return;
 
@@ -299,585 +347,339 @@ async function loadContent() {
 
     try {
         const [movies, series] = await Promise.all([
-            fetchMovies(),
-            fetchSeries()
+            fetchTable(GENRE_CONFIG.moviesTable, "movie"),
+            fetchTable(GENRE_CONFIG.seriesTable, "series")
         ]);
 
         state.allContent = [...movies, ...series];
 
         applyFilters();
-
-        console.log(
-            `CINEVA: Loaded ${state.allContent.length} content records.`
-        );
-
+        updatePageHeader();
     } catch (error) {
         console.error("CINEVA genre loading error:", error);
 
-        showError(
-            error.message ||
-            "Unable to connect to the CINEVA database."
-        );
+        elements.loading.hidden = true;
+        elements.grid.replaceChildren();
+        elements.pagination.replaceChildren();
+        elements.empty.hidden = true;
+        elements.error.hidden = false;
 
+        elements.errorText.textContent =
+            error.message || "Please check your connection and try again.";
     } finally {
         state.loading = false;
     }
 }
 
-async function fetchMovies() {
-    const { data, error } = await supabase
-        .from("movies")
-        .select("*")
-        .eq("is_active", true);
-
-    if (error) {
-        throw new Error(`Movies: ${error.message}`);
-    }
-
-    return (data || []).map(movie => ({
-        ...movie,
-        content_type: "movie"
-    }));
-}
-
-async function fetchSeries() {
-    const { data, error } = await supabase
-        .from("series")
-        .select("*")
-        .eq("is_active", true);
-
-    if (error) {
-        throw new Error(`Series: ${error.message}`);
-    }
-
-    return (data || []).map(series => ({
-        ...series,
-        content_type: "series"
-    }));
-}
-
-/* =========================================================
-   FILTERING
-========================================================= */
+/* =========================================
+   FILTERING AND SORTING
+========================================= */
 
 function applyFilters() {
-    const searchTerm = normalizeSearch(state.search);
-    const requestedGenre = normalizeText(state.genre);
+    let result = [...state.allContent];
 
-    const acceptedGenres = [
-        requestedGenre,
-        ...(GENRE_ALIASES[requestedGenre] || [])
-    ].map(normalizeText);
-
-    state.content = state.allContent.filter(item => {
-        const matchesType =
-            state.type === "all" ||
-            item.content_type === state.type;
-
-        const searchableText = [
-            getTitle(item),
-            item.original_title,
-            item.category,
-            item.overview,
-            item.description,
-            item.translator
-        ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-
-        const matchesSearch =
-            !searchTerm ||
-            normalizeSearch(searchableText).includes(searchTerm);
-
-        const matchesGenre =
-            !requestedGenre ||
-            getGenres(item).some(genre => {
-                const normalizedGenre = normalizeText(genre);
-
-                return acceptedGenres.includes(normalizedGenre) ||
-                    acceptedGenres.some(accepted =>
-                        GENRE_ALIASES[accepted]?.some(alias =>
-                            normalizeText(alias) === normalizedGenre
-                        )
-                    );
-            });
-
-        return matchesType && matchesSearch && matchesGenre;
-    });
-
-    sortContent();
-
-    const totalPages = getTotalPages();
-
-    if (state.currentPage > totalPages) {
-        state.currentPage = Math.max(1, totalPages);
+    // Movie / series filter
+    if (state.type !== "all") {
+        result = result.filter(
+            (item) => getContentType(item) === state.type
+        );
     }
 
-    renderContent();
-    updateBrowserUrl();
-}
-
-function getGenres(item) {
-    let genres = item.genres;
-
-    if (typeof genres === "string") {
-        try {
-            genres = JSON.parse(genres);
-        } catch {
-            genres = genres.split(",");
-        }
+    // Genre filter
+    if (state.genre) {
+        result = result.filter(
+            (item) => matchesGenre(item, state.genre)
+        );
     }
 
-    if (Array.isArray(genres)) {
-        return genres
-            .map(genre => {
-                if (typeof genre === "string") {
-                    return genre;
-                }
+    // Search filter
+    const searchTerm = normalizeText(state.search);
 
-                return genre?.name || genre?.title || "";
-            })
-            .filter(Boolean);
+    if (searchTerm) {
+        result = result.filter((item) => {
+            const searchable = [
+                getTitle(item),
+                item.overview,
+                item.description,
+                item.translator,
+                item.category,
+                ...parseGenreValues(item.genres),
+                ...parseGenreValues(item.genre)
+            ]
+                .filter(Boolean)
+                .join(" ");
+
+            return normalizeText(searchable).includes(searchTerm);
+        });
     }
 
-    const category = item.category;
-
-    if (Array.isArray(category)) {
-        return category;
-    }
-
-    if (typeof category === "string" && category.includes(",")) {
-        return category.split(",").map(value => value.trim());
-    }
-
-    return category ? [category] : [];
-}
-
-function normalizeText(value) {
-    return String(value || "")
-        .toLowerCase()
-        .trim()
-        .replace(/[_\s]+/g, "-");
-}
-
-function normalizeSearch(value) {
-    return String(value || "")
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, " ");
-}
-
-/* =========================================================
-   SORTING
-========================================================= */
-
-function sortContent() {
+    // Sorting
     switch (state.sort) {
         case "rating":
-            state.content.sort((a, b) =>
-                getRating(b) - getRating(a)
-            );
+            result.sort((a, b) => getRating(b) - getRating(a));
             break;
 
         case "popular":
-            state.content.sort((a, b) =>
-                getViews(b) - getViews(a)
-            );
+            result.sort((a, b) => getViews(b) - getViews(a));
             break;
 
         case "title":
-            state.content.sort((a, b) =>
-                getTitle(a).localeCompare(getTitle(b))
+            result.sort((a, b) =>
+                getTitle(a).localeCompare(getTitle(b), undefined, {
+                    sensitivity: "base"
+                })
             );
             break;
 
+        case "latest":
         default:
-            state.content.sort((a, b) =>
-                getActivityDate(b) - getActivityDate(a)
-            );
+            result.sort((a, b) => getLatestDate(b) - getLatestDate(a));
+            break;
     }
-}
 
-function getActivityDate(item) {
-    const date = item.content_type === "series"
-        ? item.updated_at || item.created_at || item.release_date
-        : item.created_at || item.release_date;
+    state.content = result;
 
-    const timestamp = date ? new Date(date).getTime() : 0;
-
-    return Number.isFinite(timestamp) ? timestamp : 0;
-}
-
-function getRating(item) {
-    return Number(item.vote_average ?? item.rating ?? 0) || 0;
-}
-
-function getViews(item) {
-    return Number(item.views || 0) || 0;
-}
-
-function getTitle(item) {
-    return String(
-        item.title ||
-        item.name ||
-        item.original_title ||
-        "Untitled"
+    const totalPages = Math.max(
+        1,
+        Math.ceil(result.length / GENRE_CONFIG.pageSize)
     );
+
+    state.currentPage = Math.min(state.currentPage, totalPages);
+
+    renderResults();
+    updateActiveFilters();
+    updateUrl();
 }
 
-/* =========================================================
-   POSTER HANDLING
-========================================================= */
+/* =========================================
+   PAGE HEADER
+========================================= */
 
-function getPoster(item) {
-    const poster =
-        item.poster ||
-        item.poster_path ||
-        item.image ||
-        item.thumbnail;
+function titleCase(value) {
+    return String(value)
+        .split(/[-\s]+/)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
 
-    if (!poster || typeof poster !== "string") {
-        return FALLBACK_POSTER;
+function updatePageHeader() {
+    let title = "Explore CINEVA";
+    let description =
+        "Discover movies and series, explore different genres and find your next favorite story.";
+
+    if (state.genre) {
+        title = `${titleCase(state.genre)} Collection`;
+        description =
+            `Explore ${titleCase(state.genre)} movies and series selected for your entertainment.`;
+    } else if (state.type === "movie") {
+        title = "Explore Movies";
+        description = "Discover movies across different genres and stories.";
+    } else if (state.type === "series") {
+        title = "Explore TV Series";
+        description = "Find your next favorite series and follow every story.";
     }
 
-    const value = poster.trim();
-
-    if (/^https?:\/\//i.test(value)) {
-        return value;
+    if (state.sort === "rating") {
+        title = state.genre
+            ? `Top Rated ${titleCase(state.genre)}`
+            : "Top Rated Collection";
+        description = "Explore the highest-rated titles in the CINEVA collection.";
+    } else if (state.sort === "popular") {
+        title = "Trending Collection";
+        description = "Explore the most viewed movies and series on CINEVA.";
+    } else if (state.sort === "latest" && !state.genre && state.type === "all") {
+        title = "Latest Added";
+        description = "Discover the newest movies and series added to CINEVA.";
     }
 
-    if (
-        value.startsWith("/") &&
-        (
-            value.startsWith("/assets/") ||
-            value.startsWith("/images/")
-        )
-    ) {
-        return value;
-    }
-
-    return `https://image.tmdb.org/t/p/w500/${
-        value.replace(/^\/+/, "")
-    }`;
+    elements.pageTitle.textContent = title;
+    elements.pageDescription.textContent = description;
+    elements.resultsHeading.textContent = title;
+    document.title = `${title} | CINEVA`;
 }
 
-function getYear(item) {
-    const date =
-        item.year ||
-        item.release_date ||
-        item.first_air_date ||
-        item.created_at;
+/* =========================================
+   RENDER RESULTS
+========================================= */
 
-    if (!date) return "N/A";
-
-    const match = String(date).match(/\b(19|20)\d{2}\b/);
-
-    return match ? match[0] : "N/A";
+function showLoading() {
+    elements.loading.hidden = false;
+    elements.grid.replaceChildren();
+    elements.empty.hidden = true;
+    elements.error.hidden = true;
+    elements.pagination.replaceChildren();
+    elements.activeFilters.hidden = true;
 }
 
-/* =========================================================
-   RENDER CONTENT
-========================================================= */
-
-function getTotalPages() {
-    return Math.ceil(state.content.length / CONTENTS_PER_PAGE);
-}
-
-function renderContent() {
-    hideAllMessages();
-
-    elements.grid.innerHTML = "";
+function renderResults() {
+    elements.loading.hidden = true;
+    elements.error.hidden = true;
 
     const total = state.content.length;
-    const totalPages = getTotalPages();
+    const totalPages = Math.max(
+        1,
+        Math.ceil(total / GENRE_CONFIG.pageSize)
+    );
 
-    if (!total) {
-        elements.count.textContent = "No titles found";
+    const start = (state.currentPage - 1) * GENRE_CONFIG.pageSize;
+    const pageItems = state.content.slice(
+        start,
+        start + GENRE_CONFIG.pageSize
+    );
+
+    elements.resultsCount.textContent = total.toLocaleString();
+    elements.resultsStatus.textContent = total
+        ? `Showing ${start + 1}–${Math.min(start + pageItems.length, total)} of ${total} titles`
+        : "No matching titles";
+
+    elements.pageIndicator.textContent = total
+        ? `Page ${state.currentPage} of ${totalPages}`
+        : "";
+
+    elements.clearSearch.hidden = !state.search;
+
+    elements.grid.replaceChildren();
+
+    if (!pageItems.length) {
         elements.empty.hidden = false;
-        elements.pagination.hidden = true;
+        elements.pagination.replaceChildren();
         return;
     }
 
-    const startIndex =
-        (state.currentPage - 1) * CONTENTS_PER_PAGE;
-
-    const endIndex = Math.min(
-        startIndex + CONTENTS_PER_PAGE,
-        total
-    );
-
-    const currentContent = state.content.slice(
-        startIndex,
-        endIndex
-    );
+    elements.empty.hidden = true;
 
     const fragment = document.createDocumentFragment();
 
-    currentContent.forEach(item => {
-        fragment.appendChild(createContentCard(item));
+    pageItems.forEach((item) => {
+        fragment.appendChild(createMovieCard(item));
     });
 
     elements.grid.appendChild(fragment);
 
-    elements.count.textContent =
-        `Showing ${startIndex + 1}–${endIndex} of ${total} titles`;
-
     renderPagination(totalPages);
 }
 
-/* =========================================================
-   CONTENT CARDS
-========================================================= */
+/* =========================================
+   SAFE CARD CREATION
+========================================= */
 
-function createContentCard(item) {
-    const card = document.createElement("a");
+function createMovieCard(item) {
+    const type = getContentType(item);
+    const title = getTitle(item);
+    const rating = getRating(item);
+    const year = getReleaseYear(item);
+    const poster = getPoster(item);
 
+    const card = document.createElement("article");
     card.className = "movie-card genre-movie-card";
 
-    card.href =
-        `watch.html?id=${encodeURIComponent(item.id)}&type=${item.content_type}`;
+    const link = document.createElement("a");
+    link.className = "movie-card-link";
+    link.href =
+        `watch.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(type)}`;
+    link.setAttribute("aria-label", `Watch ${title}`);
 
-    card.setAttribute(
-        "aria-label",
-        `Watch ${getTitle(item)}`
-    );
+    const posterWrap = document.createElement("div");
+    posterWrap.className = "movie-poster";
 
-    const posterWrapper = document.createElement("div");
-    posterWrapper.className = "genre-poster";
-
-    const poster = document.createElement("img");
-
-    poster.src = getPoster(item);
-    poster.alt = getTitle(item);
-    poster.loading = "lazy";
-    poster.decoding = "async";
-
-    poster.onerror = () => {
-        poster.onerror = null;
-        poster.src = FALLBACK_POSTER;
+    const image = document.createElement("img");
+    image.src = poster;
+    image.alt = title;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.onerror = () => {
+        image.onerror = null;
+        image.src = GENRE_CONFIG.fallbackPoster;
     };
 
     const typeBadge = document.createElement("span");
-    typeBadge.className = "genre-type-badge";
-    typeBadge.textContent =
-        item.content_type === "series" ? "SERIES" : "MOVIE";
+    typeBadge.className = "movie-type-badge";
+    typeBadge.textContent = type === "series" ? "SERIES" : "MOVIE";
 
-    posterWrapper.append(poster, typeBadge);
+    const overlay = document.createElement("div");
+    overlay.className = "movie-card-overlay";
 
-    const ratingValue = getRating(item);
+    const playIcon = document.createElement("span");
+    playIcon.className = "movie-play-icon";
 
-    if (ratingValue > 0) {
-        const ratingBadge = document.createElement("span");
+    const play = document.createElement("i");
+    play.className = "fa-solid fa-play";
+    playIcon.appendChild(play);
+    overlay.appendChild(playIcon);
 
-        ratingBadge.className = "genre-rating-badge";
+    posterWrap.append(image, typeBadge, overlay);
+
+    const info = document.createElement("div");
+    info.className = "movie-info";
+
+    const heading = document.createElement("h3");
+    heading.className = "movie-title";
+    heading.textContent = title;
+    heading.title = title;
+
+    const meta = document.createElement("div");
+    meta.className = "movie-meta";
+
+    if (year) {
+        const yearText = document.createElement("span");
+        yearText.textContent = year;
+        meta.appendChild(yearText);
+    }
+
+    if (rating > 0) {
+        const ratingText = document.createElement("span");
+        ratingText.className = "movie-rating";
 
         const star = document.createElement("i");
         star.className = "fa-solid fa-star";
 
-        const ratingText = document.createElement("span");
-        ratingText.textContent = ratingValue.toFixed(1);
+        const score = document.createElement("span");
+        score.textContent = rating.toFixed(1);
 
-        ratingBadge.append(star, ratingText);
-        posterWrapper.appendChild(ratingBadge);
+        ratingText.append(star, score);
+        meta.appendChild(ratingText);
     }
 
     if (item.translator) {
         const translator = document.createElement("span");
-
-        translator.className = "genre-translator-badge";
-        translator.textContent = `Translated by ${item.translator}`;
-
-        posterWrapper.appendChild(translator);
+        translator.className = "movie-translator";
+        translator.textContent = String(item.translator);
+        meta.appendChild(translator);
     }
 
-    const overlay = document.createElement("div");
-    overlay.className = "genre-poster-overlay";
-
-    const playButton = document.createElement("span");
-    playButton.className = "genre-play-button";
-
-    const playIcon = document.createElement("i");
-    playIcon.className = "fa-solid fa-play";
-
-    playButton.appendChild(playIcon);
-    overlay.appendChild(playButton);
-    posterWrapper.appendChild(overlay);
-
-    const information = document.createElement("div");
-    information.className = "genre-card-info";
-
-    const title = document.createElement("h3");
-    title.textContent = getTitle(item);
-
-    const metadata = document.createElement("div");
-    metadata.className = "genre-card-meta";
-
-    const year = document.createElement("span");
-    year.className = "genre-card-year";
-    year.textContent = getYear(item);
-
-    const category = document.createElement("span");
-    category.className = "genre-card-category";
-    category.textContent = getGenres(item)[0] || "CINEVA";
-
-    const rating = document.createElement("span");
-    rating.className = "genre-card-rating";
-
-    if (ratingValue > 0) {
-        rating.textContent = ratingValue.toFixed(1);
-    } else {
-        rating.textContent = "New";
-    }
-
-    metadata.append(year, category, rating);
-    information.append(title, metadata);
-
-    card.append(posterWrapper, information);
+    info.append(heading, meta);
+    link.append(posterWrap, info);
+    card.appendChild(link);
 
     return card;
 }
 
-/* =========================================================
+/* =========================================
    PAGINATION
-========================================================= */
+========================================= */
 
-function renderPagination(totalPages) {
-    elements.pagination.innerHTML = "";
-
-    if (totalPages <= 1) {
-        elements.pagination.hidden = true;
-        return;
-    }
-
-    elements.pagination.hidden = false;
-
-    const fragment = document.createDocumentFragment();
-
-    fragment.appendChild(
-        createPageButton(
-            "‹",
-            state.currentPage - 1,
-            state.currentPage === 1,
-            "Previous page"
-        )
-    );
-
-    getVisiblePages(totalPages).forEach(page => {
-        if (page === "...") {
-            const dots = document.createElement("span");
-
-            dots.className = "pagination-dots";
-            dots.textContent = "…";
-
-            fragment.appendChild(dots);
-            return;
-        }
-
-        fragment.appendChild(
-            createPageButton(
-                String(page),
-                page,
-                false,
-                `Page ${page}`,
-                page === state.currentPage
-            )
-        );
-    });
-
-    fragment.appendChild(
-        createPageButton(
-            "›",
-            state.currentPage + 1,
-            state.currentPage === totalPages,
-            "Next page"
-        )
-    );
-
-    const summary = document.createElement("span");
-
-    summary.className = "pagination-summary";
-    summary.textContent =
-        `Page ${state.currentPage} of ${totalPages}`;
-
-    elements.pagination.append(fragment, summary);
-}
-
-function getVisiblePages(totalPages) {
-    const current = state.currentPage;
-
-    if (totalPages <= 5) {
-        return Array.from(
-            { length: totalPages },
-            (_, index) => index + 1
-        );
-    }
-
-    if (current <= 3) {
-        return [1, 2, 3, 4, "...", totalPages];
-    }
-
-    if (current >= totalPages - 2) {
-        return [
-            1,
-            "...",
-            totalPages - 3,
-            totalPages - 2,
-            totalPages - 1,
-            totalPages
-        ];
-    }
-
-    return [
-        1,
-        "...",
-        current - 1,
-        current,
-        current + 1,
-        "...",
-        totalPages
-    ];
-}
-
-function createPageButton(
-    label,
-    page,
-    disabled = false,
-    ariaLabel = "",
-    active = false
-) {
+function createPageButton(label, page, options = {}) {
     const button = document.createElement("button");
 
     button.type = "button";
-    button.className = "pagination-button";
+    button.className = "genre-page-btn";
     button.textContent = label;
-    button.disabled = disabled;
+    button.disabled = Boolean(options.disabled);
 
-    if (active) {
+    if (options.active) {
         button.classList.add("active");
         button.setAttribute("aria-current", "page");
     }
 
-    if (ariaLabel) {
-        button.setAttribute("aria-label", ariaLabel);
-    }
-
     button.addEventListener("click", () => {
-        if (
-            disabled ||
-            page < 1 ||
-            page > getTotalPages() ||
-            page === state.currentPage
-        ) {
-            return;
-        }
+        if (page === state.currentPage || button.disabled) return;
 
         state.currentPage = page;
+        renderResults();
+        updateUrl();
 
-        renderContent();
-        updateBrowserUrl();
-
-        elements.grid.scrollIntoView({
+        document.getElementById("genreContent").scrollIntoView({
             behavior: "smooth",
             block: "start"
         });
@@ -886,39 +688,214 @@ function createPageButton(
     return button;
 }
 
-/* =========================================================
-   UI STATES
-========================================================= */
+function renderPagination(totalPages) {
+    elements.pagination.replaceChildren();
 
-function showLoading() {
-    elements.loading.hidden = false;
-    elements.empty.hidden = true;
-    elements.error.hidden = true;
+    if (totalPages <= 1) return;
 
-    elements.grid.innerHTML = "";
-    elements.pagination.hidden = true;
+    elements.pagination.appendChild(
+        createPageButton("‹", state.currentPage - 1, {
+            disabled: state.currentPage === 1
+        })
+    );
 
-    elements.count.textContent = "Loading CINEVA collection...";
+    const pages = new Set([
+        1,
+        totalPages,
+        state.currentPage,
+        state.currentPage - 1,
+        state.currentPage + 1
+    ]);
+
+    const sortedPages = [...pages]
+        .filter((page) => page >= 1 && page <= totalPages)
+        .sort((a, b) => a - b);
+
+    let previous = 0;
+
+    sortedPages.forEach((page) => {
+        if (previous && page - previous > 1) {
+            const dots = document.createElement("span");
+            dots.className = "genre-page-dots";
+            dots.textContent = "…";
+            elements.pagination.appendChild(dots);
+        }
+
+        elements.pagination.appendChild(
+            createPageButton(String(page), page, {
+                active: page === state.currentPage
+            })
+        );
+
+        previous = page;
+    });
+
+    elements.pagination.appendChild(
+        createPageButton("›", state.currentPage + 1, {
+            disabled: state.currentPage === totalPages
+        })
+    );
 }
 
-function hideAllMessages() {
-    elements.loading.hidden = true;
-    elements.empty.hidden = true;
-    elements.error.hidden = true;
+/* =========================================
+   ACTIVE FILTER DISPLAY
+========================================= */
+
+function updateActiveFilters() {
+    elements.activeFilters.replaceChildren();
+
+    const filters = [];
+
+    if (state.genre) {
+        filters.push(`Genre: ${titleCase(state.genre)}`);
+    }
+
+    if (state.type !== "all") {
+        filters.push(`Type: ${state.type === "movie" ? "Movies" : "Series"}`);
+    }
+
+    if (state.search.trim()) {
+        filters.push(`Search: ${state.search.trim()}`);
+    }
+
+    if (state.sort !== "latest") {
+        const labels = {
+            rating: "Top rated",
+            popular: "Most viewed",
+            title: "A – Z"
+        };
+
+        filters.push(`Sort: ${labels[state.sort] || state.sort}`);
+    }
+
+    if (!filters.length) {
+        elements.activeFilters.hidden = true;
+        return;
+    }
+
+    elements.activeFilters.hidden = false;
+
+    filters.forEach((label) => {
+        const chip = document.createElement("span");
+        chip.className = "genre-filter-chip";
+
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-filter";
+
+        chip.append(icon, document.createTextNode(label));
+        elements.activeFilters.appendChild(chip);
+    });
 }
 
-function showError(message) {
-    elements.loading.hidden = true;
-    elements.empty.hidden = true;
-    elements.error.hidden = false;
+/* =========================================
+   RESET
+========================================= */
 
-    elements.grid.innerHTML = "";
-    elements.pagination.hidden = true;
+function resetFilters() {
+    state.type = "all";
+    state.genre = "";
+    state.sort = "latest";
+    state.search = "";
+    state.currentPage = 1;
 
-    elements.errorText.textContent = message;
-    elements.count.textContent = "Content could not be loaded.";
+    elements.contentFilter.value = "all";
+    elements.sortFilter.value = "latest";
+    elements.search.value = "";
+
+    updatePageHeader();
+    applyFilters();
 }
 
-/* =========================================================
-   END
-========================================================= */
+/* =========================================
+   EVENTS
+========================================= */
+
+function bindEvents() {
+    elements.contentFilter.addEventListener("change", () => {
+        state.type = elements.contentFilter.value;
+        state.currentPage = 1;
+        updatePageHeader();
+        applyFilters();
+    });
+
+    elements.sortFilter.addEventListener("change", () => {
+        state.sort = elements.sortFilter.value;
+        state.currentPage = 1;
+        updatePageHeader();
+        applyFilters();
+    });
+
+    elements.search.addEventListener("input", () => {
+        state.search = elements.search.value;
+        state.currentPage = 1;
+        applyFilters();
+    });
+
+    elements.clearSearch.addEventListener("click", () => {
+        elements.search.value = "";
+        state.search = "";
+        state.currentPage = 1;
+        applyFilters();
+        elements.search.focus();
+    });
+
+    elements.resetButton.addEventListener("click", resetFilters);
+    elements.emptyReset.addEventListener("click", resetFilters);
+
+    elements.retryButton.addEventListener("click", () => {
+        loadContent();
+    });
+
+    // Keep the homepage search system compatible with this page.
+    const siteSearch = document.getElementById("search-form");
+
+    if (siteSearch) {
+        siteSearch.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const input = document.getElementById("search-input");
+            const value = input?.value?.trim();
+
+            if (!value) return;
+
+            state.search = value;
+            state.currentPage = 1;
+            elements.search.value = value;
+
+            applyFilters();
+
+            document.getElementById("genreContent").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+    }
+}
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+function initializeGenrePage() {
+    if (!elements.grid) {
+        console.error("CINEVA: genre grid was not found.");
+        return;
+    }
+
+    if (elements.footerYear) {
+        elements.footerYear.textContent = new Date().getFullYear();
+    }
+
+    readUrlState();
+    bindEvents();
+    updatePageHeader();
+    loadContent();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeGenrePage, {
+        once: true
+    });
+} else {
+    initializeGenrePage();
+}
