@@ -2132,3 +2132,88 @@ body.light-theme {
     object-fit: contain;
     display: block;
 }
+
+/* =========================================================
+   CINEVA PRO — SEARCH DROPDOWN RESPONSIVE UPGRADE
+========================================================= */
+
+.search-results {
+    max-width: min(100%, 460px);
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    z-index: 9999;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.search-result-item img {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 7px;
+}
+
+.search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-info h4 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-result-item.keyboard-active {
+    background: rgba(139, 53, 245, 0.18);
+    outline: 1px solid rgba(168, 85, 247, 0.5);
+}
+
+.search-view-all {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    color: var(--primary-light);
+    font-weight: 700;
+}
+
+.search-empty,
+.search-error,
+.search-loading {
+    padding: 20px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .search-results {
+        width: min(94vw, 460px);
+        max-width: 94vw;
+        max-height: 65vh;
+    }
+
+    .search-result-item {
+        min-height: 76px;
+        gap: 10px;
+        padding: 9px;
+    }
+
+    .search-result-item img {
+        flex-basis: 44px;
+        width: 44px;
+        height: 58px;
+    }
+
+    .search-result-meta {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+}
