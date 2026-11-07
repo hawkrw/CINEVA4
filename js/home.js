@@ -24,13 +24,13 @@ import {
    01. HOMEPAGE SETTINGS
 ========================================================= */
 const HOME_CONFIG = {
-    latestLimit: 10,
-    heroLimit: 5,
+    latestLimit: 6,
+    heroLimit: 10,
     categoryLimit: 6,
    trendingLimit: 12,
 
-    // Automatically change hero every 3 seconds
-    sliderInterval: 3000,
+    // Automatically change hero every 4 seconds
+    sliderInterval: 4000,
 
     requestTimeout: 6000,
 
