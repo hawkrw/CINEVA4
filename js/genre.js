@@ -370,7 +370,16 @@ async function loadContent() {
         state.loading = false;
     }
 }
+const pageLoader = document.getElementById("pageLoader");
 
+if (pageLoader) {
+    pageLoader.style.opacity = "0";
+    pageLoader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+        pageLoader.style.display = "none";
+    }, 350);
+}
 /* =========================================
    FILTERING AND SORTING
 ========================================= */
