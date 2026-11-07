@@ -1,13 +1,14 @@
 
-/* =========================================
-   CINEVA — LIVE SEARCH SYSTEM
-========================================= */
+/* =========================================================
+   CINEVA PRO — PREMIUM LIVE SEARCH SYSTEM
+   Global search dropdown + Discover integration
+========================================================= */
 
 import { searchContent } from "./supabase.js";
 
-/* =========================================
-   SEARCH ELEMENTS
-========================================= */
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
 const searchInput = document.querySelector("#search-input");
 const searchResults = document.querySelector("#search-results");
@@ -15,10 +16,22 @@ const searchForm = document.querySelector("#search-form");
 
 let searchTimeout = null;
 let activeRequest = 0;
+let selectedIndex = -1;
 
-/* =========================================
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const SEARCH_CONFIG = {
+    delay: 350,
+    minCharacters: 1,
+    maxResults: 8,
+    discoverPage: "genre.html"
+};
+
+/* =========================================================
    SAFE HTML
-========================================= */
+========================================================= */
 
 function escapeHTML(value = "") {
     return String(value).replace(/[&<>"']/g, char => ({
@@ -30,92 +43,51 @@ function escapeHTML(value = "") {
     })[char]);
 }
 
-/* =========================================
+/* =========================================================
    CONTENT URL
-========================================= */
+========================================================= */
 
 function getContentUrl(item) {
-    const type = item.content_type || "movie";
+    const type = item.content_type === "series"
+        ? "series"
+        : "movie";
 
     return `watch.html?id=${encodeURIComponent(item.id)}&type=${type}`;
 }
 
-/* =========================================
-   SHOW SEARCH RESULTS
-========================================= */
+/* =========================================================
+   DISCOVER URL
+========================================================= */
 
-function renderResults(results) {
-    if (!searchResults) return;
+function getDiscoverUrl(query) {
+    const params = new URLSearchParams(window.location.search);
 
-    if (!results.length) {
-        searchResults.innerHTML = `
-            <div class="search-empty">
-                <span>⌕</span>
-                <p>No movies or series found.</p>
-            </div>
-        `;
+    params.set("search", query);
+    params.delete("page");
 
-        searchResults.classList.add("active");
-        return;
-    }
-
-    searchResults.innerHTML = results.map(item => {
-        const title = escapeHTML(item.title || "Untitled");
-        const poster = escapeHTML(
-            item.poster_url ||
-            "assets/images/movie-placeholder.jpg"
-        );
-
-        const category = escapeHTML(item.category || "Uncategorized");
-        const year = escapeHTML(item.release_year || "");
-        const type = item.content_type === "series" ? "Series" : "Movie";
-
-        return `
-            <a
-                href="${getContentUrl(item)}"
-                class="search-result-item"
-            >
-                <img
-                    src="${poster}"
-                    alt="${title}"
-                    loading="lazy"
-                    onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
-                >
-
-                <div class="search-result-info">
-                    <h4>${title}</h4>
-
-                    <div class="search-result-meta">
-                        <span>${type}</span>
-                        <span>${category}</span>
-                        ${year ? `<span>${year}</span>` : ""}
-                    </div>
-                </div>
-
-                <span class="search-result-arrow">→</span>
-            </a>
-        `;
-    }).join("");
-
-    searchResults.classList.add("active");
+    return `${SEARCH_CONFIG.discoverPage}?${params.toString()}`;
 }
 
-/* =========================================
-   SEARCH CONTENT
-========================================= */
+/* =========================================================
+   CLEAR RESULTS
+========================================================= */
 
-async function performSearch(value) {
-    const query = value.trim();
+function clearResults() {
+    activeRequest++;
+    selectedIndex = -1;
 
     if (!searchResults) return;
 
-    if (!query) {
-        searchResults.innerHTML = "";
-        searchResults.classList.remove("active");
-        return;
-    }
+    searchResults.innerHTML = "";
+    searchResults.classList.remove("active");
+}
 
-    const requestId = ++activeRequest;
+/* =========================================================
+   RENDER LOADING
+========================================================= */
+
+function renderLoading() {
+    if (!searchResults) return;
 
     searchResults.innerHTML = `
         <div class="search-loading">
@@ -125,52 +97,174 @@ async function performSearch(value) {
     `;
 
     searchResults.classList.add("active");
+}
+
+/* =========================================================
+   RENDER RESULTS
+========================================================= */
+
+function renderResults(results, query) {
+    if (!searchResults) return;
+
+    selectedIndex = -1;
+
+    if (!Array.isArray(results) || results.length === 0) {
+        searchResults.innerHTML = `
+            <div class="search-empty">
+                <span>⌕</span>
+                <p>No movies or series found.</p>
+                <a href="${getDiscoverUrl(query)}">
+                    Explore all content
+                </a>
+            </div>
+        `;
+
+        searchResults.classList.add("active");
+        return;
+    }
+
+    const limitedResults = results.slice(
+        0,
+        SEARCH_CONFIG.maxResults
+    );
+
+    searchResults.innerHTML = `
+        ${limitedResults.map(item => {
+            const title = escapeHTML(item.title || "Untitled");
+
+            const poster = escapeHTML(
+                item.poster_url ||
+                item.poster ||
+                item.thumbnail ||
+                "assets/images/movie-placeholder.jpg"
+            );
+
+            const category = escapeHTML(
+                item.category || "Uncategorized"
+            );
+
+            const year = escapeHTML(
+                item.release_year || item.year || ""
+            );
+
+            const type = item.content_type === "series"
+                ? "Series"
+                : "Movie";
+
+            return `
+                <a
+                    href="${getContentUrl(item)}"
+                    class="search-result-item"
+                    role="option"
+                >
+                    <img
+                        src="${poster}"
+                        alt="${title}"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
+                    >
+
+                    <div class="search-result-info">
+                        <h4>${title}</h4>
+
+                        <div class="search-result-meta">
+                            <span>${type}</span>
+                            <span>${category}</span>
+                            ${year ? `<span>${year}</span>` : ""}
+                        </div>
+                    </div>
+
+                    <span class="search-result-arrow">→</span>
+                </a>
+            `;
+        }).join("")}
+
+        <a
+            class="search-view-all"
+            href="${getDiscoverUrl(query)}"
+        >
+            View all results
+            <span>→</span>
+        </a>
+    `;
+
+    searchResults.classList.add("active");
+}
+
+/* =========================================================
+   PERFORM LIVE SEARCH
+========================================================= */
+
+async function performSearch(value) {
+    const query = value.trim();
+
+    if (!searchResults) return;
+
+    if (query.length < SEARCH_CONFIG.minCharacters) {
+        clearResults();
+        return;
+    }
+
+    const requestId = ++activeRequest;
+
+    renderLoading();
 
     try {
         const results = await searchContent(query);
 
-        // Ignore outdated search responses
+        // Ignore outdated requests.
         if (requestId !== activeRequest) return;
 
-        renderResults(results);
+        renderResults(results, query);
 
     } catch (error) {
-        console.error("Search failed:", error);
+        console.error("CINEVA search failed:", error);
 
         if (requestId !== activeRequest) return;
 
         searchResults.innerHTML = `
             <div class="search-error">
-                <p>Something went wrong. Please try again.</p>
+                <p>Unable to search right now.</p>
+                <button type="button" class="search-retry">
+                    Try again
+                </button>
             </div>
         `;
 
         searchResults.classList.add("active");
+
+        searchResults
+            .querySelector(".search-retry")
+            ?.addEventListener("click", () => {
+                performSearch(searchInput?.value || "");
+            });
     }
 }
 
-/* =========================================
+/* =========================================================
    LIVE SEARCH INPUT
-========================================= */
+========================================================= */
 
 if (searchInput && searchResults) {
 
     searchInput.addEventListener("input", () => {
         clearTimeout(searchTimeout);
 
-        const value = searchInput.value;
+        selectedIndex = -1;
 
-        if (!value.trim()) {
-            activeRequest++;
+        const value = searchInput.value.trim();
 
-            searchResults.innerHTML = "";
-            searchResults.classList.remove("active");
+        if (!value) {
+            clearResults();
             return;
         }
 
+        // Immediately invalidate older requests.
+        activeRequest++;
+
         searchTimeout = setTimeout(() => {
             performSearch(value);
-        }, 350);
+        }, SEARCH_CONFIG.delay);
     });
 
     searchInput.addEventListener("focus", () => {
@@ -180,52 +274,103 @@ if (searchInput && searchResults) {
     });
 }
 
-/* =========================================
-   SEARCH FORM SUBMISSION
-========================================= */
+/* =========================================================
+   GLOBAL SEARCH SUBMISSION
+========================================================= */
 
 if (searchForm && searchInput) {
+
     searchForm.addEventListener("submit", event => {
         event.preventDefault();
 
         clearTimeout(searchTimeout);
 
-        performSearch(searchInput.value);
+        const query = searchInput.value.trim();
 
-        searchInput.focus();
+        if (!query) {
+            searchInput.focus();
+            return;
+        }
+
+        // Discover owns the full search results.
+        window.location.href = getDiscoverUrl(query);
     });
 }
 
-/* =========================================
-   CLOSE SEARCH RESULTS
-========================================= */
+/* =========================================================
+   KEYBOARD NAVIGATION
+========================================================= */
+
+if (searchInput && searchResults) {
+
+    searchInput.addEventListener("keydown", event => {
+
+        const items = [
+            ...searchResults.querySelectorAll(
+                ".search-result-item"
+            )
+        ];
+
+        if (event.key === "Escape") {
+            clearResults();
+            searchInput.blur();
+            return;
+        }
+
+        if (!items.length) return;
+
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+
+            selectedIndex = Math.min(
+                selectedIndex + 1,
+                items.length - 1
+            );
+
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+
+            selectedIndex = Math.max(
+                selectedIndex - 1,
+                0
+            );
+
+        } else {
+            return;
+        }
+
+        items.forEach((item, index) => {
+            item.classList.toggle(
+                "keyboard-active",
+                index === selectedIndex
+            );
+        });
+
+        items[selectedIndex]?.scrollIntoView({
+            block: "nearest"
+        });
+    });
+}
+
+/* =========================================================
+   CLOSE DROPDOWN WHEN CLICKING OUTSIDE
+========================================================= */
 
 document.addEventListener("click", event => {
     if (!searchInput || !searchResults) return;
 
-    const clickedInsideSearch =
-        searchInput.contains(event.target) ||
-        searchResults.contains(event.target) ||
-        searchForm?.contains(event.target);
+    const clickedInside =
+        searchForm?.contains(event.target) ||
+        searchResults.contains(event.target);
 
-    if (!clickedInsideSearch) {
+    if (!clickedInside) {
         searchResults.classList.remove("active");
+        selectedIndex = -1;
     }
 });
 
-/* =========================================
-   KEYBOARD SUPPORT
-========================================= */
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
-if (searchInput) {
-    searchInput.addEventListener("keydown", event => {
-
-        if (event.key === "Escape") {
-            searchResults?.classList.remove("active");
-            searchInput.blur();
-        }
-
-    });
-}
-
-console.log("CINEVA search system loaded.");
+console.log("CINEVA PRO live search initialized.");
