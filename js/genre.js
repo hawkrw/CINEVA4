@@ -22,7 +22,7 @@ import { supabase } from "./config.js";
 const GENRE_CONFIG = {
     moviesTable: "movies",
     seriesTable: "series",
-    pageSize: 20,
+    pageSize: 10,
     fallbackPoster:
         "https://placehold.co/400x600/151522/ffffff?text=CINEVA"
 };
