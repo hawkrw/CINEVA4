@@ -138,7 +138,17 @@
     }
 
 }
+.nav-menu {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
 
+.nav-menu.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
 
 /* =========================================================
    04. TABLET LAYOUT
