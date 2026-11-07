@@ -80,22 +80,14 @@ html {
 }
 
 body {
-
     width: 100%;
     min-height: 100vh;
-
     font-family:;
-
     background: var(--bg-primary);
-
     color: var(--text-primary);
-
     overflow-x: hidden;
-
     line-height: 1.6;
-
     -webkit-font-smoothing: antialiased;
-
 }
 
 body,
@@ -105,7 +97,6 @@ textarea,
 select {
     font-family:;
 }
-
 button,
 input,
 textarea,
