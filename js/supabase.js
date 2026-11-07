@@ -57,7 +57,184 @@ function combineContent(movies, series) {
         }))
     ]);
 }
+/* =========================================
+   02.1. SHARED HOMEPAGE DATA LOADER
+========================================= */
 
+export async function getHomepageData({
+    latestLimit = 10,
+    trendingLimit = 6,
+    categoryLimit = 6,
+    categories = []
+} = {}) {
+    const latestCount = safeLimit(latestLimit, 10);
+    const trendingCount = safeLimit(trendingLimit, 6);
+    const perCategory = safeLimit(categoryLimit, 6);
+
+    const categoryNames = [
+        ...new Set(
+            categories
+                .map(name => String(name || "").trim())
+                .filter(Boolean)
+        )
+    ];
+
+    const categoryFilters = categoryNames
+        .map(name => name.replace(/[^a-zA-Z0-9 -]/g, ""))
+        .filter(Boolean)
+        .map(name => `category.ilike.${name}`)
+        .join(",");
+
+    const requests = [
+        // Latest movies
+        supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("created_at", { ascending: false })
+            .limit(latestCount),
+
+        // Latest series
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("updated_at", { ascending: false })
+            .limit(latestCount),
+
+        // Trending movies
+        supabase
+            .from(APP_CONFIG.moviesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("views", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(trendingCount),
+
+        // Trending series
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select("*")
+            .eq("is_active", true)
+            .order("views", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(trendingCount)
+    ];
+
+    // Fetch all category content in two requests,
+    // rather than two requests for every category.
+    if (categoryFilters) {
+        requests.push(
+            supabase
+                .from(APP_CONFIG.moviesTable)
+                .select("*")
+                .eq("is_active", true)
+                .or(categoryFilters)
+                .order("created_at", { ascending: false })
+                .limit(500),
+
+            supabase
+                .from(APP_CONFIG.seriesTable)
+                .select("*")
+                .eq("is_active", true)
+                .or(categoryFilters)
+                .order("created_at", { ascending: false })
+                .limit(500)
+        );
+    }
+
+    const results = await Promise.all(requests);
+
+    const labels = [
+        "Homepage latest movies",
+        "Homepage latest series",
+        "Homepage trending movies",
+        "Homepage trending series"
+    ];
+
+    if (categoryFilters) {
+        labels.push(
+            "Homepage category movies",
+            "Homepage category series"
+        );
+    }
+
+    results.forEach((result, index) => {
+        handleError(labels[index], result.error);
+    });
+
+    const latest = combineContent(
+        results[0].data,
+        results[1].data
+    )
+        .map(item => ({
+            ...item,
+            latest_activity_at:
+                item.content_type === "series"
+                    ? item.updated_at || item.created_at
+                    : item.created_at
+        }))
+        .sort((a, b) =>
+            (Date.parse(b.latest_activity_at || "") || 0) -
+            (Date.parse(a.latest_activity_at || "") || 0)
+        )
+        .slice(0, latestCount);
+
+    const trending = [
+        ...(results[2].data || []).map(item => ({
+            ...item,
+            content_type: "movie",
+            views: Number(item.views) || 0
+        })),
+
+        ...(results[3].data || []).map(item => ({
+            ...item,
+            content_type: "series",
+            views: Number(item.views) || 0
+        }))
+    ]
+        .sort((a, b) => {
+            const viewsDifference = b.views - a.views;
+
+            if (viewsDifference !== 0) {
+                return viewsDifference;
+            }
+
+            return (
+                (Date.parse(b.created_at || "") || 0) -
+                (Date.parse(a.created_at || "") || 0)
+            );
+        })
+        .slice(0, trendingCount);
+
+    const categoryContent = {};
+
+    categoryNames.forEach(category => {
+        categoryContent[category] = [];
+    });
+
+    if (categoryFilters) {
+        const categoryItems = combineContent(
+            results[4].data,
+            results[5].data
+        );
+
+        categoryNames.forEach(category => {
+            categoryContent[category] = categoryItems
+                .filter(item =>
+                    String(item.category || "").trim().toLowerCase() ===
+                    category.toLowerCase()
+                )
+                .slice(0, perCategory);
+        });
+    }
+
+    return {
+        latest,
+        trending,
+        categories: categoryContent
+    };
+}
 /* =========================================
    03. FETCH LATEST MOVIES
 ========================================= */
@@ -361,9 +538,8 @@ export async function getLatestContent(
    15. FETCH TRENDING MOVIES AND SERIES
    Ranked by real view counts
 ========================================= */
-
 export async function getTrendingContent(limit = 12) {
-    const safeResultLimit = safeLimit(limit, 12, 50);
+    const resultLimit = safeLimit(limit, 12, 50);
 
     const [moviesResult, seriesResult] = await Promise.all([
         supabase
@@ -372,7 +548,7 @@ export async function getTrendingContent(limit = 12) {
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
-            .limit(safeResultLimit),
+            .limit(resultLimit),
 
         supabase
             .from(APP_CONFIG.seriesTable)
@@ -380,7 +556,7 @@ export async function getTrendingContent(limit = 12) {
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
-            .limit(safeResultLimit)
+            .limit(resultLimit)
     ]);
 
     handleError("Trending movies error", moviesResult.error);
@@ -388,26 +564,19 @@ export async function getTrendingContent(limit = 12) {
 
     const movies = (moviesResult.data || []).map(item => ({
         ...item,
+        content_type: "movie",
         views: Number(item.views) || 0
     }));
 
     const series = (seriesResult.data || []).map(item => ({
         ...item,
+        content_type: "series",
         views: Number(item.views) || 0
     }));
 
     return [...movies, ...series]
-        .map(item => ({
-            ...item,
-            content_type: item.content_type ||
-                (series.some(seriesItem => seriesItem.id === item.id)
-                    ? "series"
-                    : "movie")
-        }))
         .sort((a, b) => {
-            const difference =
-                (Number(b.views) || 0) -
-                (Number(a.views) || 0);
+            const difference = b.views - a.views;
 
             if (difference !== 0) return difference;
 
@@ -416,9 +585,8 @@ export async function getTrendingContent(limit = 12) {
                 (Date.parse(a.created_at || "") || 0)
             );
         })
-        .slice(0, safeResultLimit);
+        .slice(0, resultLimit);
 }
-
 /* =========================================
    16. FETCH ALL ACTIVE CONTENT
 ========================================= */
