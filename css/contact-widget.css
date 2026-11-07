@@ -1,217 +1,248 @@
-
 /* =========================================================
-   CINEVA GLOBAL FLOATING WHATSAPP & CALL
-========================================================= */
+   CINEVA — FLOATING CONTACT WIDGET
+   File: css/contact-widget.css
+   ========================================================= */
 
 .cineva-floating-contacts {
     position: fixed;
-    right: 25px;
-    bottom: 25px;
-    z-index: 99999;
+    right: 24px;
+    bottom: 24px;
+    z-index: 4500;
+
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 15px;
+    gap: 13px;
+
+    pointer-events: none;
 }
 
-/* FLOATING BUTTONS */
+/* ---------- FLOATING BUTTONS ---------- */
 
 .cineva-float-button {
     position: relative;
-    width: 58px;
-    height: 58px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: none;
+    display: grid;
+    place-items: center;
+
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(255, 255, 255, .2);
     border-radius: 50%;
-    color: white;
-    font-size: 25px;
+
+    color: #fff;
+    font-size: 21px;
+    text-decoration: none;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, .3),
+        inset 0 1px 1px rgba(255, 255, 255, .2);
+
     cursor: pointer;
-    isolation: isolate;
-    transition: transform .3s ease, box-shadow .3s ease;
-}
+    pointer-events: auto;
 
-.cineva-whatsapp {
-    background: #20c96b;
-    box-shadow: 0 6px 25px rgba(32, 201, 107, .35);
-}
-
-.cineva-call {
-    background: linear-gradient(135deg, #9164ff, #5926c9);
-    box-shadow: 0 6px 25px rgba(120, 75, 230, .4);
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        filter .25s ease;
 }
 
 .cineva-float-button:hover {
-    transform: translateY(-5px) scale(1.06);
+    transform: translateY(-4px) scale(1.05);
+    filter: brightness(1.08);
+    box-shadow:
+        0 13px 32px rgba(0, 0, 0, .38),
+        0 0 20px rgba(168, 85, 247, .18);
 }
+
+.cineva-float-button:active {
+    transform: scale(.96);
+}
+
+.cineva-whatsapp {
+    background: linear-gradient(145deg, #25d366, #119c4b);
+}
+
+.cineva-call {
+    background: linear-gradient(145deg, #a855f7, #6d28d9);
+}
+
+/* ---------- BUTTON LABELS ---------- */
 
 .cineva-float-label {
     position: absolute;
-    right: 70px;
-    padding: 8px 13px;
-    border-radius: 8px;
-    background: #171525;
-    color: white;
-    font-size: 12px;
+    right: calc(100% + 12px);
+    top: 50%;
+
+    padding: 8px 12px;
+    border: 1px solid rgba(168, 85, 247, .2);
+    border-radius: 7px;
+
+    color: #fff;
+    background: rgba(15, 12, 28, .95);
+    backdrop-filter: blur(12px);
+
+    font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
+
     opacity: 0;
     visibility: hidden;
-    transform: translateX(8px);
-    transition: .25s ease;
+    transform: translateX(5px) translateY(-50%);
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease,
+        transform .2s ease;
 }
 
 .cineva-float-button:hover .cineva-float-label {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);
 }
 
-/* PULSE WAVES */
+/* ---------- PULSE EFFECT ---------- */
 
-.cineva-float-wave {
+.cineva-float-button::before {
+    content: "";
     position: absolute;
     inset: -5px;
-    z-index: -1;
-    border: 2px solid currentColor;
-    border-radius: 50%;
-    animation: cinevaFloatWave 2s infinite;
-    opacity: .65;
+
+    border: 1px solid currentColor;
+    border-radius: inherit;
+
+    opacity: 0;
     pointer-events: none;
+
+    animation: cinevaFloatWave 2.8s ease-out infinite;
 }
 
-.cineva-call .cineva-float-wave {
-    color: #956cff;
+.cineva-whatsapp::before {
+    color: #25d366;
 }
 
-.cineva-whatsapp .cineva-float-wave {
-    color: #20c96b;
+.cineva-call::before {
+    color: #a855f7;
+    animation-delay: 1.4s;
 }
 
 @keyframes cinevaFloatWave {
     0% {
-        transform: scale(.9);
-        opacity: .7;
+        transform: scale(.85);
+        opacity: .45;
     }
 
     100% {
-        transform: scale(1.55);
+        transform: scale(1.45);
         opacity: 0;
     }
 }
 
-/* NUMBER MENUS */
+/* ---------- CONTACT MENU ---------- */
 
 .cineva-contact-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 15px);
+
     width: 260px;
-    padding: 15px;
-    margin-bottom: 2px;
-    border: 1px solid rgba(255,255,255,.1);
+    max-width: calc(100vw - 32px);
+    padding: 16px;
+
+    border: 1px solid rgba(168, 85, 247, .22);
     border-radius: 15px;
-    background: rgba(19,17,32,.97);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 12px 40px rgba(0,0,0,.45);
-    animation: cinevaMenuAppear .25s ease;
-}
 
-.cineva-contact-menu[hidden] {
-    display: none !important;
-}
+    background: rgba(15, 13, 29, .97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 
-@keyframes cinevaMenuAppear {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.cineva-menu-heading {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-bottom: 12px;
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.whatsapp-menu .cineva-menu-heading i {
-    color: #20c96b;
-    font-size: 19px;
-}
-
-.call-menu .cineva-menu-heading i {
-    color: #956cff;
-    font-size: 17px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, .42);
 }
 
 .cineva-contact-menu a {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 11px;
-    margin-top: 7px;
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 9px;
-    background: rgba(255,255,255,.045);
-    color: #eeeaf8;
-    font-size: 12px;
+    gap: 11px;
+
+    min-height: 43px;
+    padding: 9px 10px;
+
+    border-radius: 8px;
+    color: #eee8fa;
+    font-size: 13px;
+    font-weight: 650;
     text-decoration: none;
-    transition: .25s ease;
+
+    transition:
+        color .2s ease,
+        background .2s ease;
 }
 
 .cineva-contact-menu a:hover {
-    border-color: #8b5cf6;
-    background: rgba(139,92,246,.15);
-    color: white;
+    color: #d8b4fe;
+    background: rgba(139, 53, 245, .15);
 }
 
 .cineva-contact-menu a i {
-    color: #a78bfa;
-    font-size: 12px;
+    width: 19px;
+    color: #c084fc;
+    text-align: center;
 }
 
-/* MOBILE */
+/* ---------- MOBILE ---------- */
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .cineva-floating-contacts {
-        right: 16px;
-        bottom: 20px;
-        gap: 13px;
+        right: 15px;
+        bottom: calc(80px + env(safe-area-inset-bottom));
+        gap: 11px;
     }
 
     .cineva-float-button {
-        width: 52px;
-        height: 52px;
-        font-size: 22px;
-    }
-
-    .cineva-contact-menu {
-        width: min(260px, calc(100vw - 32px));
+        width: 49px;
+        height: 49px;
+        font-size: 19px;
     }
 
     .cineva-float-label {
         display: none;
     }
+
+    .cineva-contact-menu {
+        width: 245px;
+        max-width: calc(100vw - 30px);
+    }
 }
 
-/* ACCESSIBILITY */
-
-@media (prefers-reduced-motion: reduce) {
-    .cineva-float-wave {
-        animation: none;
+@media (max-width: 380px) {
+    .cineva-floating-contacts {
+        right: 11px;
     }
 
+    .cineva-float-button {
+        width: 45px;
+        height: 45px;
+        font-size: 17px;
+    }
+}
+
+/* ---------- ACCESSIBILITY ---------- */
+
+.cineva-float-button:focus-visible,
+.cineva-contact-menu a:focus-visible {
+    outline: 2px solid #c084fc;
+    outline-offset: 4px;
+}
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
     .cineva-float-button,
-    .cineva-contact-menu,
     .cineva-float-label {
         transition: none;
+    }
+
+    .cineva-float-button::before {
+        animation: none;
     }
 }
