@@ -301,6 +301,9 @@ export async function searchContent(searchTerm) {
 
 /* =========================================
    14. FETCH LATEST MOVIES AND SERIES
+   Movies: created_at
+   Series: updated_at
+   New episodes refresh their parent series.
 ========================================= */
 
 export async function getLatestContent(
@@ -309,6 +312,7 @@ export async function getLatestContent(
     const safeResultLimit = safeLimit(limit);
 
     const [moviesResult, seriesResult] = await Promise.all([
+        // Latest movies are based on creation date
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("*")
@@ -316,21 +320,41 @@ export async function getLatestContent(
             .order("created_at", { ascending: false })
             .limit(safeResultLimit),
 
+        // Latest series are based on their latest update
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
-            .order("created_at", { ascending: false })
+            .order("updated_at", { ascending: false })
             .limit(safeResultLimit)
     ]);
 
     handleError("Latest movies error", moviesResult.error);
     handleError("Latest series error", seriesResult.error);
 
-    return combineContent(
-        moviesResult.data,
-        seriesResult.data
-    ).slice(0, safeResultLimit);
+    const movies = (moviesResult.data || []).map(item => ({
+        ...item,
+        content_type: "movie",
+        latest_activity_at: item.created_at
+    }));
+
+    const series = (seriesResult.data || []).map(item => ({
+        ...item,
+        content_type: "series",
+        latest_activity_at: item.updated_at || item.created_at
+    }));
+
+    return [...movies, ...series]
+        .sort((a, b) => {
+            const dateA =
+                Date.parse(a.latest_activity_at || "") || 0;
+
+            const dateB =
+                Date.parse(b.latest_activity_at || "") || 0;
+
+            return dateB - dateA;
+        })
+        .slice(0, safeResultLimit);
 }
 
 /* =========================================
