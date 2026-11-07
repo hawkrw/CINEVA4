@@ -1510,3 +1510,59 @@
         transform: none !important;
     }
 }
+/* =========================================================
+   CINEVA — DISCOVER PAGE GRID STABILITY PATCH
+========================================================= */
+
+.genre-page .genre-grid {
+    display: grid !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 22px 16px;
+    overflow: visible;
+}
+
+.genre-page .genre-grid .movie-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+    .genre-page .genre-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Small tablet */
+@media (max-width: 850px) {
+    .genre-page .genre-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px 12px;
+    }
+}
+
+/* Android and mobile */
+@media (max-width: 600px) {
+    .genre-page .genre-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px 10px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+    .genre-page .genre-grid {
+        gap: 12px 8px;
+    }
+}
+
+/* Avoid accidental horizontal scrolling */
+.genre-page,
+.genre-page main {
+    max-width: 100%;
+    overflow-x: clip;
+}
