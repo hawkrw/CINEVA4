@@ -1444,3 +1444,72 @@
         line-height: 1.45;
     }
 }
+
+/* =====================================================
+   CINEVA PRO — LATEST ADDED MOBILE CARD SIZE FIX
+   Only affects the Latest Added section
+===================================================== */
+
+@media screen and (max-width: 600px) {
+
+    /* Latest Added grid */
+    #latestAdded #latest-movies {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px 13px !important;
+        width: 100%;
+    }
+
+    /* Individual cards */
+    #latestAdded #latest-movies .movie-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Poster */
+    #latestAdded #latest-movies .movie-poster {
+        width: 100% !important;
+        aspect-ratio: 2 / 3 !important;
+        overflow: hidden;
+    }
+
+    #latestAdded #latest-movies .movie-poster img {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+
+    /* Card information */
+    #latestAdded #latest-movies .movie-info {
+        padding: 10px !important;
+    }
+
+    #latestAdded #latest-movies .movie-title,
+    #latestAdded #latest-movies .movie-info h3 {
+        font-size: 12px !important;
+        line-height: 1.45 !important;
+    }
+
+    #latestAdded #latest-movies .movie-meta {
+        font-size: 10px;
+    }
+}
+
+/* Very narrow phones */
+@media screen and (max-width: 360px) {
+
+    #latestAdded #latest-movies {
+        gap: 12px 9px !important;
+    }
+
+    #latestAdded #latest-movies .movie-info {
+        padding: 8px !important;
+    }
+
+    #latestAdded #latest-movies .movie-title,
+    #latestAdded #latest-movies .movie-info h3 {
+        font-size: 11px !important;
+    }
+}
