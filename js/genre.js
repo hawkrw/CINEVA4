@@ -333,29 +333,29 @@ function readUrlState() {
         elements.search.value = state.search;
     }
 }
-
 function updateUrl() {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(
+        window.location.search
+    );
 
-    if (state.type !== "all") {
-        params.set("type", state.type);
-    }
+    // Update CINEVA discovery parameters.
+    const values = {
+        type: state.type === "all" ? "" : state.type,
+        genre: state.genre,
+        sort: state.sort === "latest" ? "" : state.sort,
+        search: state.search.trim(),
+        page: state.currentPage > 1
+            ? String(state.currentPage)
+            : ""
+    };
 
-    if (state.genre) {
-        params.set("genre", state.genre);
-    }
-
-    if (state.sort !== "latest") {
-        params.set("sort", state.sort);
-    }
-
-    if (state.search.trim()) {
-        params.set("search", state.search.trim());
-    }
-
-    if (state.currentPage > 1) {
-        params.set("page", String(state.currentPage));
-    }
+    Object.entries(values).forEach(([key, value]) => {
+        if (value) {
+            params.set(key, value);
+        } else {
+            params.delete(key);
+        }
+    });
 
     const query = params.toString();
 
@@ -365,7 +365,6 @@ function updateUrl() {
 
     window.history.replaceState({}, "", newUrl);
 }
-
 /* =========================================
    PAGE HEADER
 ========================================= */
@@ -1244,96 +1243,114 @@ function bindEvents() {
         }
     );
 
-    // Debounced search avoids sending a database
-    // request for every individual keystroke.
-    elements.search?.addEventListener(
-        "input",
-        () => {
-            state.search =
-                elements.search.value;
+  
+// =========================================================
+// CINEVA PRO — PREMIUM DISCOVERY SEARCH HANDLERS
+// Debounced search + stale-request protection
+// =========================================================
 
+// Search field: wait until the user stops typing.
+elements.search?.addEventListener("input", () => {
+    state.search = elements.search.value.trim();
+    state.currentPage = 1;
+
+    // Invalidate any previous request immediately.
+    state.requestId++;
+
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+        loadContent();
+    }, GENRE_CONFIG.searchDelay);
+});
+
+
+// Clear discovery search.
+elements.clearSearch?.addEventListener("click", () => {
+    if (elements.search) {
+        elements.search.value = "";
+        elements.search.focus();
+    }
+
+    state.search = "";
+    state.currentPage = 1;
+
+    // Prevent an older request from replacing cleared results.
+    state.requestId++;
+
+    clearTimeout(searchTimer);
+    loadContent();
+});
+
+
+// Reset all discovery filters.
+elements.resetButton?.addEventListener(
+    "click",
+    resetFilters
+);
+
+elements.emptyReset?.addEventListener(
+    "click",
+    resetFilters
+);
+
+
+// Retry loading content after an error.
+elements.retryButton?.addEventListener(
+    "click",
+    () => {
+        clearTimeout(searchTimer);
+        loadContent();
+    }
+);
+
+
+// =========================================================
+// GLOBAL HEADER SEARCH COMPATIBILITY
+// =========================================================
+
+const siteSearch = document.getElementById("search-form");
+
+if (siteSearch) {
+
+    // Prevent duplicate event registration.
+    if (!siteSearch.dataset.genreSearchBound) {
+
+        siteSearch.dataset.genreSearchBound = "true";
+
+        siteSearch.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const input = document.getElementById("search-input");
+            const value = input?.value?.trim() || "";
+
+            if (!value) {
+                input?.focus();
+                return;
+            }
+
+            // Synchronize global search with discovery search.
+            state.search = value;
             state.currentPage = 1;
 
-            clearTimeout(searchTimer);
-
-            searchTimer = setTimeout(
-                () => {
-                    loadContent();
-                },
-                GENRE_CONFIG.searchDelay
-            );
-        }
-    );
-
-    elements.clearSearch?.addEventListener(
-        "click",
-        () => {
             if (elements.search) {
-                elements.search.value = "";
-                elements.search.focus();
+                elements.search.value = value;
             }
 
-            state.search = "";
-            state.currentPage = 1;
-
+            // Cancel pending searches and invalidate old requests.
             clearTimeout(searchTimer);
+            state.requestId++;
 
+            // Load matching movies and series.
             loadContent();
-        }
-    );
 
-    elements.resetButton?.addEventListener(
-        "click",
-        resetFilters
-    );
+            // Bring results into view.
+            elements.genreContent?.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
 
-    elements.emptyReset?.addEventListener(
-        "click",
-        resetFilters
-    );
-
-    elements.retryButton?.addEventListener(
-        "click",
-        loadContent
-    );
-
-    // Compatibility with the site's global search.
-    const siteSearch =
-        document.getElementById("search-form");
-
-    if (siteSearch) {
-        siteSearch.addEventListener(
-            "submit",
-            (event) => {
-                event.preventDefault();
-
-                const input =
-                    document.getElementById(
-                        "search-input"
-                    );
-
-                const value =
-                    input?.value?.trim();
-
-                if (!value) return;
-
-                state.search = value;
-                state.currentPage = 1;
-
-                if (elements.search) {
-                    elements.search.value = value;
-                }
-
-                clearTimeout(searchTimer);
-
-                loadContent();
-
-                elements.genreContent?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-            }
-        );
+        });
     }
 }
 
