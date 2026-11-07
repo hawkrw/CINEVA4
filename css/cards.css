@@ -1544,3 +1544,50 @@ main .content-section .section-heading,
         gap: 11px;
     }
 }
+/* =========================================================
+   CINEVA — FINAL MOBILE GRID & CAROUSEL FIX
+========================================================= */
+
+/* Restore normal homepage grid responsiveness */
+@media (max-width: 480px) {
+    main .content-section .movie-grid:not(.horizontal-scroll),
+    #category-sections .content-section .movie-grid:not(.horizontal-scroll) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+}
+
+/* Preserve horizontal carousels on every screen size */
+main .content-section .movie-grid.horizontal-scroll,
+#category-sections .content-section .movie-grid.horizontal-scroll {
+    display: flex;
+    flex-wrap: nowrap;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+}
+
+main .content-section .movie-grid.horizontal-scroll .movie-card,
+#category-sections .content-section .movie-grid.horizontal-scroll .movie-card {
+    flex: 0 0 190px;
+    width: 190px;
+    min-width: 190px;
+}
+
+/* Smaller carousel cards on phones */
+@media (max-width: 600px) {
+    main .content-section .movie-grid.horizontal-scroll .movie-card,
+    #category-sections .content-section .movie-grid.horizontal-scroll .movie-card {
+        flex-basis: 145px;
+        width: 145px;
+        min-width: 145px;
+    }
+}
+
+/* Prevent page-wide horizontal overflow */
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
