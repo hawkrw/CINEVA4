@@ -1421,7 +1421,43 @@ function openContentForm(type, record = null) {
     form.elements.namedItem("title")?.focus();
 }
 /* =========================================
+   CINEVA PRO — REFRESH SERIES LATEST ADDED
+   Called whenever an episode is saved.
+========================================= */
+
+async function refreshSeriesLatestAdded(seriesId) {
+    if (!seriesId) {
+        console.warn("CINEVA: No series ID provided for timestamp refresh.");
+        return false;
+    }
+
+    const { error } = await supabase
+        .from("series")
+        .update({
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", seriesId);
+
+    if (error) {
+        console.error(
+            "CINEVA: Unable to refresh series latest-added timestamp:",
+            error
+        );
+
+        return false;
+    }
+
+    console.log(
+        "CINEVA: Series latest-added timestamp refreshed:",
+        seriesId
+    );
+
+    return true;
+}
+/* =========================================
    SAVE SERIES / EPISODE FORM
+   Automatically refreshes parent series
+   when an episode is added or edited.
 ========================================= */
 
 async function saveContentForm(event) {
@@ -1444,7 +1480,7 @@ async function saveContentForm(event) {
     );
 
     if (!saveButton) {
-        console.error("Save button not found.");
+        console.error("CINEVA: Save button not found.");
         return;
     }
 
@@ -1493,12 +1529,15 @@ async function saveContentForm(event) {
             title: value("title"),
 
             category: value("category") || null,
-          
+
             year: year === null
                 ? null
                 : String(year),
 
             total_seasons: totalSeasons,
+
+            // Preserve the series translator.
+            translator: value("translator") || null,
 
             description: value("description") || null,
 
@@ -1630,6 +1669,16 @@ async function saveContentForm(event) {
         }
 
         /* =================================
+           REFRESH PARENT SERIES TIMESTAMP
+        ================================= */
+
+        if (!isSeries) {
+            // Every successful episode addition or edit
+            // makes its parent series newly updated.
+            await refreshSeriesLatestAdded(selectedSeriesId);
+        }
+
+        /* =================================
            CLOSE FORM AFTER SUCCESS
         ================================= */
 
@@ -1640,12 +1689,12 @@ async function saveContentForm(event) {
                 ? (
                     isSeries
                         ? "Series updated successfully."
-                        : "Episode updated successfully."
+                        : "Episode updated successfully. The series has been refreshed in Latest Added."
                 )
                 : (
                     isSeries
                         ? "Series added successfully."
-                        : "Episode added successfully."
+                        : "Episode added successfully. The series has been refreshed in Latest Added."
                 )
         );
 
@@ -1656,12 +1705,15 @@ async function saveContentForm(event) {
         if (isSeries) {
             await refreshContent();
         } else {
-            await loadEpisodes();
+            await Promise.all([
+                loadEpisodes(),
+                loadSeries()
+            ]);
         }
 
     } catch (error) {
         console.error(
-            "Series/Episode save error:",
+            "CINEVA Series/Episode save error:",
             error
         );
 
@@ -1683,7 +1735,6 @@ async function saveContentForm(event) {
             : "Save";
     }
 }
-
 /* =========================================
    CINEVA PRO — AUTOMATIC MANAGEMENT BUTTONS
 ========================================= */
@@ -2350,10 +2401,10 @@ function requestCloseBulkUpload() {
 
     bulkUploadModal.hidden = true;
 }
-
-
 /* -----------------------------------------
    PROCESS BULK UPLOAD
+   Automatically refresh parent series
+   after successful episode uploads.
 ----------------------------------------- */
 
 async function processBulkUpload(event) {
@@ -2362,11 +2413,19 @@ async function processBulkUpload(event) {
     if (bulkUploadBusy || !bulkUploadKind) return;
 
     const kind = bulkUploadKind;
+
+    // Preserve the parent series ID throughout this upload.
+    const parentSeriesId = kind === "episode"
+        ? selectedSeriesId
+        : null;
+
     const items = [
         ...bulkUploadModal.querySelectorAll(".cineva-bulk-item")
     ];
 
-    const submit = bulkUploadModal.querySelector("#bulkUploadSubmit");
+    const submit = bulkUploadModal.querySelector(
+        "#bulkUploadSubmit"
+    );
 
     const prepared = [];
     let filledCount = 0;
@@ -2391,7 +2450,11 @@ async function processBulkUpload(event) {
             });
 
         } catch (error) {
-            setBulkItemStatus(item, "failed", error.message);
+            setBulkItemStatus(
+                item,
+                "failed",
+                error.message
+            );
         }
     });
 
@@ -2401,7 +2464,9 @@ async function processBulkUpload(event) {
     }
 
     if (prepared.length === 0) {
-        alert("No valid items to upload. Please correct the failed rows.");
+        alert(
+            "No valid items to upload. Please correct the failed rows."
+        );
         return;
     }
 
@@ -2421,7 +2486,9 @@ async function processBulkUpload(event) {
             setBulkItemStatus(entry.item, "uploading");
 
             try {
-                const table = kind === "movie" ? "movies" : "episodes";
+                const table = kind === "movie"
+                    ? "movies"
+                    : "episodes";
 
                 const { error } = await supabase
                     .from(table)
@@ -2431,7 +2498,10 @@ async function processBulkUpload(event) {
 
                 savedCount++;
 
-                setBulkItemStatus(entry.item, "saved");
+                setBulkItemStatus(
+                    entry.item,
+                    "saved"
+                );
 
             } catch (error) {
                 failedCount++;
@@ -2453,25 +2523,48 @@ async function processBulkUpload(event) {
         bulkUploadBusy = false;
 
         submit.disabled = false;
+
         submit.textContent = kind === "movie"
             ? "Upload Movies"
             : "Upload Episodes";
 
+        /* =================================
+           REFRESH AFTER SUCCESSFUL UPLOADS
+        ================================= */
+
         if (savedCount > 0) {
             if (kind === "movie") {
                 await refreshContent();
+
             } else {
-                await loadEpisodes();
+                // Refresh the parent series timestamp once,
+                // even if several episodes were uploaded.
+                await refreshSeriesLatestAdded(parentSeriesId);
+
+                await Promise.all([
+                    loadEpisodes(),
+                    loadSeries()
+                ]);
             }
         }
+
+        /* =================================
+           FINAL UPLOAD REPORT
+        ================================= */
 
         if (!bulkCancelRequested) {
             alert(
                 "Bulk upload finished.\n\n" +
                 `Saved: ${savedCount}\n` +
                 `Failed: ${failedCount}\n` +
-                `Skipped: ${BULK_UPLOAD_LIMIT - filledCount}`
+                `Skipped: ${BULK_UPLOAD_LIMIT - filledCount}` +
+                (
+                    kind === "episode" && savedCount > 0
+                        ? "\n\nParent series refreshed successfully."
+                        : ""
+                )
             );
+
         } else {
             console.info(
                 `CINEVA bulk upload stopped. ${savedCount} item(s) saved.`
@@ -2481,8 +2574,6 @@ async function processBulkUpload(event) {
         bulkCancelRequested = false;
     }
 }
-
-
 /* -----------------------------------------
    BULK BUTTONS
 ----------------------------------------- */
