@@ -1440,3 +1440,107 @@ main > .content-section + .content-section {
     background: rgba(20, 12, 35, 0.96);
     border-color: #a855f7;
 }
+/* =========================================================
+   CINEVA PRO — UNIFIED HOMEPAGE SECTION WIDTH
+   Align Latest Added and every category section
+========================================================= */
+
+main {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Every homepage section shares the same horizontal boundaries */
+main .content-section,
+#category-sections .content-section {
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-left: 20px;
+    padding-right: 20px;
+
+    box-sizing: border-box;
+}
+
+/* All homepage content grids use the same six-column layout */
+main .content-section .movie-grid,
+#category-sections .content-section .movie-grid {
+    display: grid;
+
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+
+    align-items: stretch;
+    gap: 20px;
+
+    width: 100%;
+    min-width: 0;
+}
+
+/* Consistent card sizing */
+main .content-section .movie-card,
+#category-sections .content-section .movie-card {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+}
+
+/* Latest Added uses exactly the same grid alignment */
+#latestAdded .movie-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* Keep section headings aligned with their cards */
+main .content-section .section-heading,
+#category-sections .content-section .section-heading {
+    width: 100%;
+}
+
+/* =========================================================
+   RESPONSIVE GRID
+========================================================= */
+
+@media (max-width: 1100px) {
+    main .content-section .movie-grid,
+    #category-sections .content-section .movie-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 900px) {
+    main .content-section,
+    #category-sections .content-section {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    main .content-section .movie-grid,
+    #category-sections .content-section .movie-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    main .content-section .movie-grid,
+    #category-sections .content-section .movie-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 11px;
+    }
+}
+
+@media (max-width: 420px) {
+    main .content-section,
+    #category-sections .content-section {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    main .content-section .movie-grid,
+    #category-sections .content-section .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+}
