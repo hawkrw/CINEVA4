@@ -1083,15 +1083,55 @@ async function loadFeatured() {
     }
 
 }
+/* =========================================================
+   CINEVA PRO — LATEST ADDED VIEW ALL LINK
+========================================================= */
 
+function ensureLatestViewAll() {
+    if (!elements.latest) return;
+
+    const section =
+        elements.latest.closest(".content-section") ||
+        document.querySelector("#latestAdded");
+
+    if (!section) return;
+
+    const heading = section.querySelector(
+        ".section-heading, .section-header"
+    );
+
+    if (!heading) return;
+
+    let viewAll = heading.querySelector(".view-all");
+
+    if (!viewAll) {
+        viewAll = document.createElement("a");
+        viewAll.className = "view-all";
+        heading.appendChild(viewAll);
+    }
+
+    viewAll.href = "movies.html?sort=latest";
+    viewAll.setAttribute("aria-label", "View all latest content");
+
+    viewAll.innerHTML = `
+        View All
+        <i class="fa-solid fa-arrow-right"></i>
+    `;
+}
 
 /* =========================================================
    27. LOAD LATEST CONTENT
 ========================================================= */
+/* =========================================================
+   CINEVA PRO — LATEST ADDED
+   Displays only 6 newest movies and series
+========================================================= */
 
 async function loadLatest() {
-
     if (!elements.latest) return;
+
+    // Make sure the View All link is visible
+    ensureLatestViewAll();
 
     showLoading(
         elements.latest,
@@ -1099,21 +1139,27 @@ async function loadLatest() {
     );
 
     try {
-
         const latest = await withTimeout(
             getLatestContent(HOME_CONFIG.latestLimit),
             "Latest content request timed out."
         );
 
+        const latestSix = Array.isArray(latest)
+            ? latest
+                .filter(item => item && item.id)
+                .slice(0, 6)
+            : [];
+
         renderMovieGrid(
             elements.latest,
-            Array.isArray(latest)
-                ? latest.slice(0, HOME_CONFIG.latestLimit)
-                : []
+            latestSix
+        );
+
+        console.log(
+            `CINEVA: Displaying ${latestSix.length} latest contents.`
         );
 
     } catch (error) {
-
         console.error(
             "Latest content failed:",
             error
@@ -1123,11 +1169,8 @@ async function loadLatest() {
             elements.latest,
             "Unable to load latest content. Please try again."
         );
-
     }
-
 }
-
 /* =========================================================
    CINEVA — LOAD TRENDING MOVIES AND SERIES
    Ranked by actual Supabase views
