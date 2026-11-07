@@ -880,3 +880,633 @@
         animation: none;
     }
 }
+
+/* =========================================================
+   CINEVA PRO — ANDROID & MOBILE PREMIUM UPGRADE
+   Append to the bottom of css/genre.css
+========================================================= */
+
+/* GLOBAL MOBILE SAFETY */
+.genre-page,
+.genre-page * {
+    box-sizing: border-box;
+}
+
+.genre-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+.genre-main,
+.genre-content-section,
+.genre-hero,
+.genre-hero-inner,
+.genre-grid {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.genre-page img {
+    max-width: 100%;
+}
+
+.genre-page button,
+.genre-page select,
+.genre-page input {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* PREMIUM CARD IMPROVEMENTS */
+.genre-grid .movie-card {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 13px;
+    background: #11101d;
+    border: 1px solid rgba(255,255,255,.055);
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+.genre-grid .movie-card-link {
+    display: block;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.genre-grid .movie-poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #171426;
+}
+
+.genre-grid .movie-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .45s ease;
+}
+
+.genre-grid .movie-info {
+    min-width: 0;
+    padding: 11px 10px 13px;
+}
+
+.genre-grid .movie-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    min-height: 2.7em;
+    margin: 0 0 8px;
+    color: #f7f5ff;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.genre-grid .movie-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 9px;
+    min-width: 0;
+    color: #918ba5;
+    font-size: 10px;
+}
+
+.genre-grid .movie-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffc857;
+}
+
+.genre-grid .movie-translator {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.genre-grid .movie-type-badge {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    z-index: 2;
+    padding: 5px 8px;
+    color: #fff;
+    background: rgba(12,10,23,.83);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    backdrop-filter: blur(8px);
+}
+
+/* DESKTOP HOVER */
+@media (hover: hover) and (pointer: fine) {
+    .genre-grid .movie-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(168,85,247,.48);
+        box-shadow: 0 14px 35px rgba(0,0,0,.3);
+    }
+
+    .genre-grid .movie-card:hover .movie-poster img {
+        transform: scale(1.055);
+    }
+}
+
+/* TABLET */
+@media (max-width: 850px) {
+    .genre-hero-copy {
+        max-width: 100%;
+    }
+
+    .genre-toolbar {
+        gap: 12px;
+    }
+
+    .genre-search-field {
+        min-height: 48px;
+    }
+
+    .genre-toolbar-controls {
+        width: 100%;
+    }
+
+    .genre-select-wrap {
+        min-width: 0;
+    }
+
+    .genre-select-wrap select {
+        min-width: 0;
+    }
+
+    .genre-reset-btn {
+        min-height: 44px;
+    }
+
+    .genre-grid {
+        gap: 20px 13px;
+    }
+}
+
+/* ANDROID PHONES */
+@media (max-width: 600px) {
+    .genre-page {
+        font-size: 14px;
+    }
+
+    .genre-hero {
+        padding: 100px 0 38px;
+        background:
+            radial-gradient(
+                ellipse at 85% 15%,
+                rgba(139,53,245,.19),
+                transparent 43%
+            ),
+            linear-gradient(
+                155deg,
+                #100c20,
+                #080812 75%
+            );
+    }
+
+    .genre-hero::before {
+        width: 260px;
+        height: 260px;
+        right: -145px;
+        top: -140px;
+    }
+
+    .genre-hero-glow {
+        width: 180px;
+        height: 180px;
+        filter: blur(95px);
+    }
+
+    .genre-breadcrumb {
+        gap: 8px;
+        margin-bottom: 23px;
+        font-size: 11px;
+    }
+
+    .genre-eyebrow {
+        font-size: 9px;
+        letter-spacing: 1.6px;
+    }
+
+    .genre-hero-copy h1 {
+        max-width: 100%;
+        margin-top: 13px;
+        font-size: clamp(32px, 9vw, 40px);
+        line-height: 1.1;
+        letter-spacing: -1.5px;
+        overflow-wrap: anywhere;
+    }
+
+    .genre-hero-copy p {
+        max-width: 100%;
+        font-size: 12px;
+        line-height: 1.75;
+    }
+
+    .genre-hero-stats {
+        gap: 8px;
+        margin-top: 23px;
+    }
+
+    .genre-stat {
+        min-height: 34px;
+        padding: 8px 11px;
+        font-size: 9px;
+    }
+
+    /* 3D BRAND SIGNATURE */
+    .hawk-3d-float {
+        width: min(245px, 85%);
+        height: 160px;
+        margin: 28px auto 0;
+    }
+
+    .hawk-3d-content {
+        padding: 21px 13px;
+        border-radius: 16px;
+        transform: rotateY(-7deg) rotateX(3deg);
+    }
+
+    .hawk-3d-content h2 {
+        font-size: clamp(34px, 10vw, 43px);
+        letter-spacing: -2px;
+    }
+
+    .hawk-3d-small {
+        margin-bottom: 9px;
+        font-size: 8px;
+        letter-spacing: 3px;
+    }
+
+    .hawk-3d-line {
+        margin: 13px auto 10px;
+    }
+
+    .hawk-3d-content p {
+        font-size: 8px;
+        letter-spacing: 2px;
+    }
+
+    .hawk-3d-orbit {
+        width: 250px;
+        height: 90px;
+    }
+
+    .hawk-3d-orbit.orbit-two {
+        width: 225px;
+        height: 120px;
+    }
+
+    /* MAIN CONTENT */
+    .genre-content-section {
+        padding-top: 35px;
+        padding-bottom: 55px;
+    }
+
+    .genre-section-heading {
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .genre-section-heading > div:first-child {
+        min-width: 0;
+    }
+
+    .genre-section-heading h2 {
+        font-size: 23px;
+        line-height: 1.2;
+    }
+
+    .genre-section-heading p {
+        font-size: 11px;
+    }
+
+    .genre-result-counter {
+        flex-shrink: 0;
+        padding: 8px 9px;
+        border-radius: 10px;
+    }
+
+    .genre-result-counter strong {
+        font-size: 17px;
+    }
+
+    .genre-result-counter span {
+        font-size: 8px;
+    }
+
+    /* MOBILE SEARCH */
+    .genre-toolbar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 17px;
+        border-radius: 14px;
+        background: rgba(19,17,34,.96);
+    }
+
+    .genre-search-field {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 12px;
+        border-radius: 11px;
+    }
+
+    .genre-search-field input {
+        min-width: 0;
+        font-size: 13px;
+    }
+
+    .genre-search-field button {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    /* TOUCH-FRIENDLY FILTERS */
+    .genre-toolbar-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+
+    .genre-select-wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+        min-width: 0;
+        min-height: 45px;
+        padding: 0 9px;
+        border-radius: 10px;
+    }
+
+    .genre-select-wrap span {
+        flex-shrink: 0;
+        font-size: 9px;
+    }
+
+    .genre-select-wrap select {
+        width: auto;
+        max-width: 105px;
+        min-width: 0;
+        min-height: 42px;
+        font-size: 10px;
+        text-align: right;
+    }
+
+    .genre-reset-btn {
+        grid-column: 1 / -1;
+        min-height: 45px;
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    /* FILTER CHIPS */
+    .genre-active-filters {
+        gap: 7px;
+        margin: 0 0 15px;
+    }
+
+    .genre-filter-chip {
+        max-width: 100%;
+        padding: 7px 9px;
+        font-size: 9px;
+        overflow-wrap: anywhere;
+    }
+
+    /* RESULT STATUS */
+    .genre-results-top {
+        align-items: center;
+        gap: 8px;
+        margin: 20px 0 13px;
+    }
+
+    .genre-results-label {
+        min-width: 0;
+        font-size: 10px;
+    }
+
+    .genre-page-indicator {
+        flex-shrink: 0;
+        font-size: 9px;
+    }
+
+    /* TWO-COLUMN MOBILE CATALOG */
+    .genre-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 11px;
+        width: 100%;
+    }
+
+    .genre-grid .movie-card {
+        border-radius: 11px;
+    }
+
+    .genre-grid .movie-info {
+        padding: 9px 8px 11px;
+    }
+
+    .genre-grid .movie-title {
+        font-size: 11px;
+        min-height: 2.65em;
+        margin-bottom: 6px;
+    }
+
+    .genre-grid .movie-meta {
+        gap: 5px 7px;
+        font-size: 9px;
+    }
+
+    .genre-grid .movie-type-badge {
+        top: 7px;
+        left: 7px;
+        padding: 4px 6px;
+        font-size: 7px;
+    }
+
+    /* PAGINATION */
+    .genre-pagination {
+        gap: 6px;
+        margin-top: 30px;
+    }
+
+    .genre-page-btn {
+        min-width: 40px;
+        min-height: 42px;
+        height: 42px;
+        padding: 0 9px;
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    /* EMPTY AND ERROR */
+    .genre-empty,
+    .genre-error {
+        padding: 45px 15px;
+        border-radius: 14px;
+    }
+
+    .genre-empty h3,
+    .genre-error h3 {
+        font-size: 16px;
+    }
+
+    .genre-empty p,
+    .genre-error p {
+        font-size: 11px;
+    }
+
+    .genre-empty-btn {
+        min-height: 44px;
+        padding: 12px 16px;
+    }
+
+    /* LOADING */
+    .genre-loading {
+        min-height: 240px;
+    }
+}
+
+/* SMALL ANDROID PHONES */
+@media (max-width: 380px) {
+    .genre-hero-copy h1 {
+        font-size: 32px;
+    }
+
+    .genre-section-heading {
+        flex-direction: column;
+    }
+
+    .genre-result-counter {
+        align-self: flex-start;
+    }
+
+    .genre-grid {
+        gap: 13px 8px;
+    }
+
+    .genre-grid .movie-info {
+        padding: 8px 7px 10px;
+    }
+
+    .genre-grid .movie-title {
+        font-size: 10px;
+    }
+
+    .genre-select-wrap {
+        padding: 0 6px;
+    }
+
+    .genre-select-wrap span {
+        font-size: 8px;
+    }
+
+    .genre-select-wrap select {
+        max-width: 90px;
+        font-size: 9px;
+    }
+
+    .genre-pagination {
+        gap: 4px;
+    }
+
+    .genre-page-btn {
+        min-width: 35px;
+        height: 39px;
+        min-height: 39px;
+        padding: 0 7px;
+    }
+}
+
+/* EXTRA SMALL DEVICES */
+@media (max-width: 330px) {
+    .genre-grid {
+        gap: 11px 7px;
+    }
+
+    .genre-grid .movie-title {
+        font-size: 9px;
+    }
+
+    .genre-grid .movie-meta {
+        font-size: 8px;
+    }
+
+    .genre-select-wrap span {
+        display: none;
+    }
+
+    .genre-select-wrap select {
+        width: 100%;
+        max-width: none;
+        text-align: left;
+    }
+}
+
+/* LANDSCAPE PHONE */
+@media (max-height: 500px) and (orientation: landscape) {
+    .genre-hero {
+        padding-top: 85px;
+        padding-bottom: 30px;
+    }
+
+    .genre-hero-copy h1 {
+        font-size: 34px;
+    }
+
+    .hawk-3d-float {
+        width: 210px;
+        height: 145px;
+    }
+}
+
+/* REDUCE EFFECTS ON LOW-POWER DEVICES */
+@media (max-width: 600px) {
+    .genre-hero-glow {
+        filter: blur(75px);
+        opacity: .12;
+    }
+
+    .hawk-3d-glow {
+        opacity: .2;
+    }
+
+    .hawk-3d-content {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+    .genre-grid .movie-card,
+    .genre-grid .movie-poster img,
+    .hawk-3d-float {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
