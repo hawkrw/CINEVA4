@@ -14,12 +14,9 @@
 ========================================================= */
 
 import {
-    getLatestContent,
-    getMoviesByCategory,
-    getTrendingContent,
+    getHomepageData,
     getOurTranslators
 } from "./supabase.js";
-
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -1045,43 +1042,22 @@ function restartHeroSlider() {
 /* =========================================================
    26. LOAD HERO CONTENT
 ========================================================= */
+/* =========================================================
+   26. RENDER HERO FROM SHARED HOMEPAGE DATA
+========================================================= */
 
-async function loadFeatured() {
-
+function loadFeatured(content = []) {
     if (!elements.hero) return;
 
-    try {
+    heroSlides = Array.isArray(content)
+        ? content
+            .filter(item => item && item.id)
+            .slice(0, HOME_CONFIG.heroLimit)
+        : [];
 
-        const content = await withTimeout(
-            getLatestContent(HOME_CONFIG.heroLimit),
-            "Hero content request timed out."
-        );
+    currentSlide = 0;
 
-        heroSlides = Array.isArray(content)
-
-            ? content
-                .filter(item => item && item.id)
-                .slice(0, HOME_CONFIG.heroLimit)
-
-            : [];
-
-        currentSlide = 0;
-
-        renderHero();
-
-    } catch (error) {
-
-        console.error(
-            "CINEVA hero slider error:",
-            error
-        );
-
-        heroSlides = [];
-
-        renderHero();
-
-    }
-
+    renderHero();
 }
 /* =========================================================
    CINEVA PRO — LATEST ADDED VIEW ALL LINK
@@ -1120,105 +1096,59 @@ function ensureLatestViewAll() {
 }
 
 /* =========================================================
-   27. LOAD LATEST CONTENT
-========================================================= */
-/* =========================================================
-   CINEVA PRO — LATEST ADDED
-   Displays only 6 newest movies and series
+   27. RENDER LATEST FROM SHARED HOMEPAGE DATA
 ========================================================= */
 
-async function loadLatest() {
+function loadLatest(content = []) {
     if (!elements.latest) return;
 
-    // Make sure the View All link is visible
     ensureLatestViewAll();
 
-    showLoading(
-        elements.latest,
-        "Loading latest movies and series..."
-    );
+    const latestSix = Array.isArray(content)
+        ? content
+            .filter(item => item && item.id)
+            .slice(0, HOME_CONFIG.latestLimit)
+        : [];
 
-    try {
-        const latest = await withTimeout(
-            getLatestContent(HOME_CONFIG.latestLimit),
-            "Latest content request timed out."
-        );
-
-        const latestSix = Array.isArray(latest)
-            ? latest
-                .filter(item => item && item.id)
-                .slice(0, 6)
-            : [];
-
-        renderMovieGrid(
-            elements.latest,
-            latestSix
-        );
-
-        console.log(
-            `CINEVA: Displaying ${latestSix.length} latest contents.`
-        );
-
-    } catch (error) {
-        console.error(
-            "Latest content failed:",
-            error
-        );
-
+    if (!latestSix.length) {
         showEmpty(
             elements.latest,
-            "Unable to load latest content. Please try again."
+            "New movies and series will appear here soon."
         );
+        return;
     }
+
+    renderMovieGrid(elements.latest, latestSix);
+
+    console.log(
+        `CINEVA: Displaying ${latestSix.length} latest titles.`
+    );
 }
 /* =========================================================
    CINEVA — LOAD TRENDING MOVIES AND SERIES
    Ranked by actual Supabase views
 ========================================================= */
+/* =========================================================
+   RENDER TRENDING FROM SHARED HOMEPAGE DATA
+========================================================= */
 
-async function loadTrending() {
+function loadTrending(content = []) {
     if (!elements.trending) return;
 
-    showLoading(
-        elements.trending,
-        "Finding the most watched content..."
-    );
-
-    try {
-        const trending = await withTimeout(
-            getTrendingContent(HOME_CONFIG.trendingLimit),
-            "Trending content request timed out."
-        );
-
-        if (!Array.isArray(trending) || !trending.length) {
-            showEmpty(
-                elements.trending,
-                "Trending content will appear here as viewers watch movies and series."
-            );
-            return;
-        }
-
-        renderMovieGrid(
-            elements.trending,
-            trending
-        );
-
-        console.log(
-            `CINEVA: Loaded ${trending.length} trending titles.`,
-            trending
-        );
-
-    } catch (error) {
-        console.error("CINEVA trending error:", error);
-
+    if (!Array.isArray(content) || !content.length) {
         showEmpty(
             elements.trending,
-            "Unable to load trending content. Please try again."
+            "Trending content will appear here as viewers watch movies and series."
         );
+        return;
     }
+
+    renderMovieGrid(elements.trending, content);
+
+    console.log(
+        `CINEVA: Loaded ${content.length} trending titles.`
+    );
 }
-
-
 /* =========================================================
    28. CATEGORY SECTION MARKUP
 ========================================================= */
@@ -1291,70 +1221,16 @@ function createCategorySection(category, content) {
 
 
 /* =========================================================
-   29. LOAD CATEGORY SECTIONS
+   29. RENDER CATEGORIES FROM SHARED HOMEPAGE DATA
 ========================================================= */
 
-async function loadCategories() {
-
+function loadCategories(categoryData = {}) {
     if (!elements.categorySections) return;
 
     elements.categorySections.innerHTML = "";
 
-    const results = await Promise.all(
-
-        CATEGORIES.map(async category => {
-
-            try {
-
-                const content = await withTimeout(
-
-                    getMoviesByCategory(
-                        category,
-                        HOME_CONFIG.categoryLimit
-                    ),
-
-                    `${category} request timed out.`
-
-                );
-
-                return {
-
-                    category,
-
-                    content: Array.isArray(content)
-
-                        ? content.slice(
-                            0,
-                            HOME_CONFIG.categoryLimit
-                        )
-
-                        : []
-
-                };
-
-            } catch (error) {
-
-                console.error(
-                    `${category} loading failed:`,
-                    error
-                );
-
-                return {
-
-                    category,
-
-                    content: []
-
-                };
-
-            }
-
-        })
-
-    );
-
-
-    results.forEach(({ category, content }) => {
+    CATEGORIES.forEach(category => {
+        const content = categoryData[category] || [];
 
         if (!content.length) return;
 
@@ -1364,16 +1240,12 @@ async function loadCategories() {
         );
 
         if (section) {
-
             elements.categorySections.appendChild(section);
-
         }
-
     });
 
+    console.log("CINEVA: Category sections rendered.");
 }
-
-
 /* =========================================================
    30. PAGE LOADER
 ========================================================= */
@@ -1402,21 +1274,77 @@ function hidePageLoader() {
 
 }
 /* =========================================================
-   CINEVA — HOMEPAGE INITIALIZATION
+   CINEVA PRO — OPTIMIZED HOMEPAGE INITIALIZATION
+   One shared homepage database request
 ========================================================= */
 
 async function initializeHome() {
+    console.log("CINEVA: Initializing optimized homepage...");
+
+    // Show loading states
+    showLoading(
+        elements.latest,
+        "Loading latest movies and series..."
+    );
+
+    showLoading(
+        elements.trending,
+        "Finding the most watched content..."
+    );
+
+    if (elements.categorySections) {
+        elements.categorySections.innerHTML = "";
+    }
+
     try {
-        await Promise.allSettled([
-            loadFeatured(),
-            loadLatest(),
-            loadTrending(),
-            loadCategories(),
+        // Fetch shared homepage data and translators concurrently.
+        const results = await Promise.allSettled([
+            withTimeout(
+                getHomepageData({
+                    latestLimit: HOME_CONFIG.heroLimit,
+                    trendingLimit: HOME_CONFIG.trendingLimit,
+                    categoryLimit: HOME_CONFIG.categoryLimit,
+                    categories: CATEGORIES
+                }),
+                "Homepage content request timed out."
+            ),
+
             loadOurTranslators()
         ]);
 
+        const homepageResult = results[0];
+
+        if (homepageResult.status === "fulfilled") {
+            const homepageData = homepageResult.value;
+
+            // Reuse the same latest data for hero and Latest Added.
+            loadFeatured(homepageData.latest || []);
+
+            loadLatest(homepageData.latest || []);
+
+            // Render trending content.
+            loadTrending(homepageData.trending || []);
+
+            // Render all category sections.
+            loadCategories(homepageData.categories || {});
+
+            console.log(
+                "CINEVA: Homepage content loaded successfully.",
+                {
+                    latest: homepageData.latest?.length || 0,
+                    trending: homepageData.trending?.length || 0,
+                    categories: Object.keys(
+                        homepageData.categories || {}
+                    ).length
+                }
+            );
+
+        } else {
+            throw homepageResult.reason;
+        }
+
         console.log(
-            "CINEVA homepage initialized successfully."
+            "CINEVA: Homepage initialized successfully."
         );
 
     } catch (error) {
@@ -1424,6 +1352,23 @@ async function initializeHome() {
             "CINEVA homepage initialization failed:",
             error
         );
+
+        // Keep the page usable even when Supabase is unavailable.
+        loadFeatured([]);
+
+        showEmpty(
+            elements.latest,
+            "Unable to load latest content. Please try again."
+        );
+
+        showEmpty(
+            elements.trending,
+            "Unable to load trending content. Please try again."
+        );
+
+        if (elements.categorySections) {
+            elements.categorySections.innerHTML = "";
+        }
 
     } finally {
         hidePageLoader();
