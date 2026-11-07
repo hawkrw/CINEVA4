@@ -1,0 +1,679 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Explore the complete CINEVA collection of movies and TV series. Discover your next favorite story.">
+
+    <meta name="theme-color" content="#080812">
+
+    <title>Explore All Content | CINEVA</title>
+
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- CINEVA Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/cards.css">
+    <link rel="stylesheet" href="/css/viewall.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/contact-widget.css">
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- PAGE LOADER -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-logo">CINE<span>VA</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+
+    <!-- HEADER -->
+    <header class="main-header" id="mainHeader">
+
+        <div class="navbar container">
+
+            <a href="index.html" class="logo">
+
+                <span class="brand-icon">
+                    <img src="assets/images/logo.png" alt="CINEVA Logo">
+                </span>
+
+                <div class="logo-text">
+                    <h2>CINE<span>VA</span></h2>
+                    <small>Unlimited Entertainment</small>
+                </div>
+
+            </a>
+
+
+            <!-- DESKTOP NAVIGATION -->
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="index.html" class="nav-link">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+
+                <a href="viewall.html?type=movie" class="nav-link">
+                    <i class="fa-solid fa-film"></i>
+                    Movies
+                </a>
+
+                <a href="viewall.html?type=series" class="nav-link">
+                    <i class="fa-solid fa-tv"></i>
+                    Series
+                </a>
+
+                <a href="viewall.html?genre=animation" class="nav-link">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Animation
+                </a>
+
+                <a href="index.html#categories" class="nav-link">
+                    <i class="fa-solid fa-layer-group"></i>
+                    Categories
+                </a>
+
+            </nav>
+
+
+            <!-- SEARCH -->
+            <form id="search-form" class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    type="search"
+                    id="search-input"
+                    placeholder="Search movies and series..."
+                    autocomplete="off">
+
+                <button type="submit" aria-label="Search">
+                    Search
+                </button>
+
+                <div id="search-results" class="search-results"></div>
+
+            </form>
+
+
+            <!-- HEADER ACTIONS -->
+            <div class="nav-actions">
+
+                <a href="profile.html#favorites"
+                    class="nav-icon"
+                    aria-label="Favorites">
+                    <i class="fa-regular fa-heart"></i>
+                </a>
+
+                <button
+                    class="nav-icon notification-btn"
+                    id="notificationBtn"
+                    aria-label="Notifications">
+
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot"></span>
+
+                </button>
+
+                <button
+                    class="nav-icon theme-toggle"
+                    id="themeToggle"
+                    aria-label="Toggle theme">
+
+                    <i class="fa-solid fa-sun"></i>
+
+                </button>
+
+                <a href="login.html"
+                    class="sign-in-btn"
+                    id="authButton">
+
+                    <i class="fa-regular fa-user"></i>
+                    <span>Sign In</span>
+
+                </a>
+
+                <button
+                    class="mobile-menu-btn"
+                    id="mobileMenuBtn"
+                    aria-label="Toggle navigation">
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="viewall-page">
+
+        <!-- PAGE HERO -->
+        <section class="viewall-hero">
+
+            <div class="container viewall-hero-content">
+
+                <div class="viewall-breadcrumb">
+                    <a href="index.html">Home</a>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Explore</span>
+                </div>
+
+                <span class="viewall-eyebrow">
+                    <i class="fa-solid fa-sparkles"></i>
+                    THE CINEVA COLLECTION
+                </span>
+
+                <h1>
+                    Explore <span>Entertainment.</span>
+                </h1>
+
+                <p>
+                    Discover incredible movies and series.
+                    Find your next favorite story in the CINEVA collection.
+                </p>
+
+                <div class="viewall-statistics">
+
+                    <div class="viewall-stat">
+                        <i class="fa-solid fa-film"></i>
+                        <div>
+                            <strong id="totalMovies">—</strong>
+                            <span>Movies</span>
+                        </div>
+                    </div>
+
+                    <div class="viewall-stat">
+                        <i class="fa-solid fa-tv"></i>
+                        <div>
+                            <strong id="totalSeries">—</strong>
+                            <span>Series</span>
+                        </div>
+                    </div>
+
+                    <div class="viewall-stat">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <div>
+                            <strong id="totalContent">—</strong>
+                            <span>Total Titles</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CATALOGUE -->
+        <section class="viewall-catalogue container">
+
+            <!-- SECTION HEADING -->
+            <div class="viewall-heading">
+
+                <div>
+                    <span class="viewall-section-label">
+                        DISCOVER MORE
+                    </span>
+
+                    <h2 id="catalogueTitle">
+                        All Entertainment
+                    </h2>
+
+                    <p id="catalogueDescription">
+                        Browse the complete CINEVA collection.
+                    </p>
+                </div>
+
+                <div class="catalogue-count">
+                    <span id="resultsCount">0 titles</span>
+                </div>
+
+            </div>
+
+
+            <!-- FILTER TOOLBAR -->
+            <div class="viewall-toolbar">
+
+                <!-- SEARCH -->
+                <div class="catalogue-search">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="search"
+                        id="catalogueSearch"
+                        placeholder="Find a movie or series..."
+                        autocomplete="off"
+                        aria-label="Search catalogue">
+
+                    <button
+                        type="button"
+                        id="clearSearch"
+                        aria-label="Clear search"
+                        hidden>
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+                </div>
+
+
+                <!-- TYPE FILTER -->
+                <div class="catalogue-filter">
+
+                    <label for="typeFilter">
+                        <i class="fa-solid fa-layer-group"></i>
+                        Type
+                    </label>
+
+                    <select id="typeFilter">
+                        <option value="all">All Content</option>
+                        <option value="movie">Movies</option>
+                        <option value="series">Series</option>
+                    </select>
+
+                </div>
+
+
+                <!-- CATEGORY FILTER -->
+                <div class="catalogue-filter">
+
+                    <label for="categoryFilter">
+                        <i class="fa-solid fa-shapes"></i>
+                        Category
+                    </label>
+
+                    <select id="categoryFilter">
+                        <option value="all">All Categories</option>
+                    </select>
+
+                </div>
+
+
+                <!-- SORT FILTER -->
+                <div class="catalogue-filter">
+
+                    <label for="sortFilter">
+                        <i class="fa-solid fa-arrow-down-wide-short"></i>
+                        Sort By
+                    </label>
+
+                    <select id="sortFilter">
+                        <option value="latest">Latest Added</option>
+                        <option value="oldest">Oldest Added</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="views">Most Viewed</option>
+                        <option value="title">Title A–Z</option>
+                    </select>
+
+                </div>
+
+
+                <!-- RESET FILTERS -->
+                <button
+                    type="button"
+                    class="catalogue-reset"
+                    id="resetFilters">
+
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Reset
+
+                </button>
+
+            </div>
+
+
+            <!-- ACTIVE FILTERS -->
+            <div class="active-filters" id="activeFilters" hidden>
+
+                <span>Active filters:</span>
+
+                <div id="activeFilterTags"></div>
+
+            </div>
+
+
+            <!-- RESULTS -->
+            <div class="catalogue-results">
+
+                <div class="catalogue-results-heading">
+
+                    <h3>
+                        <i class="fa-solid fa-clapperboard"></i>
+                        Collection
+                    </h3>
+
+                    <span id="showingCount">
+                        Showing 0 titles
+                    </span>
+
+                </div>
+
+
+                <!-- MOVIE GRID -->
+                <div
+                    class="movie-grid viewall-grid"
+                    id="viewallGrid">
+
+                    <!-- Content loaded from Supabase -->
+
+                </div>
+
+
+                <!-- EMPTY STATE -->
+                <div class="viewall-empty" id="viewallEmpty" hidden>
+
+                    <div class="viewall-empty-icon">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+
+                    <h3>No titles found</h3>
+
+                    <p id="emptyMessage">
+                        Try changing your search or filters.
+                    </p>
+
+                    <button
+                        type="button"
+                        id="emptyReset">
+
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Clear Filters
+
+                    </button>
+
+                </div>
+
+
+                <!-- LOAD MORE -->
+                <div class="viewall-load-more" id="loadMoreWrapper" hidden>
+
+                    <p id="remainingCount">
+                        More titles available
+                    </p>
+
+                    <button
+                        type="button"
+                        id="loadMoreBtn">
+
+                        <span>Load More</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+
+        <div class="footer-container container">
+
+            <!-- BRAND -->
+            <div class="footer-column footer-brand">
+
+                <a href="index.html" class="logo">
+
+                    <span class="brand-icon">
+                        <img src="assets/images/logo.png" alt="CINEVA Logo">
+                    </span>
+
+                    <div class="logo-text">
+                        <h2>CINE<span>VA</span></h2>
+                        <small>Unlimited Entertainment</small>
+                    </div>
+
+                </a>
+
+                <p>
+                    Your destination for movies and series.
+                    Discover amazing stories, explore new worlds
+                    and enjoy entertainment in one place.
+                </p>
+
+                <div class="social-links">
+
+                    <a href="https://www.facebook.com/mrhawk734"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+
+                    <a href="https://chat.whatsapp.com/FgsooLes8rQAQRjGbpfqY5?s=cl&p=a&mlu=4&ilr=4&iam=2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp Group">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+
+                    <a href="https://www.instagram.com/hawk_mrperfect"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+
+                    <a href="https://www.youtube.com/@mrhawk_rw"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="YouTube">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+
+                    <a href="https://x.com/mrhawk2007"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="X">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+
+                    <a href="https://t.me/it_hawk_rw"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Telegram">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+
+                    <a href="https://wa.me/250794669266"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- EXPLORE -->
+            <div class="footer-column">
+
+                <h3>Explore</h3>
+
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="viewall.html?type=movie">Movies</a></li>
+                    <li><a href="viewall.html?type=series">TV Series</a></li>
+                    <li><a href="viewall.html">All Content</a></li>
+                </ul>
+
+            </div>
+
+
+            <!-- CATEGORIES -->
+            <div class="footer-column">
+
+                <h3>Categories</h3>
+
+                <ul>
+                    <li><a href="viewall.html?genre=action">Action</a></li>
+                    <li><a href="viewall.html?genre=horror">Horror</a></li>
+                    <li><a href="viewall.html?genre=drama">Drama</a></li>
+                    <li><a href="viewall.html?genre=comedy">Comedy</a></li>
+                    <li><a href="viewall.html?genre=animation">Animation</a></li>
+                </ul>
+
+            </div>
+
+
+            <!-- INFORMATION -->
+            <div class="footer-column footer-navigation">
+
+                <h3>Explore CINEVA</h3>
+
+                <p class="footer-nav-description">
+                    Your entertainment, your way.
+                </p>
+
+                <ul>
+                    <li>
+                        <a href="about.html">
+                            <i class="fa-solid fa-circle-info"></i>
+                            About CINEVA
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="contact.html">
+                            <i class="fa-solid fa-envelope"></i>
+                            Contact Us
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="privacy.html">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Privacy Policy
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="terms.html">
+                            <i class="fa-solid fa-file-contract"></i>
+                            Terms of Service
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="help.html">
+                            <i class="fa-solid fa-circle-question"></i>
+                            Help Center
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- COPYRIGHT -->
+        <div class="footer-bottom">
+
+            <div class="container footer-bottom-content">
+
+                <p>
+                    © <span id="currentYear">2026</span>
+                    <strong>CINEVA</strong>.
+                    All Rights Reserved.
+                </p>
+
+                <div class="footer-bottom-links">
+                    <span>
+                        Developed by IT HAWK_RW
+                        <i class="fa-solid fa-heart"></i>
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- SCROLL TO TOP -->
+    <button
+        class="scroll-top"
+        id="scrollTop"
+        aria-label="Scroll to top">
+
+        <i class="fa-solid fa-chevron-up"></i>
+
+    </button>
+
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-bottom-nav">
+
+        <a href="index.html">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+
+        <a href="viewall.html?type=movie">
+            <i class="fa-solid fa-film"></i>
+            <span>Movies</span>
+        </a>
+
+        <a href="viewall.html?type=series">
+            <i class="fa-solid fa-tv"></i>
+            <span>Series</span>
+        </a>
+
+        <a href="profile.html#favorites">
+            <i class="fa-regular fa-heart"></i>
+            <span>Saved</span>
+        </a>
+
+        <a href="profile.html">
+            <i class="fa-regular fa-user"></i>
+            <span>Profile</span>
+        </a>
+
+    </nav>
+
+
+    <!-- JAVASCRIPT -->
+    <script type="module" src="/js/viewall.js"></script>
+    <script type="module" src="/js/search.js"></script>
+    <script type="module" src="/js/navigation.js"></script>
+    <script src="/js/contact-widget.js" defer></script>
+
+</body>
+</html>
