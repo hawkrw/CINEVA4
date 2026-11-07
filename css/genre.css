@@ -687,3 +687,196 @@
         transition-duration: .01ms !important;
     }
 }
+
+/* =========================================================
+   IT HAWK_RW — 3D FLOATING HERO SIGNATURE
+========================================================= */
+
+.genre-hero-inner {
+    position: relative;
+}
+
+.hawk-3d-float {
+    position: absolute;
+    top: 50%;
+    right: 4%;
+    width: 310px;
+    height: 230px;
+    display: grid;
+    place-items: center;
+    transform: translateY(-50%);
+    perspective: 900px;
+    z-index: 2;
+    animation: hawkFloat 5s ease-in-out infinite;
+}
+
+.hawk-3d-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    padding: 30px 20px;
+    text-align: center;
+    background: linear-gradient(
+        145deg,
+        rgba(31, 20, 55, .95),
+        rgba(9, 8, 22, .96)
+    );
+    border: 1px solid rgba(168, 85, 247, .55);
+    border-radius: 20px;
+    transform: rotateY(-13deg) rotateX(7deg);
+    box-shadow:
+        0 25px 45px rgba(0, 0, 0, .55),
+        0 0 25px rgba(139, 53, 245, .3),
+        inset 0 1px 1px rgba(255,255,255,.15);
+    backdrop-filter: blur(15px);
+}
+
+.hawk-3d-small {
+    display: block;
+    margin-bottom: 12px;
+    color: #b77aff;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 4px;
+}
+
+.hawk-3d-content h2 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(37px, 4vw, 53px);
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1;
+    text-shadow:
+        1px 1px 0 #b77aff,
+        2px 2px 0 #7130c7,
+        4px 4px 0 #431c7c,
+        7px 8px 12px rgba(0,0,0,.9),
+        0 0 22px rgba(168,85,247,.7);
+}
+
+.hawk-3d-content h2 span {
+    color: #c084fc;
+    background: linear-gradient(135deg, #fff, #c084fc 45%, #8b35f5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hawk-3d-line {
+    width: 65%;
+    height: 2px;
+    margin: 19px auto 13px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #a855f7,
+        #ef315e,
+        transparent
+    );
+    box-shadow: 0 0 12px rgba(168,85,247,.8);
+}
+
+.hawk-3d-content p {
+    margin: 0;
+    color: #bdb4d4;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.hawk-3d-content p span {
+    color: #ef315e;
+}
+
+.hawk-3d-glow {
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    background: #8b35f5;
+    filter: blur(85px);
+    opacity: .35;
+    z-index: 0;
+}
+
+.hawk-3d-orbit {
+    position: absolute;
+    width: 340px;
+    height: 115px;
+    border: 1px solid rgba(168,85,247,.45);
+    border-radius: 50%;
+    transform: rotate(-22deg);
+    box-shadow: 0 0 15px rgba(139,53,245,.12);
+    pointer-events: none;
+}
+
+.hawk-3d-orbit.orbit-two {
+    width: 290px;
+    height: 155px;
+    border-color: rgba(239,49,94,.22);
+    transform: rotate(35deg);
+}
+
+@keyframes hawkFloat {
+    0%, 100% {
+        margin-top: 0;
+        transform: translateY(-50%) rotate(0deg);
+    }
+    50% {
+        margin-top: -16px;
+        transform: translateY(-50%) rotate(2deg);
+    }
+}
+
+/* TABLET */
+@media (max-width: 1050px) {
+    .hawk-3d-float {
+        right: 0;
+        width: 250px;
+        opacity: .85;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+    .hawk-3d-float {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: min(270px, 90%);
+        height: 180px;
+        margin: 35px auto 0;
+        transform: none;
+    }
+
+    .hawk-3d-content {
+        padding: 24px 15px;
+    }
+
+    .hawk-3d-content h2 {
+        font-size: 43px;
+    }
+
+    .hawk-3d-orbit {
+        width: 280px;
+    }
+
+    .hawk-3d-orbit.orbit-two {
+        width: 250px;
+    }
+
+    @keyframes hawkFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hawk-3d-float {
+        animation: none;
+    }
+}
