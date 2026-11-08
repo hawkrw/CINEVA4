@@ -9,6 +9,12 @@
     <meta name="description" content="Discover movies, TV series and animation on CINEVA. Explore recently added titles, trending entertainment and curated categories.">
 
     <meta name="theme-color" content="#080812">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CINEVA">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="preconnect" href="https://exjgejujfxejjlbfizgz.supabase.co" crossorigin>
     <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
@@ -1181,6 +1187,14 @@
 <script type="module" src="js/navigation.js"></script>
     <script type="module" src="js/test-connection.js"></script>
     <script src="js/contact-widget.js?v=20261108-2"></script>
+    <script id="cineva-service-worker">
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("/sw.js", { scope: "/" })
+                .catch(error => console.warn("CINEVA offline support unavailable:", error));
+        });
+    }
+    </script>
 </body>
 
 </html>
