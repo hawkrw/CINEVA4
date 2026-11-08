@@ -627,7 +627,23 @@ function createMovieCard(item) {
     playIcon.appendChild(play);
     overlay.appendChild(playIcon);
 
-    posterWrap.append(image, typeBadge, overlay);
+    const translatorName = String(item.translator || "").trim();
+    if (translatorName) {
+        const translatorBadge = document.createElement("span");
+        translatorBadge.className = "movie-translator-badge";
+        translatorBadge.title = `Translated by ${translatorName}`;
+
+        const translatorIcon = document.createElement("i");
+        translatorIcon.className = "fa-solid fa-language";
+
+        const translatorText = document.createElement("span");
+        translatorText.textContent = translatorName;
+
+        translatorBadge.append(translatorIcon, translatorText);
+        posterWrap.append(image, typeBadge, translatorBadge, overlay);
+    } else {
+        posterWrap.append(image, typeBadge, overlay);
+    }
 
     const info = document.createElement("div");
     info.className = "movie-info";
