@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080812">
+<meta name="description" content="Explore movies and series translated for CINEVA.">
+<title>Translator Collection | CINEVA</title>
+<link rel="icon" href="assets/images/favicon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/cards.css">
+<link rel="stylesheet" href="css/cineva-theme.css">
+<link rel="stylesheet" href="css/contact-widget.css">
+<link rel="stylesheet" href="css/translators.css">
+</head>
+<body>
+<header class="main-header">
+ <div class="navbar container">
+  <a href="index.html" class="logo"><span class="brand-icon"><img src="assets/images/logo.png" alt="CINEVA"></span><div class="logo-text"><h2>CINE<span>VA</span></h2><small>Unlimited Entertainment</small></div></a>
+  <nav class="nav-menu"><a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a><a href="genre.html?type=movie" class="nav-link">Movies</a><a href="genre.html?type=series" class="nav-link">Series</a></nav>
+  <div class="nav-actions"><a href="login.html" class="sign-in-btn" id="authButton"><i class="fa-regular fa-user"></i><span>Sign In</span></a></div>
+ </div>
+</header>
+<main class="translator-page">
+ <section class="translator-hero">
+  <div class="container">
+   <a class="translator-back" href="index.html#our-translators"><i class="fa-solid fa-arrow-left"></i> All translators</a>
+   <span class="translator-eyebrow"><i class="fa-solid fa-language"></i> CINEVA CONTRIBUTORS</span>
+   <div class="translator-profile">
+    <div class="translator-profile-avatar" id="translatorAvatar">C</div>
+    <div><h1 id="translatorName">Translator</h1><p id="translatorDescription">Discover all movies and series translated by this contributor.</p></div>
+   </div>
+   <div class="translator-stats"><span><strong id="translatorCount">—</strong> titles</span><span id="translatorBreakdown">Movies &amp; series</span></div>
+  </div>
+ </section>
+ <section class="container translator-results">
+  <div class="translator-results-heading"><div><span>THE COLLECTION</span><h2>Translated <em>Content</em></h2></div><div class="translator-search"><i class="fa-solid fa-magnifying-glass"></i><input id="translatorSearch" type="search" placeholder="Search this collection..." aria-label="Search translated content"></div></div>
+  <div class="translator-content-grid" id="translatorGrid"><div class="translator-page-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading translated content...</div></div>
+  <div class="translator-page-state" id="translatorEmpty" hidden>No translated titles were found for this translator.</div>
+ </section>
+</main>
+<footer class="info-footer"><p>© <span id="footerYear"></span> CINEVA. All rights reserved.</p></footer>
+<script>document.getElementById("footerYear").textContent=new Date().getFullYear();</script>
+<script type="module" src="js/translators.js"></script>
+<script src="js/contact-widget.js" defer></script>
+</body></html>
