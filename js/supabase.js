@@ -636,7 +636,7 @@ export async function getOurTranslators() {
             .not("translator", "is", null)
     ]);
 
-    const names = [];
+    const collected = [];
 
     results.forEach((result, index) => {
         const label = index === 0
@@ -644,27 +644,23 @@ export async function getOurTranslators() {
             : "Series translators";
 
         if (result.status === "rejected") {
-            console.warn(
-                `CINEVA ${label} request failed:`,
-                result.reason
-            );
+            console.warn(`CINEVA ${label} request failed:`, result.reason);
             return;
         }
 
         const { data, error } = result.value;
 
         if (error) {
-            console.warn(
-                `CINEVA ${label} error:`,
-                error.message
-            );
+            console.warn(`CINEVA ${label} error:`, error.message);
             return;
         }
 
         (data || []).forEach(item => {
-            const name = String(item.translator || "").trim();
+            const name = String(item.translator || "")
+                .replace(/\\s+/g, " ")
+                .trim();
 
-            if (name) names.push(name);
+            if (name) collected.push(name);
         });
     });
 
@@ -672,9 +668,25 @@ export async function getOurTranslators() {
         throw new Error("Unable to load translator information.");
     }
 
-    return [...new Set(names)].sort(
-        (a, b) => a.localeCompare(b)
-    );
+    // Merge case and spacing variants (e.g. "ROCKY" and "Rocky")
+    // while keeping the most frequently used display spelling.
+    const grouped = new Map();
+
+    collected.forEach(name => {
+        const key = name.toLocaleLowerCase();
+
+        if (!grouped.has(key)) {
+            grouped.set(key, new Map());
+        }
+
+        const variants = grouped.get(key);
+        variants.set(name, (variants.get(name) || 0) + 1);
+    });
+
+    return [...grouped.values()]
+        .map(variants => [...variants.entries()]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0])
+        .sort((a, b) => a.localeCompare(b));
 }
 
 /* =========================================
