@@ -1991,3 +1991,54 @@ if (document.readyState === "loading") {
 }
 
 console.log("CINEVA Watch System Ready.");
+
+/* =========================================
+   CINEVA WATCH PAGE — SEARCH OPEN/CLOSE
+========================================= */
+
+function initializeWatchSearchControls() {
+    const searchForm = document.getElementById("search-form");
+    const searchInput = document.getElementById("search-input");
+    const searchClose = document.getElementById("watchSearchClose");
+    const searchResults = document.getElementById("search-results");
+
+    if (!searchForm || !searchInput || !searchClose) return;
+
+    // Open search when the input receives focus
+    searchInput.addEventListener("focus", () => {
+        searchForm.classList.remove("watch-search-collapsed");
+    });
+
+    // Open search when the magnifying glass is clicked
+    searchForm.addEventListener("submit", (event) => {
+        if (searchForm.classList.contains("watch-search-collapsed")) {
+            event.preventDefault();
+
+            searchForm.classList.remove("watch-search-collapsed");
+
+            requestAnimationFrame(() => {
+                searchInput.focus();
+            });
+        }
+    }, true);
+
+    // Close search when X is clicked
+    searchClose.addEventListener("click", () => {
+        searchInput.value = "";
+
+        // Notify the existing search system that input was cleared
+        searchInput.dispatchEvent(new Event("input", {
+            bubbles: true
+        }));
+
+        if (searchResults) {
+            searchResults.innerHTML = "";
+            searchResults.classList.remove("active", "show");
+        }
+
+        searchForm.classList.add("watch-search-collapsed");
+        searchInput.blur();
+    });
+}
+
+initializeWatchSearchControls();
