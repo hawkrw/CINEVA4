@@ -3215,3 +3215,143 @@
 
 }
 
+
+/* =========================================================
+   WATCH HEADER — USE THE SAME HOMEPAGE HEADER SYSTEM
+   Shared structure, typography, controls and mobile navigation
+========================================================= */
+.watch-page-body .main-header {
+    height: var(--header-height, 76px);
+    min-height: var(--header-height, 76px);
+    background: var(--nav-glass, rgba(9,9,13,.94));
+    border-bottom: 1px solid var(--nav-border, rgba(255,255,255,.075));
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    z-index: 2000;
+}
+.watch-page-body .main-header.scrolled {
+    background: rgba(7,7,11,.98);
+    box-shadow: 0 12px 35px rgba(0,0,0,.35);
+}
+.watch-page-body .main-header .navbar.container {
+    width: min(100% - 64px, 1600px);
+    height: 100%;
+    min-height: 0;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+}
+.watch-page-body .main-header .logo { gap: 11px; color: white; }
+.watch-page-body .main-header .logo-text h2 {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 23px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
+}
+.watch-page-body .main-header .logo-text small {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.05px;
+    text-transform: uppercase;
+}
+.watch-page-body .main-header .nav-menu {
+    position: static;
+    width: auto;
+    padding: 0;
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    border: 0;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    backdrop-filter: none;
+}
+.watch-page-body .main-header .nav-link {
+    width: auto;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 11px;
+    color: #a7a5ad;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.watch-page-body .main-header .nav-link:hover { color: #fff; background: var(--nav-hover); }
+.watch-page-body .main-header .nav-link.active { color: #fff; background: var(--gradient-primary); }
+.watch-page-body .main-header .nav-actions { display:flex; align-items:center; gap:9px; flex-shrink:0; }
+.watch-page-body .main-header .nav-icon {
+    width:39px; height:39px; display:inline-flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid transparent; border-radius:10px;
+    color:#b9b5c4; font-size:17px;
+}
+.watch-page-body .main-header .nav-icon:hover { color:#fff; background:rgba(255,255,255,.08); border-color:var(--nav-border); }
+.watch-page-body .main-header .theme-toggle { color:#ffc857; }
+.watch-page-body .main-header .sign-in-btn {
+    min-height:40px; display:inline-flex; align-items:center; justify-content:center;
+    gap:8px; padding:0 16px; border-radius:10px;
+    background:var(--gradient-primary); color:#fff; font-size:12px; font-weight:800;
+}
+.watch-page-body .main-header .mobile-menu-btn {
+    display:none; width:39px; height:39px; align-items:center; justify-content:center;
+    color:#fff; background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1); border-radius:10px;
+}
+.watch-page-body .main-header .search-box {
+    width:clamp(180px,24vw,330px); min-width:150px; height:48px;
+}
+.watch-page-body .main-header .search-box button { min-width:64px; height:36px; }
+
+@media(max-width:1200px) {
+    .watch-page-body .main-header .navbar.container { width:calc(100% - 45px); gap:15px; }
+    .watch-page-body .main-header .nav-menu { gap:2px; }
+    .watch-page-body .main-header .nav-link { padding:9px 10px; font-size:12px; }
+    .watch-page-body .main-header .nav-actions { gap:9px; }
+    .watch-page-body .main-header .search-box { width:clamp(150px,20vw,240px); min-width:130px; }
+}
+@media(max-width:950px) {
+    .watch-page-body .main-header .navbar.container { width:calc(100% - 36px); gap:10px; }
+    .watch-page-body .main-header .nav-menu {
+        position:absolute; top:100%; left:0; width:100%;
+        padding:15px 25px 22px; display:flex; flex-direction:column;
+        align-items:stretch; justify-content:flex-start; gap:5px;
+        background:rgba(10,10,21,.98); border-bottom:1px solid var(--border-color);
+        opacity:0; visibility:hidden; transform:translateY(-12px);
+        backdrop-filter:blur(20px);
+    }
+    .watch-page-body .main-header .nav-menu.active { opacity:1; visibility:visible; transform:translateY(0); }
+    .watch-page-body .main-header .nav-link { width:100%; padding:13px 15px; font-size:13px; }
+    .watch-page-body .main-header .mobile-menu-btn { display:flex; }
+    .watch-page-body .main-header .search-box { width:44px; min-width:44px; }
+    .watch-page-body .main-header .search-box input { display:none; }
+}
+@media(max-width:600px) {
+    .watch-page-body .main-header { height:68px; min-height:68px; }
+    .watch-page-body .main-header .navbar.container { width:calc(100% - 22px); gap:7px; }
+    .watch-page-body .main-header .logo { gap:8px; }
+    .watch-page-body .main-header .logo .brand-icon { width:41px; height:41px; flex:0 0 41px; }
+    .watch-page-body .main-header .logo-text h2 { font-size:20px; }
+    .watch-page-body .main-header .logo-text small { font-size:7px; letter-spacing:.8px; }
+    .watch-page-body .main-header .nav-actions { gap:5px; }
+    .watch-page-body .main-header .nav-icon,
+    .watch-page-body .main-header .theme-toggle,
+    .watch-page-body .main-header .mobile-menu-btn { width:34px; height:34px; min-width:34px; }
+    .watch-page-body .main-header .sign-in-btn { min-height:34px; padding:0 9px; font-size:10px; }
+    .watch-page-body .main-header .search-box { width:36px; min-width:36px; height:36px; }
+}
+@media(max-width:380px) {
+    .watch-page-body .main-header .logo-text h2 { font-size:18px; }
+    .watch-page-body .main-header .nav-icon { display:none; }
+    .watch-page-body .main-header .sign-in-btn span { display:none; }
+    .watch-page-body .main-header .sign-in-btn { width:34px; padding:0; }
+}
