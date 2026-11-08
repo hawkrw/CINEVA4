@@ -1,0 +1,16 @@
+# Dependencies and local tooling
+node_modules/
+.wrangler/
+.DS_Store
+
+# Local secrets — never commit these
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Local logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
