@@ -75,7 +75,9 @@ function getContentUrl(item) {
             ? "series"
             : "movie";
 
-    return `watch.html?id=${encodeURIComponent(item.id)}&type=${type}`;
+    const id = type === "series" ? item.id : (item.public_id ?? item.id);
+
+    return `/${type}/${encodeURIComponent(id)}`;
 }
 
 function getDiscoverUrl(query) {
