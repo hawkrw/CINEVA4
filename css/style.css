@@ -2234,3 +2234,21 @@ body.light-theme {
     }
 }
 
+
+
+/* CINEVA — BACK-TO-TOP CONTROL ON THE LEFT */
+.scroll-top {
+    left: 24px;
+    right: auto;
+    bottom: 25px;
+}
+
+@media (max-width: 768px) {
+    .scroll-top {
+        left: 16px;
+        right: auto;
+        bottom: 82px;
+        width: 42px;
+        height: 42px;
+    }
+}
