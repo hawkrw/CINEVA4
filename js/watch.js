@@ -571,8 +571,8 @@ function normalizeEmbedUrl(value) {
     let input = value.trim();
 
     // Accept a pasted iframe embed snippet as well as a plain URL.
-    if (/<iframe\\b/i.test(input)) {
-        const match = input.match(/<iframe\\b[^>]*\\bsrc\\s*=\\s*["']([^"']+)["']/i);
+    if (/<iframe\b/i.test(input)) {
+        const match = input.match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
         if (!match) return "";
         input = match[1].replace(/&amp;/g, "&");
     }
@@ -581,19 +581,19 @@ function normalizeEmbedUrl(value) {
 
     try {
         const url = new URL(input);
-        const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+        const host = url.hostname.toLowerCase().replace(/^www\./, "");
         const parts = url.pathname.split("/").filter(Boolean);
         const first = parts[0] || "";
         const second = parts[1] || "";
 
         // YouTube watch, short, live and youtu.be links.
         if (host === "youtu.be") {
-            return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(first)}`;
+            return "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(first);
         }
         if (["youtube.com", "m.youtube.com", "youtube-nocookie.com"].includes(host)) {
             const id = url.searchParams.get("v") ||
                 (["embed", "shorts", "live"].includes(first) ? second : "");
-            if (id) return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`;
+            if (id) return "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id);
         }
 
         // Vimeo public video links.
@@ -601,18 +601,18 @@ function normalizeEmbedUrl(value) {
             const id = host === "player.vimeo.com"
                 ? (first === "video" ? second : first)
                 : first;
-            if (/^\\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+            if (/^\d+$/.test(id)) return "https://player.vimeo.com/video/" + id;
         }
 
         // Google Drive share links.
         if (host === "drive.google.com" || host === "docs.google.com") {
-            const fileMatch = url.pathname.match(/\\/file\\/d\\/([^/]+)/);
+            const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
             const id = fileMatch?.[1] || url.searchParams.get("id");
-            if (id) return `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
+            if (id) return "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
         }
 
         // Dropbox share links are best served as a browser preview.
-        if (host === "dropbox.com" || host === "www.dropbox.com") {
+        if (host === "dropbox.com") {
             url.searchParams.delete("dl");
             url.searchParams.set("raw", "1");
             return url.href;
@@ -624,17 +624,13 @@ function normalizeEmbedUrl(value) {
             first &&
             !["e", "embed"].includes(first.toLowerCase())
         ) {
-            return `https://hgcloud.to/e/${encodeURIComponent(first)}`;
+            return "https://hgcloud.to/e/" + encodeURIComponent(first);
         }
 
         // Voe.sx share-page links use /e/VIDEO_ID for embedding.
         if (host === "voe.sx") {
-            if (["e", "embed"].includes(first.toLowerCase())) {
-                return url.href;
-            }
-            if (first) {
-                return `https://voe.sx/e/${encodeURIComponent(first)}`;
-            }
+            if (["e", "embed"].includes(first.toLowerCase())) return url.href;
+            if (first) return "https://voe.sx/e/" + encodeURIComponent(first);
         }
 
         // Generic providers: use their supplied player/embed URL.
