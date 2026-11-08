@@ -657,7 +657,7 @@ export async function getOurTranslators() {
 
         (data || []).forEach(item => {
             const name = String(item.translator || "")
-                .replace(/\\s+/g, " ")
+                .replace(/\s+/g, " ")
                 .trim();
 
             if (name) collected.push(name);
