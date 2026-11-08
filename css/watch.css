@@ -55,7 +55,7 @@
 
     color: var(--watch-text);
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
     overflow-x: hidden;
 }
 
@@ -153,7 +153,7 @@
 .main-header .logo-text h2 {
     margin: 0;
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 25px;
     font-weight: 800;
     letter-spacing: -1px;
@@ -472,7 +472,7 @@
 }
 
 .player-empty h3 {
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 24px;
     margin: 0 0 10px;
 }
@@ -693,7 +693,7 @@
 
     color: white;
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: clamp(27px, 4vw, 43px);
     font-weight: 800;
     line-height: 1.15;
@@ -795,7 +795,7 @@
 
     color: white;
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: clamp(23px, 3vw, 29px);
     font-weight: 800;
 }
@@ -866,7 +866,7 @@
     color: white;
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     border-radius: 10px;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 14px;
     font-weight: 800;
 }
@@ -882,7 +882,7 @@
     overflow: hidden;
     margin: 0;
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 13px;
     font-weight: 700;
     text-overflow: ellipsis;
@@ -1204,7 +1204,7 @@
 
 .comments-count {
     color: var(--watch-muted);
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 15px;
     font-weight: 600;
 }
@@ -1238,7 +1238,7 @@
 
     color: white;
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 17px;
     font-weight: 800;
 }
@@ -1543,7 +1543,7 @@
 .footer-column .logo-text h2 {
     margin: 0;
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 25px;
     font-weight: 800;
 }
@@ -1571,7 +1571,7 @@
 .footer-column h3 {
     margin: 5px 0 20px;
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 14px;
     font-weight: 800;
 }
@@ -3246,7 +3246,7 @@
 .watch-page-body .main-header .logo { gap: 11px; color: white; }
 .watch-page-body .main-header .logo-text h2 {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 23px;
     font-weight: 900;
     letter-spacing: -1.2px;
