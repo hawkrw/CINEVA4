@@ -321,14 +321,18 @@ function showError(message) {
 
     if (el.error) {
         el.error.hidden = false;
-        el.error.textContent = message;
+
+        const messageElement = el.error.querySelector("p");
+
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
     }
 
     if (el.content) {
         el.content.hidden = true;
     }
 }
-
 /* =====================================================
    CONTENT DISPLAY STATE
 ===================================================== */
