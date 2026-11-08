@@ -75,9 +75,10 @@ function getContentUrl(item) {
             ? "series"
             : "movie";
 
-    const id = type === "series" ? item.id : (item.public_id ?? item.id);
+    // Legacy watch navigation uses the original database primary key.
+    const id = item.id;
 
-    return `/${type}/${encodeURIComponent(id)}`;
+    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
 }
 
 function getDiscoverUrl(query) {
