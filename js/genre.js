@@ -101,7 +101,7 @@ function getContentUrl(item) {
     // Clean movie routes must use the numeric public_id, while series use id.
     const id = type === "series" ? item.id : item.public_id;
 
-    if (id == null || !/^\\d+$/.test(String(id))) {
+    if (id == null || !/^\d+$/.test(String(id))) {
         return "genre.html";
     }
 
