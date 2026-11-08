@@ -30,72 +30,6 @@ body {
 }
 
 /* =========================================================
-   3D FLOATING BACKGROUND
-========================================================= */
-
-body::before {
-    content: "IT HAWK RW";
-    position: fixed;
-    z-index: -1;
-    top: 43%;
-    left: 50%;
-    width: max-content;
-    pointer-events: none;
-    white-space: nowrap;
-
-    font-family: 'Outfit', sans-serif;
-    font-size: clamp(65px, 13vw, 190px);
-    font-weight: 900;
-    letter-spacing: 13px;
-
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgba(167, 139, 250, .18);
-
-    text-shadow:
-        0 0 15px rgba(139, 92, 246, .18),
-        0 0 45px rgba(139, 92, 246, .13),
-        0 0 90px rgba(56, 189, 248, .09);
-
-    transform: translate(-50%, -50%) perspective(600px) rotateX(12deg) rotateY(-12deg);
-
-    animation: hawkFloat 9s ease-in-out infinite;
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    z-index: -1;
-    inset: 0;
-    pointer-events: none;
-
-    background-image:
-        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.7), transparent),
-        radial-gradient(2px 2px at 80% 30%, rgba(167,139,250,.8), transparent),
-        radial-gradient(2px 2px at 60% 80%, rgba(56,189,248,.7), transparent),
-        radial-gradient(2px 2px at 30% 65%, rgba(255,255,255,.5), transparent);
-
-    background-size: 250px 250px;
-    opacity: .45;
-    animation: starDrift 25s linear infinite;
-}
-
-@keyframes hawkFloat {
-    0%, 100% {
-        transform: translate(-50%, -50%) perspective(600px)
-            rotateX(12deg) rotateY(-12deg) translateY(0);
-    }
-    50% {
-        transform: translate(-50%, -54%) perspective(600px)
-            rotateX(8deg) rotateY(12deg) translateY(-25px);
-    }
-}
-
-@keyframes starDrift {
-    from { background-position: 0 0; }
-    to { background-position: 250px 500px; }
-}
-
-/* =========================================================
    HEADER
 ========================================================= */
 
@@ -119,7 +53,7 @@ body::after {
 
 .profile-logo {
     color: white;
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 30px;
     font-weight: 900;
     letter-spacing: -1.5px;
@@ -276,7 +210,7 @@ body::after {
 
 .profile-banner h1 {
     margin: 15px 0 10px;
-    font-family:;
+    font-family: 'Outfit', sans-serif;
     font-size: clamp(38px, 5vw, 65px);
     font-weight: 900;
     letter-spacing: -2px;
