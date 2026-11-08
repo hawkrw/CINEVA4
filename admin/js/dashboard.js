@@ -856,9 +856,9 @@ function renderEpisodes() {
         );
 
         row.append(
-            createCell(episode),
+            createCell(`Ep${episode}`),
             createCell(season),
-            createCell(item.title || `Episode ${episode}`),
+            createCell(item.title || `Ep${episode}`),
             createCell(item.duration || "—"),
             createCell(getStatus(item.is_active)),
             createCell(item.is_final ? "Yes" : "No"),
@@ -1350,7 +1350,7 @@ function openContentForm(type, record = null) {
     ]
         : [
             ["season", "Season Number *", "number", false],
-            ["episode", "Episode Number *", "number", false],
+            ["episode", "Episode Number (Ep1, Ep2, Ep3...) *", "number", false],
             ["title", "Episode Title *", "text", true],
             ["duration", "Duration (e.g. 45 min)", "text", false],
             ["thumbnail", "Episode Thumbnail URL", "url", true],
@@ -2165,7 +2165,7 @@ function createBulkItem(index, kind) {
     heading.className = "cineva-bulk-item-head";
 
     const number = document.createElement("strong");
-    number.textContent = `${kind === "movie" ? "Movie" : "Episode"} ${index + 1}`;
+    number.textContent = kind === "movie" ? `Movie ${index + 1}` : `Ep${index + 1}`;
 
     const status = document.createElement("span");
     status.className = "cineva-bulk-status";
@@ -2188,7 +2188,7 @@ function createBulkItem(index, kind) {
         ]
         : [
             ["season", "Season Number *", "number", false],
-            ["episode", "Episode Number *", "number", false],
+            ["episode", "Episode Number (Ep1, Ep2, Ep3...) *", "number", false],
             ["title", "Episode Title *", "text", true],
             ["duration", "Duration", "text", false],
             ["thumbnail", "Thumbnail URL", "url", true],
