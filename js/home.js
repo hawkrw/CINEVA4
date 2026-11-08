@@ -998,8 +998,7 @@ function bindHeroControls() {
         });
     });
 
-    elements.hero.addEventListener("mouseenter", stopHeroSlider);
-    elements.hero.addEventListener("mouseleave", startHeroSlider);
+    // Keep autoplay running even while the pointer is over the hero.
 
     // Pause autoplay when the browser tab is hidden
     document.addEventListener("visibilitychange", () => {
