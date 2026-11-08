@@ -3867,6 +3867,9 @@ function createMovieModal() {
 
     movieModal = document.createElement("div");
     movieModal.className = "cineva-modal";
+    movieModal.setAttribute("role", "dialog");
+    movieModal.setAttribute("aria-modal", "true");
+    movieModal.setAttribute("aria-labelledby", "movieFormTitle");
     movieModal.hidden = true;
 
     movieModal.innerHTML = `
@@ -4188,8 +4191,17 @@ function createMovieModal() {
     movieModal.querySelector("#cancelMovieForm")
         .addEventListener("click", closeMovieForm);
 
-    movieModal.addEventListener("click", event => {
+    // Close only when the backdrop itself is pressed, never when
+    // the user interacts with fields or controls inside the form.
+    movieModal.addEventListener("pointerdown", event => {
         if (event.target === movieModal) {
+            closeMovieForm();
+        }
+    });
+
+    // Escape is a convenient keyboard alternative to the close button.
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && movieModal && !movieModal.hidden) {
             closeMovieForm();
         }
     });
@@ -4336,26 +4348,13 @@ async function saveMovie(event) {
     }
 
     /*
-     * PLAYBACK REQUIREMENT
+     * Main playback URL is optional.
+     * Movies may be saved with metadata and download links first,
+     * then have playback added later from the edit form.
      *
-     * A movie can use either:
-     * 1. One main Movie Watch URL, or
-     * 2. One or more complete Movie Parts.
-     *
-     * The main Watch URL is optional when parts exist.
-     *
-     * collectMovieParts() already validates that every entered
-     * part has a title, Watch URL and Download URL.
+     * Any part that is added must still contain its own valid
+     * Watch URL and Download URL.
      */
-
-    if (!payload.video_url && movieParts.length === 0) {
-        alert(
-            "Add a Main Movie Watch URL or add at least one complete Movie Part."
-        );
-
-        movieModal.querySelector("#addMoviePart")?.focus();
-        return;
-    }
 
     if (
         (payload.year !== null &&
