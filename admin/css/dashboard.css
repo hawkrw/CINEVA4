@@ -22,7 +22,7 @@ body {
     min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    font-family:;
+    font-family: 'Inter', sans-serif;
 }
 
 button, a {
@@ -1144,7 +1144,7 @@ td {
 .cineva-content-card h2,
 .cineva-content-card h3 {
     color: #ffffff !important;
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 21px !important;
     font-weight: 800 !important;
     letter-spacing: -.4px;
@@ -1153,7 +1153,7 @@ td {
 /* Form */
 #contentForm {
     width: 100%;
-    font-family:;
+    font-family: 'Inter', sans-serif;
 }
 
 /* Fields grid */
@@ -1181,7 +1181,7 @@ td {
 .cineva-content-field label {
     display: block;
     color: #d8d2e7 !important;
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 12px !important;
     font-weight: 650 !important;
     line-height: 1.5;
@@ -1204,7 +1204,7 @@ td {
     border: 1px solid #343047 !important;
     border-radius: 9px !important;
 
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 12px !important;
 
     outline: none !important;
