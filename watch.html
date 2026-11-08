@@ -46,137 +46,138 @@
 
         <div class="navbar container">
 
-            <!-- BRAND -->
-            <a href="/index.html" class="logo" aria-label="CINEVA Home">
+            <!-- LOGO -->
 
-                <span class="brand-icon">
-                    <img
-                        src="/assets/images/logo.png"
-                        alt="CINEVA logo"
-                    >
-                </span>
+            <a href="/index.html" class="logo">
 
-                <span class="logo-text">
-                    <h2>CINEVA</h2>
-                    <small>UNLIMITED ENTERTAINMENT</small>
-                </span>
+               <span class="brand-icon">
+    <img src="assets/images/logo.png" alt="CINEVA Logo">
+</span>
+
+                <div class="logo-text">
+                    <h2>CINE<span>VA</span></h2>
+                    <small>Unlimited Entertainment</small>
+                </div>
 
             </a>
 
+
             <!-- DESKTOP NAVIGATION -->
+
             <nav class="nav-menu" id="navMenu">
 
-                <a href="/index.html" class="nav-link">
+                <a href="/index.html" class="nav-link active">
+                    <i class="fa-solid fa-house"></i>
                     Home
                 </a>
 
                 <a href="/genre.html?type=movie" class="nav-link">
+                    <i class="fa-solid fa-film"></i>
                     Movies
                 </a>
 
                 <a href="/genre.html?type=series" class="nav-link">
+                    <i class="fa-solid fa-tv"></i>
                     Series
                 </a>
 
-                <a href="/genre.html?category=Animation" class="nav-link">
+                <a href="/genre.html?genre=animation" class="nav-link">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
                     Animation
                 </a>
-
-                <a href="/categories.html" class="nav-link">
+              
+                <a href="/index.html#categories" class="nav-link">
+                    <i class="fa-solid fa-layer-group"></i>
                     Categories
                 </a>
 
             </nav>
+             <!-- SEARCH -->
 
-            <!-- HEADER ACTIONS -->
-            <div class="nav-actions">
+                <form id="search-form" class="search-box">
 
-             
-
-<!-- WATCH PAGE SEARCH -->
-<form class="search-box watch-search-collapsed" id="search-form" role="search">
+    <span class="search-icon">⌕</span>
 
     <input
         type="search"
         id="search-input"
-        placeholder="Search movies, series..."
+        placeholder="Search movies and series..."
         autocomplete="off"
-        aria-label="Search movies and series"
     >
 
-    <button type="submit" aria-label="Search" id="watchSearchButton">
-        <i class="fa-solid fa-magnifying-glass"></i>
+    <button type="submit" aria-label="Search">
+        Search
     </button>
 
-    <button
-        type="button"
-        class="search-close-btn"
-        id="watchSearchClose"
-        aria-label="Close search"
-    >
-        <i class="fa-solid fa-xmark"></i>
-    </button>
-
-    <div class="search-results" id="search-results"></div>
+    <div id="search-results" class="search-results"></div>
 
 </form>
 
 
 
+            <!-- NAVIGATION ACTIONS -->
+
+            <div class="nav-actions">
+
                 <!-- FAVORITES -->
-                <a
-                    href="/profile.html#favorites"
+
+                <a href="/profile.html#favorites"
                     class="nav-icon"
-                    aria-label="Favorites"
-                >
+                    aria-label="Favorites">
+
                     <i class="fa-regular fa-heart"></i>
+
                 </a>
+
 
                 <!-- NOTIFICATIONS -->
-                <button
-                    class="nav-icon"
+
+                <button class="nav-icon notification-btn"
                     id="notificationBtn"
-                    type="button"
-                    aria-label="Notifications"
-                >
+                    aria-label="Notifications">
+
                     <i class="fa-regular fa-bell"></i>
+
                     <span class="notification-dot"></span>
+
                 </button>
+
 
                 <!-- THEME -->
-                <button
-                    class="theme-toggle"
+
+                <button class="nav-icon theme-toggle"
                     id="themeToggle"
-                    type="button"
-                    aria-label="Toggle theme"
-                >
-                    <i class="fa-solid fa-moon"></i>
+                    aria-label="Toggle theme">
+
+                    <i class="fa-solid fa-sun"></i>
+
                 </button>
 
-                <!-- AUTH -->
-                <a
-                    href="/login.html"
-                    class="sign-in-btn"
-                    id="authButton"
-                >
+
+                <!-- USER ACCOUNT -->
+
+                <a href="/login.html" class="sign-in-btn" id="authButton">
+
                     <i class="fa-regular fa-user"></i>
+
                     <span>Sign In</span>
+
                 </a>
 
+
                 <!-- MOBILE MENU -->
-                <button
-                    class="mobile-menu-btn"
-                    id="mobileMenuBtn"
-                    type="button"
-                    aria-label="Open menu"
-                >
+
+                <button class="mobile-menu-btn" id="mobileMenuBtn"
+                    aria-label="Toggle navigation">
+
                     <i class="fa-solid fa-bars"></i>
+
                 </button>
 
             </div>
 
         </div>
-
+        
     </header>
 
 
