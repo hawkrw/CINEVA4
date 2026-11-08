@@ -293,15 +293,12 @@ function getContentUrl(item) {
 
     const type = getContentType(item);
 
-    // Series already use their automatically generated bigint ID.
-    // Movies use the separate numeric public_id added by the database migration.
-    const id = type === "series"
-        ? item.id
-        : (item.public_id ?? item.id);
+    // Legacy watch navigation uses the original database primary key.
+    const id = item.id;
 
     if (id == null) return "watch.html";
 
-    return `/${type}/${encodeURIComponent(id)}`;
+    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
 
 }
 
