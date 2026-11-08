@@ -262,15 +262,14 @@ function safeImageURL(image) {
 ========================================================= */
 
 function getWatchLink(item) {
-    const id = item.id;
-
-    if (!id) {
-        return "watch.html";
-    }
-
     const type = getContentType(item);
+    const id = type === "series"
+        ? item.id
+        : (item.public_id ?? item.id);
 
-    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
+    if (id == null) return "watch.html";
+
+    return `/${type}/${encodeURIComponent(id)}`;
 }
 
 /* =========================================================
