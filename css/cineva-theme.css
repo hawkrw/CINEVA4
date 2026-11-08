@@ -1,0 +1,116 @@
+/* =========================================================
+   CINEVA — GLOBAL VISUAL IDENTITY
+   One midnight / violet / rose palette across every page.
+   Typography remains Inter. Brand mark uses a rounded square
+   (squircle), not a circular crop.
+========================================================= */
+:root {
+  color-scheme: dark;
+  --cineva-bg: #080812;
+  --cineva-bg-soft: #0d0d19;
+  --cineva-surface: #121221;
+  --cineva-surface-hover: #19192b;
+  --cineva-purple: #8b35f5;
+  --cineva-purple-light: #a855f7;
+  --cineva-purple-dark: #6420c9;
+  --cineva-rose: #ef315e;
+  --cineva-text: #ffffff;
+  --cineva-muted: #b6b6c7;
+  --cineva-subtle: #77778e;
+  --cineva-border: rgba(255,255,255,.09);
+  --cineva-gradient: linear-gradient(135deg,#ef315e 0%,#a52df1 55%,#7137f5 100%);
+  --cineva-shadow: 0 12px 34px rgba(139,53,245,.18);
+}
+html { background: var(--cineva-bg); }
+body {
+  background-color: var(--cineva-bg);
+  color: var(--cineva-text);
+  font-family: Inter, sans-serif;
+}
+::selection { color:#fff; background:rgba(139,53,245,.72); }
+:focus-visible {
+  outline: 2px solid var(--cineva-purple-light);
+  outline-offset: 3px;
+}
+a { -webkit-tap-highlight-color: transparent; }
+
+/* Unified surface and border tokens, including legacy page tokens. */
+:root {
+  --bg-primary:var(--cineva-bg); --bg-secondary:var(--cineva-bg-soft);
+  --bg-card:var(--cineva-surface); --bg-card-hover:var(--cineva-surface-hover);
+  --primary:var(--cineva-purple); --primary-light:var(--cineva-purple-light);
+  --primary-dark:var(--cineva-purple-dark); --secondary:var(--cineva-rose);
+  --text-primary:var(--cineva-text); --text-secondary:var(--cineva-muted);
+  --text-muted:var(--cineva-subtle); --border-color:var(--cineva-border);
+  --profile-bg:var(--cineva-bg); --profile-purple:var(--cineva-purple);
+  --profile-blue:var(--cineva-purple-light); --profile-pink:var(--cineva-rose);
+  --watch-bg:var(--cineva-bg); --watch-bg-soft:var(--cineva-bg-soft);
+  --watch-card:var(--cineva-surface); --watch-card-light:var(--cineva-surface-hover);
+  --watch-primary:var(--cineva-purple); --watch-primary-light:var(--cineva-purple-light);
+  --vip-bg:var(--cineva-bg); --vip-bg-secondary:var(--cineva-bg-soft);
+  --vip-card:var(--cineva-surface); --vip-primary:var(--cineva-purple);
+  --vip-primary-light:var(--cineva-purple-light); --vip-secondary:var(--cineva-rose);
+  --movies-bg:var(--cineva-bg); --movies-purple:var(--cineva-purple);
+  --va-bg:var(--cineva-bg); --va-bg-soft:var(--cineva-bg-soft);
+  --va-card:var(--cineva-surface); --va-purple:var(--cineva-purple);
+  --va-purple-light:var(--cineva-purple-light); --va-pink:var(--cineva-rose);
+  --admin-bg:var(--cineva-bg); --admin-purple:var(--cineva-purple);
+  --admin-pink:var(--cineva-rose);
+  --auth-bg:var(--cineva-bg); --auth-primary:var(--cineva-purple);
+  --auth-primary-light:var(--cineva-purple-light); --auth-secondary:var(--cineva-rose);
+}
+
+/* Premium squircle logo frame: same visual shape across breakpoints. */
+.brand-icon, .main-header .brand-icon, .main-footer .footer-brand .brand-icon,
+.auth-brand-icon, .boot-logo, .sidebar-brand .brand-icon {
+  border-radius: 16px !important;
+  overflow: hidden;
+  background: linear-gradient(145deg,rgba(139,53,245,.22),rgba(239,49,94,.14)) !important;
+  border: 1px solid rgba(192,132,252,.32);
+  box-shadow: 0 7px 22px rgba(91,35,170,.22);
+}
+.brand-icon img, .main-header .brand-icon img,
+.main-footer .footer-brand .brand-icon img {
+  border-radius: 11px;
+  object-fit: contain;
+}
+.auth-brand-icon {
+  width: 58px; height: 58px;
+  display:grid; place-items:center;
+}
+.auth-brand-icon img { width:100%; height:100%; object-fit:contain; padding:5px; }
+.info-logo::before, .profile-logo::before, .vip-header .brand::before,
+.auth-logo::before {
+  content:"";
+  display:inline-block;
+  width:34px; height:34px;
+  margin-right:10px;
+  vertical-align:middle;
+  border-radius:11px;
+  border:1px solid rgba(192,132,252,.32);
+  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat;
+  box-shadow:0 5px 16px rgba(91,35,170,.2);
+}
+.info-logo, .profile-logo, .vip-header .brand, .auth-logo {
+  display:inline-flex; align-items:center;
+}
+.info-logo::before, .profile-logo::before, .vip-header .brand::before,
+.auth-logo::before { flex:0 0 34px; }
+.auth-logo::before { width:36px; height:36px; border-radius:12px; }
+
+/* Admin branding follows the same palette and rounded-square mark. */
+.admin-app .sidebar-brand .brand-icon {
+  border-radius:13px !important;
+  background:var(--cineva-gradient) !important;
+}
+.admin-app .sidebar, .admin-app .topbar,
+.auth-container .auth-card {
+  border-color:var(--cineva-border);
+}
+button, .btn, .primary-btn, .login-btn {
+  accent-color:var(--cineva-purple);
+}
+@media(max-width:600px) {
+  .info-logo::before, .profile-logo::before, .vip-header .brand::before,
+  .auth-logo::before { width:30px; height:30px; flex-basis:30px; border-radius:10px; }
+}
