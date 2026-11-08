@@ -404,7 +404,80 @@ async function incrementContentView(item) {
    DISPLAY CONTENT DETAILS
 ===================================================== */
 
+function setSeoMeta(name, value, property = false) {
+    if (!value) return;
+
+    const selector = property
+        ? `meta[property="${name}"]`
+        : `meta[name="${name}"]`;
+
+    let meta = document.head.querySelector(selector);
+
+    if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute(property ? "property" : "name", name);
+        document.head.appendChild(meta);
+    }
+
+    meta.setAttribute("content", String(value));
+}
+
+function updateWatchSeo(item) {
+    const title = String(item.title || "Watch").trim();
+    const description = String(getDescription(item) || "Discover this title on CINEVA.")
+        .replace(/\\s+/g, " ")
+        .slice(0, 300);
+    const image = getPoster(item);
+    const canonicalUrl = new URL(window.location.href);
+    canonicalUrl.hash = "";
+
+    document.title = `${title} | CINEVA`;
+
+    setSeoMeta("description", description);
+    setSeoMeta("robots", "index, follow, max-image-preview:large");
+    setSeoMeta("og:type", "video.movie", true);
+    setSeoMeta("og:site_name", "CINEVA", true);
+    setSeoMeta("og:title", `${title} | CINEVA`, true);
+    setSeoMeta("og:description", description, true);
+    setSeoMeta("og:url", canonicalUrl.href, true);
+    setSeoMeta("og:image", image, true);
+    setSeoMeta("twitter:card", "summary_large_image");
+    setSeoMeta("twitter:title", `${title} | CINEVA`);
+    setSeoMeta("twitter:description", description);
+    setSeoMeta("twitter:image", image);
+
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalUrl.href;
+
+    const structuredData = {
+        "@context": "https://schema.org",
+        "@type": contentType === "series" ? "TVSeries" : "Movie",
+        "name": title,
+        "description": description,
+        "url": canonicalUrl.href,
+        "image": image || undefined,
+        "datePublished": item.release_date || undefined,
+        "genre": item.category || undefined,
+        "inLanguage": item.original_language || undefined
+    };
+
+    let script = document.getElementById("cineva-watch-structured-data");
+    if (!script) {
+        script = document.createElement("script");
+        script.id = "cineva-watch-structured-data";
+        script.type = "application/ld+json";
+        document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(structuredData);
+}
+
 function displayContent(item) {
+    updateWatchSeo(item);
     document.title = `${item.title || "Watch"} | CINEVA`;
 
     if (el.title) {
