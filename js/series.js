@@ -83,7 +83,7 @@ function renderSeries(seriesList) {
         return `
             <a
                 class="movie-card"
-                href="/series/${id}"
+                href="watch.html?id=${id}&type=series"
             >
                 <div class="movie-card-image">
                     <img
