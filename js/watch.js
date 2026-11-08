@@ -627,6 +627,16 @@ function normalizeEmbedUrl(value) {
             return `https://hgcloud.to/e/${encodeURIComponent(first)}`;
         }
 
+        // Voe.sx share-page links use /e/VIDEO_ID for embedding.
+        if (host === "voe.sx") {
+            if (["e", "embed"].includes(first.toLowerCase())) {
+                return url.href;
+            }
+            if (first) {
+                return `https://voe.sx/e/${encodeURIComponent(first)}`;
+            }
+        }
+
         // Generic providers: use their supplied player/embed URL.
         return url.href;
     } catch {
