@@ -2690,3 +2690,527 @@
 .watch-page-body .search-box.watch-search-collapsed #watchSearchButton {
     display: flex;
 }
+
+/* =========================================================
+   CINEVA PRO — COMPLETE ANDROID WATCH PAGE EXPERIENCE
+   Scoped to watch.html only
+========================================================= */
+
+@media (max-width: 600px) {
+
+    /* -----------------------------------------
+       1. PAGE FOUNDATION
+    ----------------------------------------- */
+
+    .watch-page-body {
+        overflow-x: hidden;
+        padding-bottom: 75px;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .watch-page,
+    .watch-content,
+    .watch-page-body .container {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .watch-page-body .watch-content {
+        padding-top: 12px;
+    }
+
+    .watch-page-body .watch-content > section {
+        margin-bottom: 30px;
+    }
+
+    /* -----------------------------------------
+       2. CONTENT INFORMATION
+    ----------------------------------------- */
+
+    .watch-page-body .watch-details-section {
+        padding: 18px 0;
+    }
+
+    .watch-page-body .watch-details {
+        width: calc(100% - 30px);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .watch-page-body .watch-poster {
+        flex: 0 0 112px;
+        width: 112px;
+        height: 160px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+    }
+
+    .watch-page-body .watch-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .watch-page-body .watch-type-badge {
+        font-size: 9px;
+        padding: 5px 8px;
+    }
+
+    .watch-page-body .watch-information {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .watch-page-body .watch-small-label {
+        font-size: 9px;
+        letter-spacing: 1px;
+        line-height: 1.5;
+    }
+
+    .watch-page-body .watch-information h1 {
+        font-size: clamp(18px, 5vw, 23px);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        margin: 5px 0 9px;
+    }
+
+    .watch-page-body .watch-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px 12px;
+        font-size: 10px;
+    }
+
+    .watch-page-body .watch-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .watch-page-body .watch-description {
+        font-size: 12px;
+        line-height: 1.65;
+        margin-top: 12px;
+    }
+
+    .watch-page-body .watch-information-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px 12px;
+        margin-top: 12px;
+        font-size: 9px;
+    }
+
+    /* -----------------------------------------
+       3. VIDEO PLAYER
+    ----------------------------------------- */
+
+    .watch-page-body .player-section {
+        width: calc(100% - 20px);
+        padding: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .watch-page-body .player-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .watch-page-body .player-breadcrumb {
+        min-width: 0;
+        font-size: 10px;
+        overflow: hidden;
+    }
+
+    .watch-page-body .player-breadcrumb span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .watch-page-body .player-live-label {
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    .watch-page-body .video-player-wrapper {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+        border-radius: 13px;
+        background: #000;
+        box-shadow: 0 12px 35px rgba(0,0,0,.35);
+    }
+
+    .watch-page-body .video-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        background: #000;
+    }
+
+    .watch-page-body .player-empty {
+        position: absolute;
+        inset: 0;
+        padding: 15px;
+    }
+
+    .watch-page-body .player-message h3 {
+        font-size: 16px;
+    }
+
+    .watch-page-body .player-message p {
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    /* -----------------------------------------
+       4. PLAYER ACTIONS
+    ----------------------------------------- */
+
+    .watch-page-body .player-action-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 13px 0;
+    }
+
+    .watch-page-body .player-action-left,
+    .watch-page-body .player-action-right {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        width: 100%;
+    }
+
+    .watch-page-body .player-action-left .player-action-btn {
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+        min-height: 43px;
+        font-size: 12px;
+    }
+
+    .watch-page-body .player-action-right .player-action-btn {
+        flex: 1;
+        min-height: 42px;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    /* -----------------------------------------
+       5. MOVIE PARTS
+    ----------------------------------------- */
+
+    .watch-page-body .movie-parts-section,
+    .watch-page-body .episodes-section,
+    .watch-page-body .comments-section,
+    .watch-page-body .related-section {
+        width: calc(100% - 28px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .watch-page-body .watch-section-heading {
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .watch-page-body .watch-section-heading h2 {
+        font-size: 18px;
+        line-height: 1.35;
+        margin-top: 5px;
+    }
+
+    .watch-page-body .watch-section-heading p {
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .watch-page-body .movie-parts-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .watch-page-body .movie-part-card {
+        min-width: 0;
+        padding: 14px;
+        border-radius: 13px;
+    }
+
+    /* -----------------------------------------
+       6. SERIES EPISODES
+    ----------------------------------------- */
+
+    .watch-page-body .episode-total {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .watch-page-body .season-filter-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: 14px 0;
+    }
+
+    .watch-page-body .season-filter-wrapper label {
+        font-size: 12px;
+    }
+
+    .watch-page-body .season-selector {
+        width: 100%;
+        min-height: 43px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .watch-page-body .episodes-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .watch-page-body .episode-card {
+        min-width: 0;
+        border-radius: 13px;
+        padding: 12px;
+    }
+
+    .watch-page-body .episode-card button {
+        min-height: 40px;
+    }
+
+    /* -----------------------------------------
+       7. COMMENTS
+    ----------------------------------------- */
+
+    .watch-page-body .comment-form-card {
+        padding: 15px;
+        border-radius: 13px;
+    }
+
+    .watch-page-body .comment-form-heading h3 {
+        font-size: 15px;
+    }
+
+    .watch-page-body .comment-field {
+        margin-bottom: 14px;
+    }
+
+    .watch-page-body .comment-field label {
+        font-size: 12px;
+    }
+
+    .watch-page-body .comment-field input,
+    .watch-page-body .comment-field textarea {
+        width: 100%;
+        min-height: 44px;
+        padding: 12px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .watch-page-body .comment-field textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .watch-page-body .post-comment-btn {
+        width: 100%;
+        min-height: 45px;
+        justify-content: center;
+        border-radius: 11px;
+    }
+
+    .watch-page-body .comments-count {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .watch-page-body .comments-list {
+        margin-top: 17px;
+    }
+
+    /* -----------------------------------------
+       8. RELATED CONTENT
+    ----------------------------------------- */
+
+    .watch-page-body .related-section {
+        overflow: hidden;
+    }
+
+    .watch-page-body .related-horizontal-grid {
+        grid-auto-columns: 78vw;
+        gap: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .watch-page-body .related-horizontal-grid .movie-card {
+        width: 100%;
+        min-height: 112px;
+    }
+
+    /* -----------------------------------------
+       9. FOOTER
+    ----------------------------------------- */
+
+    .watch-page-body .main-footer {
+        padding-bottom: 10px;
+    }
+
+    .watch-page-body .footer-container {
+        width: calc(100% - 32px);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 25px 16px;
+    }
+
+    .watch-page-body .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .watch-page-body .footer-column h3 {
+        font-size: 13px;
+    }
+
+    .watch-page-body .footer-link {
+        font-size: 11px;
+    }
+
+    .watch-page-body .footer-bottom-content {
+        width: calc(100% - 30px);
+        gap: 8px;
+        font-size: 10px;
+    }
+
+    /* -----------------------------------------
+       10. MOBILE BOTTOM NAVIGATION
+    ----------------------------------------- */
+
+    .watch-page-body .mobile-bottom-nav {
+        position: fixed;
+        z-index: 1100;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        gap: 4px;
+        padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+        background: rgba(10, 10, 22, .97);
+        border-top: 1px solid rgba(168, 85, 247, .20);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .watch-page-body .mobile-bottom-nav a {
+        flex: 1;
+        min-width: 0;
+        min-height: 45px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: #9996ad;
+        text-decoration: none;
+        font-size: 9px;
+        border-radius: 10px;
+    }
+
+    .watch-page-body .mobile-bottom-nav a i {
+        font-size: 16px;
+    }
+
+    /* Hide Profile item in bottom navigation */
+
+    .watch-page-body .mobile-bottom-nav a:last-child {
+        display: none !important;
+    }
+
+    .watch-page-body .mobile-bottom-nav a:active {
+        color: #a855f7;
+        background: rgba(168, 85, 247, .10);
+    }
+
+    /* Back-to-top above bottom navigation */
+
+    .watch-page-body .scroll-top {
+        bottom: 78px;
+        right: 15px;
+        z-index: 1050;
+    }
+
+}
+
+/* =========================================================
+   VERY SMALL ANDROID SCREENS
+========================================================= */
+
+@media screen and (max-width: 380px) {
+
+    .watch-page-body .watch-details {
+        gap: 11px;
+    }
+
+    .watch-page-body .watch-poster {
+        flex-basis: 98px;
+        width: 98px;
+        height: 145px;
+    }
+
+    .watch-page-body .watch-information h1 {
+        font-size: 18px;
+    }
+
+    .watch-page-body .watch-meta {
+        gap: 6px 9px;
+    }
+
+    .watch-page-body .player-action-left,
+    .watch-page-body .player-action-right {
+        gap: 6px;
+    }
+
+    .watch-page-body .player-action-btn {
+        font-size: 11px;
+    }
+
+}
+
+/* =========================================================
+   ACCESSIBILITY — ANDROID TOUCH
+========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .watch-page-body button,
+    .watch-page-body .mobile-bottom-nav a {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .watch-page-body .related-horizontal-grid .movie-card:hover {
+        transform: none;
+    }
+
+}
