@@ -218,68 +218,6 @@ body {
 }
 
 /* =========================================================
-   3D IT HAWK_RW SIGNATURE
-========================================================= */
-
-.viewall-hero-content {
-    position: relative;
-}
-
-.viewall-hero-content::after {
-    content: "IT HAWK_RW";
-
-    position: absolute;
-    right: 2%;
-    bottom: 5px;
-
-    color: #e8d5ff;
-    font-size: clamp(22px, 3.1vw, 39px);
-    font-weight: 1000;
-    font-style: italic;
-    letter-spacing: 3px;
-    white-space: nowrap;
-
-    transform: perspective(550px)
-               rotateY(-18deg)
-               rotateX(8deg)
-               rotateZ(-4deg);
-
-    transform-style: preserve-3d;
-
-    text-shadow:
-        1px 1px 0 #d2a9ff,
-        2px 2px 0 #b77aff,
-        3px 3px 0 #9447e8,
-        4px 4px 0 #7131c0,
-        5px 5px 0 #4a1e83,
-        7px 10px 15px rgba(0,0,0,.8),
-        0 0 20px rgba(168,85,247,.65),
-        0 0 45px rgba(168,85,247,.25);
-
-    animation: hawkSignatureFloat 4s ease-in-out infinite;
-    pointer-events: none;
-    user-select: none;
-}
-
-@keyframes hawkSignatureFloat {
-    0%, 100% {
-        transform: perspective(550px)
-                   rotateY(-18deg)
-                   rotateX(8deg)
-                   rotateZ(-4deg)
-                   translateY(0);
-    }
-
-    50% {
-        transform: perspective(550px)
-                   rotateY(-18deg)
-                   rotateX(8deg)
-                   rotateZ(-4deg)
-                   translateY(-9px);
-    }
-}
-
-/* =========================================================
    STATISTICS
 ========================================================= */
 
@@ -448,7 +386,7 @@ body {
     border-radius: 11px;
     outline: none;
 
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 600;
 
@@ -505,7 +443,7 @@ body {
     border: 1px solid rgba(255,255,255,.10);
     border-radius: 10px;
 
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 700;
 
@@ -705,7 +643,7 @@ body {
     border: 0;
     border-radius: 9px;
 
-    font-family:;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 800;
 
@@ -745,7 +683,7 @@ body {
     border: 0;
     border-radius: 11px;
 
-    font-family:t;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 850;
     letter-spacing: .3px;
@@ -1013,7 +951,6 @@ body {
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-    .viewall-hero-content::after,
     .viewall-loading::before {
         animation: none !important;
     }
