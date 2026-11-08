@@ -2044,3 +2044,199 @@
         transition: none;
     }
 }
+
+
+/* =========================================================
+   CINEVA — MOBILE HERO SLIDESHOW
+   Cinematic artwork first, readable details below.
+========================================================= */
+@media (max-width: 600px) {
+    #hero-section {
+        display: block;
+        min-height: 690px;
+        height: auto;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    #hero-section .hero-slide {
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        min-height: 690px;
+        height: 100%;
+        inset: 0;
+    }
+
+    #hero-section .hero-slide.active {
+        position: relative;
+        min-height: 690px;
+    }
+
+    #hero-section .hero-slide .hero-background {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    #hero-section .hero-slide .hero-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 690px;
+        object-fit: cover;
+        object-position: center 18%;
+        opacity: .9;
+        transform: none;
+    }
+
+    #hero-section .hero-slide .hero-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+            linear-gradient(
+                180deg,
+                rgba(8, 8, 18, .04) 0%,
+                rgba(8, 8, 18, .08) 25%,
+                rgba(8, 8, 18, .55) 48%,
+                rgba(8, 8, 18, .96) 72%,
+                #080812 100%
+            );
+    }
+
+    #hero-section .hero-slide .hero-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 285px 20px 112px;
+        margin: 0;
+    }
+
+    #hero-section .hero-slide .hero-information {
+        width: 100%;
+        max-width: 100%;
+        animation: none;
+    }
+
+    #hero-section .hero-label {
+        margin-bottom: 12px;
+        padding: 6px 10px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    #hero-section .hero-type {
+        margin-bottom: 10px;
+        padding: 5px 11px;
+        font-size: 8px;
+    }
+
+    #hero-section .hero-information h1 {
+        max-width: 100%;
+        margin: 0;
+        font-size: clamp(30px, 8.5vw, 40px);
+        line-height: 1.08;
+        letter-spacing: -1.3px;
+        overflow-wrap: anywhere;
+    }
+
+    #hero-section .hero-meta {
+        gap: 8px;
+        margin-top: 13px;
+        font-size: 10px;
+    }
+
+    #hero-section .hero-description {
+        display: -webkit-box;
+        max-width: 100%;
+        margin-top: 12px;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    #hero-section .hero-buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 9px;
+        margin-top: 17px;
+    }
+
+    #hero-section .hero-buttons .primary-btn,
+    #hero-section .hero-buttons .secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        min-height: 42px;
+        padding: 0 13px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    #hero-section .hero-controls {
+        right: 18px;
+        bottom: 25px;
+        z-index: 5;
+        gap: 10px;
+    }
+
+    #hero-section .hero-arrow {
+        width: 32px;
+        height: 32px;
+    }
+
+    #hero-section .hero-indicators {
+        gap: 5px;
+    }
+
+    #hero-section .hero-indicators .indicator {
+        width: 13px;
+        height: 3px;
+    }
+
+    #hero-section .hero-indicators .indicator.active {
+        width: 25px;
+    }
+
+    #hero-section .hero-bottom-fade {
+        height: 85px;
+        z-index: 3;
+    }
+}
+
+@media (max-width: 380px) {
+    #hero-section,
+    #hero-section .hero-slide,
+    #hero-section .hero-slide.active {
+        min-height: 660px;
+    }
+
+    #hero-section .hero-slide .hero-image {
+        min-height: 660px;
+    }
+
+    #hero-section .hero-slide .hero-content {
+        padding: 270px 16px 108px;
+    }
+
+    #hero-section .hero-information h1 {
+        font-size: 30px;
+    }
+
+    #hero-section .hero-description {
+        -webkit-line-clamp: 2;
+    }
+
+    #hero-section .hero-buttons .primary-btn,
+    #hero-section .hero-buttons .secondary-btn {
+        padding: 0 10px;
+        font-size: 9px;
+    }
+}
