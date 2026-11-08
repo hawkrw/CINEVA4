@@ -28,7 +28,7 @@
     margin: 0 auto;
     padding: 145px 0 90px;
     color: var(--movies-text);
-    font-family: 'Inter', sans-serif;
+    font-family:;
 }
 
 .movies-page::before {
