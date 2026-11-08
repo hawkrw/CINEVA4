@@ -1,0 +1,17 @@
+{
+  "name": "cineva-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CINEVA mobile app build for Android, with an installable iOS web app.",
+  "scripts": {
+    "mobile:prepare": "node scripts/prepare-mobile.mjs",
+    "android:sync": "npm run mobile:prepare && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
