@@ -63,6 +63,14 @@
     function initializeWidget() {
         if (document.querySelector(".cineva-floating-contacts")) return;
 
+        if (!document.querySelector(".cineva-hawk-signature")) {
+            const signature = document.createElement("div");
+            signature.className = "cineva-hawk-signature";
+            signature.setAttribute("aria-label", "IT HAWK RW — Creative Developer");
+            signature.innerHTML = '<span>IT</span> HAWK <b>RW</b><small>CREATIVE DEVELOPER</small>';
+            document.body.appendChild(signature);
+        }
+
         document.body.appendChild(widget);
 
         const whatsappButton = document.getElementById("cinevaWhatsAppButton");
