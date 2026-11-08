@@ -542,6 +542,13 @@ function destroyPlayer() {
         el.player.pause();
         el.player.removeAttribute("src");
         el.player.load();
+        el.player.hidden = false;
+    }
+
+    const embed = document.querySelector("#embed-player");
+    if (embed) {
+        embed.src = "about:blank";
+        embed.hidden = true;
     }
 }
 
@@ -556,6 +563,33 @@ function showPlayerMessage(title, message) {
             <p>${escapeHTML(message)}</p>
         </div>
     `;
+}
+
+function normalizeEmbedUrl(value) {
+    if (!isSafeHttpUrl(value)) return "";
+
+    try {
+        const url = new URL(value.trim());
+        const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+        const pathId = url.pathname.split("/").filter(Boolean)[0];
+
+        // StreamHG share-page links use the HGCloud embed endpoint.
+        if (
+            (host === "audinifer.com" || host === "streamhg.com") &&
+            pathId &&
+            !["e", "embed"].includes(pathId.toLowerCase())
+        ) {
+            return `https://hgcloud.to/e/${encodeURIComponent(pathId)}`;
+        }
+
+        return url.href;
+    } catch {
+        return "";
+    }
+}
+
+function isDirectMediaUrl(value) {
+    return /\\.(mp4|m4v|webm|ogv|ogg|m3u8)(?:$|[?#])/i.test(value);
 }
 
 function playVideo(videoUrl, autoplay = false) {
@@ -575,8 +609,33 @@ function playVideo(videoUrl, autoplay = false) {
         el.playerEmpty.hidden = true;
     }
 
-    const isHLS = /\.m3u8($|\?)/i.test(videoUrl);
+    const playbackUrl = normalizeEmbedUrl(videoUrl);
+    const isHLS = /\\.m3u8($|[?#])/i.test(playbackUrl);
+    const isDirectMedia = isDirectMediaUrl(playbackUrl);
 
+    // Web-page and embed URLs are loaded in an iframe. Direct media
+    // files and HLS streams continue using the native video player.
+    if (!isDirectMedia && !isHLS) {
+        const embed = document.querySelector("#embed-player");
+
+        if (!embed) {
+            showPlayerMessage(
+                "Player unavailable",
+                "The embedded video player could not be initialized."
+            );
+            return;
+        }
+
+        el.player.hidden = true;
+        embed.hidden = false;
+        embed.title = currentContent?.title
+            ? `CINEVA player — ${currentContent.title}`
+            : "CINEVA embedded video player";
+        embed.src = playbackUrl;
+        return;
+    }
+
+    el.player.hidden = false;
     el.player.controls = true;
     el.player.playsInline = true;
     el.player.preload = "metadata";
@@ -586,14 +645,14 @@ function playVideo(videoUrl, autoplay = false) {
         !el.player.canPlayType("application/vnd.apple.mpegurl")
     ) {
         if (window.Hls) {
-            attachHls(videoUrl, autoplay);
+            attachHls(playbackUrl, autoplay);
         } else {
             const script = document.createElement("script");
 
             script.src =
                 "https://cdn.jsdelivr.net/npm/hls.js@latest";
 
-            script.onload = () => attachHls(videoUrl, autoplay);
+            script.onload = () => attachHls(playbackUrl, autoplay);
 
             script.onerror = () => {
                 showPlayerMessage(
@@ -605,7 +664,7 @@ function playVideo(videoUrl, autoplay = false) {
             document.head.appendChild(script);
         }
     } else {
-        el.player.src = videoUrl;
+        el.player.src = playbackUrl;
 
         if (autoplay) {
             el.player.play().catch(() => {
@@ -614,7 +673,6 @@ function playVideo(videoUrl, autoplay = false) {
         }
     }
 }
-
 function attachHls(videoUrl, autoplay) {
     if (!window.Hls || !window.Hls.isSupported()) {
         showPlayerMessage(
