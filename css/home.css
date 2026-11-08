@@ -1727,3 +1727,59 @@
         animation: none;
     }
 }
+
+
+/* =========================================================
+   CINEVA — LATEST ADDED CARD SIZE MATCH
+   Keep Latest Added identical to the other homepage grids.
+   Three columns on phones; two only on extra-narrow screens.
+========================================================= */
+@media (max-width: 600px) {
+    #latestAdded #latest-movies {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 11px !important;
+        width: 100%;
+    }
+
+    #latestAdded #latest-movies .movie-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    #latestAdded #latest-movies .movie-poster {
+        width: 100% !important;
+        aspect-ratio: 2 / 3 !important;
+    }
+
+    #latestAdded #latest-movies .movie-info {
+        padding: 8px 7px 9px !important;
+    }
+
+    #latestAdded #latest-movies .movie-title,
+    #latestAdded #latest-movies .movie-info h3 {
+        font-size: 10px !important;
+        line-height: 1.35 !important;
+    }
+
+    #latestAdded #latest-movies .movie-meta {
+        font-size: 9px !important;
+    }
+}
+
+@media (max-width: 420px) {
+    #latestAdded #latest-movies {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 11px !important;
+    }
+
+    #latestAdded #latest-movies .movie-info {
+        padding: 9px 8px 10px !important;
+    }
+
+    #latestAdded #latest-movies .movie-title,
+    #latestAdded #latest-movies .movie-info h3 {
+        font-size: 11px !important;
+    }
+}
