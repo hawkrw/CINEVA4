@@ -1380,60 +1380,55 @@ async function initializeHome() {
    CINEVA — OUR TRANSLATORS
 ========================================================= */
 
+function normalizeTranslatorName(value = "") {
+    const name = String(value).replace(/\s+/g, " ").trim();
+    const key = name.toLowerCase();
+
+    if (/^gaheza(?:\s+simba)?$/.test(key)) return "Gaheza";
+    if (/^hakim(?:\s+the\s+(?:prof|mwarimu))?$/.test(key)) return "Hakim's";
+
+    return name;
+}
+
 async function loadOurTranslators() {
     const track = document.getElementById("translatorsTrack");
-
     if (!track) return;
 
     try {
-        const uniqueNames = await getOurTranslators();
+        const names = await getOurTranslators();
+        const grouped = [...new Set(names.map(normalizeTranslatorName))]
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b));
 
-        if (!uniqueNames.length) {
-            track.innerHTML = `
-                <div class="translator-loading">
-                    No translators available yet.
-                </div>
-            `;
-
+        if (!grouped.length) {
+            track.innerHTML = '<div class="translator-loading">No translators available yet.</div>';
             track.style.animation = "none";
             return;
         }
 
-        const cards = uniqueNames.map(name => {
+        const cards = grouped.map(name => {
             const safeName = escapeHTML(name);
-            const initial = escapeHTML(
-                name.charAt(0).toUpperCase()
-            );
+            const initial = escapeHTML(name.charAt(0).toUpperCase());
+            const href = `translator.html?name=${encodeURIComponent(name)}`;
 
             return `
-                <div class="translator-card">
-                    <div class="translator-avatar">
-                        ${initial}
-                    </div>
-
-                    <div class="translator-details">
-                        <h3>${safeName}</h3>
-                        <span>CINEVA Translator</span>
-                    </div>
-                </div>
+                <a class="translator-card" href="${href}" aria-label="View all content translated by ${safeName}">
+                    <span class="translator-avatar">${initial}</span>
+                    <span class="translator-details">
+                        <strong>${safeName}</strong>
+                        <span>Explore translated titles <i class="fa-solid fa-arrow-right"></i></span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right translator-card-arrow" aria-hidden="true"></i>
+                </a>
             `;
         }).join("");
 
         track.innerHTML = cards + cards;
-
-        if (uniqueNames.length < 2) {
-            track.style.animation = "none";
-        }
-
+        track.style.animationDuration = `${Math.max(75, grouped.length * 8)}s`;
+        track.classList.toggle("is-static", grouped.length < 2);
     } catch (error) {
         console.error("CINEVA translators error:", error);
-
-        track.innerHTML = `
-            <div class="translator-loading">
-                Unable to load translators.
-            </div>
-        `;
-
+        track.innerHTML = '<div class="translator-loading">Unable to load translators right now.</div>';
         track.style.animation = "none";
     }
 }
