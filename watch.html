@@ -90,8 +90,9 @@
             <div class="nav-actions">
 
              
-<!-- SEARCH -->
-<form class="search-box" id="search-form" role="search">
+
+<!-- WATCH PAGE SEARCH -->
+<form class="search-box watch-search-collapsed" id="search-form" role="search">
 
     <input
         type="search"
@@ -101,7 +102,7 @@
         aria-label="Search movies and series"
     >
 
-    <button type="submit" aria-label="Search">
+    <button type="submit" aria-label="Search" id="watchSearchButton">
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
 
@@ -114,12 +115,10 @@
         <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <div
-        class="search-results"
-        id="search-results"
-    ></div>
+    <div class="search-results" id="search-results"></div>
 
 </form>
+
 
 
                 <!-- FAVORITES -->
