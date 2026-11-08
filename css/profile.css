@@ -26,7 +26,7 @@ body {
         radial-gradient(ellipse at 15% 20%, rgba(104, 56, 220, .17), transparent 35%),
         radial-gradient(ellipse at 90% 65%, rgba(20, 130, 220, .12), transparent 35%),
         linear-gradient(135deg, #080912, #101020 50%, #080912);
-    font-family: 'Inter', sans-serif;
+    font-family:;
 }
 
 /* =========================================================
@@ -53,7 +53,7 @@ body {
 
 .profile-logo {
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 30px;
     font-weight: 900;
     letter-spacing: -1.5px;
