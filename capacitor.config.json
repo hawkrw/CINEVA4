@@ -1,0 +1,13 @@
+{
+  "appId": "com.cineva.app",
+  "appName": "CINEVA",
+  "webDir": "mobile/www",
+  "backgroundColor": "#080812",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
