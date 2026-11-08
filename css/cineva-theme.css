@@ -114,3 +114,18 @@ button, .btn, .primary-btn, .login-btn {
   .info-logo::before, .profile-logo::before, .vip-header .brand::before,
   .auth-logo::before { width:30px; height:30px; flex-basis:30px; border-radius:10px; }
 }
+
+.auth-container .brand-logo::before {
+  content:""; display:inline-block; width:34px; height:34px;
+  margin-right:10px; vertical-align:middle; border-radius:11px;
+  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat;
+  border:1px solid rgba(192,132,252,.32);
+}
+.admin-app .sidebar-brand .brand-icon {
+  color:transparent !important; font-size:0 !important;
+  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat !important;
+}
+.admin-app .boot-logo {
+  color:transparent !important; font-size:0 !important;
+  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat !important;
+}
