@@ -1513,3 +1513,217 @@
         font-size: 11px !important;
     }
 }
+
+
+/* =========================================================
+   CINEVA — CINEMATIC HERO REFINEMENT
+   Keeps the existing Inter typography and hero markup.
+========================================================= */
+.hero-section,
+#hero-section {
+    min-height: clamp(570px, 72vh, 790px);
+    isolation: isolate;
+    background:
+        radial-gradient(ellipse at 76% 35%, rgba(139,53,245,.14), transparent 42%),
+        #080812;
+}
+
+.hero-background,
+.hero-slide .hero-background {
+    overflow: hidden;
+}
+
+.hero-image,
+.hero-slide .hero-image {
+    object-fit: cover;
+    object-position: center 24%;
+    opacity: .88;
+    filter: saturate(1.06) contrast(1.04);
+    transform: scale(1.015);
+    transition: transform 8s ease, opacity .5s ease;
+}
+
+.hero-section:hover .hero-image,
+.hero-slide.active .hero-image {
+    transform: scale(1.055);
+}
+
+.hero-overlay,
+.hero-slide .hero-overlay {
+    background:
+        linear-gradient(90deg,
+            rgba(8,8,18,.99) 0%,
+            rgba(8,8,18,.92) 22%,
+            rgba(8,8,18,.62) 48%,
+            rgba(8,8,18,.16) 78%,
+            rgba(8,8,18,.12) 100%),
+        linear-gradient(0deg,
+            #080812 0%,
+            rgba(8,8,18,.76) 11%,
+            rgba(8,8,18,.12) 48%,
+            rgba(8,8,18,.12) 100%);
+}
+
+.hero-content {
+    width: min(100% - 48px, 1440px);
+    padding-top: clamp(92px, 12vh, 150px);
+    padding-bottom: clamp(100px, 12vh, 145px);
+}
+
+.hero-information {
+    max-width: min(650px, 58vw);
+}
+
+.hero-information h1 {
+    max-width: 680px;
+    font-size: clamp(40px, 5.2vw, 78px);
+    line-height: 1.035;
+    letter-spacing: -2.8px;
+    text-wrap: balance;
+}
+
+.hero-description {
+    max-width: 560px;
+    color: rgba(238,238,248,.84);
+    font-size: clamp(13px, 1.1vw, 15px);
+    line-height: 1.8;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hero-label,
+.hero-type {
+    box-shadow: 0 8px 28px rgba(0,0,0,.24);
+}
+
+.hero-buttons .primary-btn,
+.hero-buttons .secondary-btn {
+    min-height: 50px;
+    border-radius: 9px;
+    font-weight: 800;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.hero-buttons .primary-btn:hover,
+.hero-buttons .secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.28);
+}
+
+.hero-controls {
+    z-index: 4;
+    right: clamp(20px, 4vw, 64px);
+    bottom: 34px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    background: rgba(8,8,18,.42);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.hero-arrow {
+    width: 40px;
+    height: 40px;
+}
+
+@media (max-width: 768px) {
+    .hero-section,
+    #hero-section {
+        min-height: min(690px, 82svh);
+        align-items: flex-end;
+    }
+
+    .hero-image,
+    .hero-slide .hero-image {
+        object-position: 62% center;
+    }
+
+    .hero-overlay,
+    .hero-slide .hero-overlay {
+        background:
+            linear-gradient(0deg,
+                #080812 0%,
+                rgba(8,8,18,.96) 15%,
+                rgba(8,8,18,.72) 48%,
+                rgba(8,8,18,.18) 100%),
+            linear-gradient(90deg, rgba(8,8,18,.32), transparent 100%);
+    }
+
+    .hero-content {
+        width: calc(100% - 36px);
+        padding-top: 190px;
+        padding-bottom: 106px;
+    }
+
+    .hero-information {
+        max-width: 100%;
+    }
+
+    .hero-information h1 {
+        max-width: 540px;
+        font-size: clamp(35px, 8.8vw, 54px);
+        letter-spacing: -1.6px;
+        line-height: 1.06;
+    }
+
+    .hero-description {
+        max-width: 100%;
+        -webkit-line-clamp: 3;
+    }
+
+    .hero-controls {
+        right: 18px;
+        bottom: 20px;
+        gap: 10px;
+        padding: 7px 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section,
+    #hero-section {
+        min-height: 640px;
+        min-height: min(690px, 84svh);
+    }
+
+    .hero-content {
+        width: calc(100% - 30px);
+        padding-top: 170px;
+        padding-bottom: 100px;
+    }
+
+    .hero-information h1 {
+        font-size: clamp(32px, 9vw, 43px);
+        letter-spacing: -1.2px;
+    }
+
+    .hero-meta {
+        gap: 9px;
+        font-size: 11px;
+    }
+
+    .hero-buttons {
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .hero-buttons .primary-btn,
+    .hero-buttons .secondary-btn {
+        min-height: 46px;
+        padding: 0 15px;
+        font-size: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-image,
+    .hero-slide .hero-image,
+    .hero-buttons .primary-btn,
+    .hero-buttons .secondary-btn {
+        transition: none;
+        animation: none;
+    }
+}
