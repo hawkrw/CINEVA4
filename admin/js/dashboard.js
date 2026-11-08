@@ -4050,11 +4050,14 @@ function createMovieModal() {
                     </div>
 
                     <div class="cineva-field full">
-                        <label>Main Movie Watch URL (Optional if using parts)</label>
+                        <label>Main Movie Watch URL (Optional)</label>
                         <input
                             name="video_url"
                             type="url"
-                            placeholder="Enter main streaming link, or leave empty if using movie parts">
+                            placeholder="Add a streaming link now, or leave empty and add it later">
+                        <small class="cineva-field-hint">
+                            You can save movie details without a watch URL and add playback later.
+                        </small>
                     </div>
 
                     <div class="cineva-field full">
