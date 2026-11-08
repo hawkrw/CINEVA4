@@ -570,7 +570,7 @@ function normalizeEmbedUrl(value) {
 
     try {
         const url = new URL(value.trim());
-        const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+        const host = url.hostname.toLowerCase().replace(/^www\./, "");
         const pathId = url.pathname.split("/").filter(Boolean)[0];
 
         // StreamHG share-page links use the HGCloud embed endpoint.
@@ -589,7 +589,7 @@ function normalizeEmbedUrl(value) {
 }
 
 function isDirectMediaUrl(value) {
-    return /\\.(mp4|m4v|webm|ogv|ogg|m3u8)(?:$|[?#])/i.test(value);
+    return /\.(mp4|m4v|webm|ogv|ogg|m3u8)(?:$|[?#])/i.test(value);
 }
 
 function playVideo(videoUrl, autoplay = false) {
@@ -610,7 +610,7 @@ function playVideo(videoUrl, autoplay = false) {
     }
 
     const playbackUrl = normalizeEmbedUrl(videoUrl);
-    const isHLS = /\\.m3u8($|[?#])/i.test(playbackUrl);
+    const isHLS = /\.m3u8($|[?#])/i.test(playbackUrl);
     const isDirectMedia = isDirectMediaUrl(playbackUrl);
 
     // Web-page and embed URLs are loaded in an iframe. Direct media
