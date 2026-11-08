@@ -84,7 +84,7 @@ body {
     width: 100%;
     min-height: 100vh;
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
 
     background: var(--bg-primary);
 
@@ -103,7 +103,7 @@ button,
 input,
 textarea,
 select {
-    font-family: 'Inter', sans-serif;
+    font-family:;
 }
 
 button,
