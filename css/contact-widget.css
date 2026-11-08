@@ -243,3 +243,10 @@
     .cineva-hawk-signature small { font-size:6px; letter-spacing:1.4px; }
 }
 @media(prefers-reduced-motion:reduce) { .cineva-hawk-signature { animation:none; } }
+
+@media(max-width:600px) {
+    .watch-page-body .cineva-hawk-signature,
+    .genre-page .cineva-hawk-signature {
+        bottom:78px;
+    }
+}
