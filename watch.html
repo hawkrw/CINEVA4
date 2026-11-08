@@ -6,23 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="theme-color" content="#080812">
-    <meta name="description" content="Watch movies and series on CINEVA. Enjoy premium entertainment.">
+    <meta name="description" content="Watch movies and series on CINEVA Premium Streaming.">
 
     <title>Watch | CINEVA</title>
 
-    <!-- FONTS -->
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- ICONS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <!-- CINEVA STYLES -->
+    <!-- SHARED CINEVA DESIGN -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/cards.css">
     <link rel="stylesheet" href="/css/responsive.css">
+
+    <!-- WATCH PAGE DESIGN -->
     <link rel="stylesheet" href="/css/watch.css">
     <link rel="stylesheet" href="/css/contact-widget.css">
 </head>
@@ -30,18 +32,16 @@
 <body class="watch-page-body">
 
     <!-- =================================================
-         CINEVA HEADER — SHARED HOMEPAGE DESIGN
+         CINEVA SHARED HEADER
     ================================================== -->
 
     <header class="main-header" id="mainHeader">
-
         <div class="navbar container">
 
-            <!-- LOGO -->
             <a href="index.html" class="logo" aria-label="CINEVA Home">
 
                 <span class="brand-icon">
-                    <img src="assets/images/logo.png" alt="CINEVA logo">
+                    <img src="/assets/images/logo.png" alt="CINEVA logo">
                 </span>
 
                 <span class="logo-text">
@@ -51,39 +51,30 @@
 
             </a>
 
-
-            <!-- NAVIGATION -->
             <nav class="nav-menu" id="navMenu">
 
                 <a href="index.html" class="nav-link">
-                    <i class="fa-solid fa-house"></i>
                     Home
                 </a>
 
                 <a href="genre.html?type=movie" class="nav-link">
-                    <i class="fa-solid fa-film"></i>
                     Movies
                 </a>
 
                 <a href="genre.html?type=series" class="nav-link">
-                    <i class="fa-solid fa-tv"></i>
                     Series
                 </a>
 
                 <a href="genre.html?category=Animation" class="nav-link">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
                     Animation
                 </a>
 
                 <a href="categories.html" class="nav-link">
-                    <i class="fa-solid fa-layer-group"></i>
                     Categories
                 </a>
 
             </nav>
 
-
-            <!-- HEADER ACTIONS -->
             <div class="nav-actions">
 
                 <!-- SEARCH -->
@@ -101,196 +92,243 @@
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
 
-                    <div class="search-results" id="search-results"></div>
+                    <div
+                        class="search-results"
+                        id="search-results">
+                    </div>
 
                 </form>
-
 
                 <!-- FAVORITES -->
                 <a
                     href="profile.html#favorites"
                     class="nav-icon"
-                    aria-label="Favorites"
-                >
-                    <i class="fa-regular fa-heart"></i>
-                </a>
+                    aria-label="Favorites">
 
+                    <i class="fa-regular fa-heart"></i>
+
+                </a>
 
                 <!-- NOTIFICATIONS -->
                 <button
                     class="nav-icon"
                     id="notificationBtn"
                     type="button"
-                    aria-label="Notifications"
-                >
+                    aria-label="Notifications">
+
                     <i class="fa-regular fa-bell"></i>
                     <span class="notification-dot"></span>
-                </button>
 
+                </button>
 
                 <!-- THEME -->
                 <button
                     class="theme-toggle"
                     id="themeToggle"
                     type="button"
-                    aria-label="Toggle theme"
-                >
+                    aria-label="Toggle theme">
+
                     <i class="fa-solid fa-moon"></i>
+
                 </button>
 
-
-                <!-- AUTHENTICATION -->
+                <!-- AUTH -->
                 <a
                     href="login.html"
                     class="sign-in-btn"
-                    id="authButton"
-                >
+                    id="authButton">
+
                     <i class="fa-regular fa-user"></i>
                     <span>Sign In</span>
-                </a>
 
+                </a>
 
                 <!-- MOBILE MENU -->
                 <button
                     class="mobile-menu-btn"
                     id="mobileMenuBtn"
                     type="button"
-                    aria-label="Open menu"
-                >
+                    aria-label="Open menu">
+
                     <i class="fa-solid fa-bars"></i>
+
                 </button>
 
             </div>
 
         </div>
-
     </header>
 
 
     <!-- =================================================
-         WATCH PAGE MAIN CONTENT
+         WATCH PAGE
     ================================================== -->
 
-    <main class="watch-page">
-
+    <main class="watch-page container">
 
         <!-- LOADING -->
-        <div class="watch-loading" id="watch-loading">
+        <section id="watch-loading" class="watch-loading">
 
             <div class="watch-loader"></div>
 
-            <h3>Preparing your entertainment...</h3>
+            <h2>Preparing your entertainment</h2>
 
-            <p>Please wait while CINEVA loads your content.</p>
+            <p>
+                CINEVA is getting everything ready for you.
+            </p>
 
-        </div>
+        </section>
 
 
         <!-- ERROR -->
-        <div class="watch-error" id="watch-error" hidden>
+        <section
+            id="watch-error"
+            class="watch-error"
+            hidden>
 
-            <i class="fa-solid fa-circle-exclamation"></i>
+            <div class="watch-error-icon">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
 
-            <h2>Content Not Available</h2>
+            <h2>Content unavailable</h2>
 
             <p>
-                We couldn't find the content you're looking for.
-                It may have been removed or the link may be incorrect.
+                We couldn't load this content. Please try again.
             </p>
 
-            <a href="index.html" class="watch-error-btn">
+            <a href="index.html" class="primary-watch-btn">
                 <i class="fa-solid fa-house"></i>
                 Back to Home
             </a>
 
-        </div>
+        </section>
 
 
         <!-- =================================================
-             WATCH CONTENT
+             CONTENT
         ================================================== -->
 
-        <div class="watch-content" id="watch-content" hidden>
+        <div id="watch-content" class="watch-content" hidden>
 
 
             <!-- =================================================
-                 CONTENT DETAILS
+                 VIDEO PLAYER CARD
             ================================================== -->
 
-            <section class="watch-details-section">
+            <section class="player-section">
 
-                <div class="watch-details">
+                <div class="player-topbar">
 
+                    <div class="player-breadcrumb">
 
-                    <!-- POSTER -->
-                    <div class="watch-poster">
+                        <a href="index.html">
+                            <i class="fa-solid fa-house"></i>
+                            Home
+                        </a>
 
-                        <img
-                            id="watch-poster"
-                            src="assets/images/movie-placeholder.jpg"
-                            alt="Movie poster"
-                        >
+                        <i class="fa-solid fa-chevron-right"></i>
 
-                        <span class="watch-type-badge" id="watch-type">
-                            MOVIE
+                        <span id="player-breadcrumb-title">
+                            Now Playing
                         </span>
 
                     </div>
 
+                    <span class="player-live-label">
+                        <span></span>
+                        CINEVA PLAYER
+                    </span>
 
-                    <!-- INFORMATION -->
-                    <div class="watch-information">
-
-                        <span class="watch-small-label">
-                            NOW STREAMING ON CINEVA
-                        </span>
-
-
-                        <div class="watch-title-row">
-
-                            <h1 id="watch-title">
-                                Loading...
-                            </h1>
-
-                            <span class="watch-quality-badge">
-                                <i class="fa-solid fa-crown"></i>
-                                PREMIUM
-                            </span>
-
-                        </div>
+                </div>
 
 
-                        <!-- META INFORMATION -->
-                        <div class="watch-meta">
+                <div class="video-player-wrapper">
 
-                            <span id="watch-category"></span>
+                    <video
+                        id="video-player"
+                        class="video-player"
+                        controls
+                        playsinline
+                        preload="metadata"
+                        poster="/assets/images/movie-placeholder.jpg">
 
-                            <span id="watch-year"></span>
-
-                            <span id="watch-rating"></span>
-
-                        </div>
-
-
-                        <!-- DESCRIPTION -->
-                        <p class="watch-description" id="watch-description">
-                            Loading content information...
-                        </p>
+                    </video>
 
 
-                        <div class="watch-information-footer">
+                    <div
+                        id="player-empty"
+                        class="player-empty"
+                        hidden>
 
-                            <span>
-                                <i class="fa-solid fa-circle-check"></i>
-                                Available on CINEVA
-                            </span>
+                        <div class="player-message">
 
-                            <span>
+                            <div class="player-empty-icon">
                                 <i class="fa-solid fa-play"></i>
-                                Enjoy watching
-                            </span>
+                            </div>
+
+                            <h3>Ready to watch</h3>
+
+                            <p>
+                                Select a movie part or episode to start watching.
+                            </p>
 
                         </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PLAYER ACTIONS -->
+                <div class="player-action-bar">
+
+                    <div class="player-action-left">
+
+                        <button
+                            id="main-watch-btn"
+                            class="player-action-btn primary-watch-btn"
+                            type="button">
+
+                            <i class="fa-solid fa-play"></i>
+                            Watch Now
+
+                        </button>
+
+                        <button
+                            id="main-download-btn"
+                            class="player-action-btn download-watch-btn"
+                            type="button">
+
+                            <i class="fa-solid fa-download"></i>
+                            Download
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="player-action-right">
+
+                        <button
+                            id="like-btn"
+                            class="player-action-btn engagement-btn"
+                            type="button">
+
+                            <i class="fa-regular fa-heart"></i>
+
+                            <span id="like-count">0</span>
+
+                        </button>
+
+                        <button
+                            id="share-btn"
+                            class="player-action-btn engagement-btn"
+                            type="button">
+
+                            <i class="fa-solid fa-share-nodes"></i>
+                            Share
+
+                        </button>
 
                     </div>
 
@@ -301,125 +339,106 @@
 
 
             <!-- =================================================
-                 VIDEO PLAYER
+                 MOVIE INFORMATION CARD
             ================================================== -->
 
-            <section class="player-section">
+            <section class="watch-details-section">
 
+                <div class="watch-details">
 
-                <!-- PLAYER TOPBAR -->
-                <div class="player-topbar">
+                    <div class="watch-poster">
 
-                    <div class="player-breadcrumb">
+                        <img
+                            id="watch-poster"
+                            src="/assets/images/movie-placeholder.jpg"
+                            alt="Movie poster"
+                            loading="eager"
+                        >
 
-                        <a href="index.html">Home</a>
-
-                        <i class="fa-solid fa-chevron-right"></i>
-
-                        <a href="genre.html?type=movie">Watch</a>
-
-                        <i class="fa-solid fa-chevron-right"></i>
-
-                        <span id="player-breadcrumb-title">
-                            Now Playing
+                        <span
+                            id="watch-type"
+                            class="watch-type-badge">
+                            Movie
                         </span>
 
                     </div>
 
 
-                    <div class="player-live-label">
-                        <span></span>
-                        CINEVA PLAYER
-                    </div>
+                    <div class="watch-information">
 
-                </div>
+                        <div class="watch-title-row">
 
+                            <div>
+                                <span class="watch-small-label">
+                                    NOW STREAMING ON CINEVA
+                                </span>
 
-                <!-- VIDEO PLAYER -->
-                <div class="video-player-wrapper">
+                                <h1 id="watch-title">
+                                    Loading title...
+                                </h1>
+                            </div>
 
-                    <video
-                        id="video-player"
-                        class="video-player"
-                        controls
-                        playsinline
-                        preload="metadata"
-                        poster="assets/images/movie-placeholder.jpg"
-                    >
-                        Your browser does not support HTML5 video.
-                    </video>
+                            <span class="watch-quality-badge">
+                                <i class="fa-solid fa-crown"></i>
+                                PREMIUM
+                            </span>
 
-
-                    <!-- EMPTY PLAYER MESSAGE -->
-                    <div class="player-empty" id="player-empty">
-
-                        <i class="fa-solid fa-circle-play"></i>
-
-                        <h3>Ready to Watch?</h3>
-
-                        <p>
-                            Select a watch option below to start streaming.
-                        </p>
-
-                    </div>
-
-                </div>
+                        </div>
 
 
-                <!-- PLAYER ACTIONS -->
-                <div class="player-action-bar">
+                        <div class="watch-meta">
+
+                            <span>
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span id="watch-category">
+                                    Uncategorized
+                                </span>
+                            </span>
+
+                            <span>
+                                <i class="fa-regular fa-calendar"></i>
+                                <span id="watch-year">
+                                    N/A
+                                </span>
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-star"></i>
+                                <span id="watch-rating">
+                                    Not rated
+                                </span>
+                            </span>
+
+                        </div>
 
 
-                    <div class="player-action-left">
+                        <div class="watch-description-wrapper">
 
-                        <!-- WATCH -->
-                        <button
-                            type="button"
-                            class="player-action-btn primary-watch-btn"
-                            id="main-watch-btn"
-                        >
-                            <i class="fa-solid fa-play"></i>
-                            Watch Now
-                        </button>
+                            <h3>
+                                <i class="fa-solid fa-align-left"></i>
+                                About This Title
+                            </h3>
 
+                            <p id="watch-description">
+                                Loading description...
+                            </p>
 
-                        <!-- DOWNLOAD -->
-                        <a
-                            href="#"
-                            class="player-action-btn download-watch-btn"
-                            id="main-download-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <i class="fa-solid fa-download"></i>
-                            Download
-                        </a>
-
-                    </div>
+                        </div>
 
 
-                    <div class="player-action-right">
+                        <div class="watch-information-footer">
 
-                        <!-- LIKE -->
-                        <button
-                            type="button"
-                            class="engagement-btn"
-                            id="like-btn"
-                        >
-                            <i class="fa-regular fa-heart"></i>
-                            <span id="like-count">0</span>
-                        </button>
+                            <span>
+                                <i class="fa-solid fa-shield-halved"></i>
+                                CINEVA Premium Experience
+                            </span>
 
+                            <span>
+                                <i class="fa-solid fa-play"></i>
+                                Watch Anytime
+                            </span>
 
-                        <!-- SHARE -->
-                        <button
-                            type="button"
-                            class="engagement-btn"
-                            id="share-btn"
-                        >
-                            <i class="fa-solid fa-share-nodes"></i>
-                            Share
-                        </button>
+                        </div>
 
                     </div>
 
@@ -434,17 +453,15 @@
             ================================================== -->
 
             <section
-                class="movie-parts-section"
                 id="movie-parts-container"
-                hidden
-            >
+                class="movie-parts-section"
+                hidden>
 
                 <div class="watch-section-heading">
 
                     <div>
-
-                        <span class="section-eyebrow">
-                            CONTINUE YOUR MOVIE
+                        <span class="watch-small-label">
+                            MOVIE COLLECTION
                         </span>
 
                         <h2>
@@ -453,21 +470,21 @@
                         </h2>
 
                         <p>
-                            Select the part you want to watch or download.
+                            Select a part to start watching or download it.
                         </p>
-
                     </div>
+
+                    <span class="section-count">
+                        <i class="fa-solid fa-film"></i>
+                        Multiple Parts
+                    </span>
 
                 </div>
 
 
                 <div
-                    class="movie-parts-grid"
                     id="movie-parts-grid"
-                >
-
-                    <!-- Movie parts generated by watch.js -->
-
+                    class="movie-parts-grid">
                 </div>
 
             </section>
@@ -479,17 +496,15 @@
             ================================================== -->
 
             <section
-                class="episodes-section"
                 id="episodes-container"
-                hidden
-            >
+                class="episodes-section"
+                hidden>
 
                 <div class="watch-section-heading">
 
                     <div>
-
-                        <span class="section-eyebrow">
-                            YOUR NEXT EPISODE
+                        <span class="watch-small-label">
+                            SERIES COLLECTION
                         </span>
 
                         <h2>
@@ -498,49 +513,37 @@
                         </h2>
 
                         <p>
-                            Choose an episode and continue watching.
+                            Choose your preferred season and episode.
                         </p>
-
                     </div>
 
-
-                    <div class="episode-total">
-
-                        <i class="fa-solid fa-list-ol"></i>
-
-                        <span id="episode-count">0 Episodes</span>
-
-                    </div>
+                    <span
+                        id="episode-count"
+                        class="episode-total">
+                        0 Episodes
+                    </span>
 
                 </div>
 
 
-                <!-- SEASON FILTER -->
                 <div class="season-filter-wrapper">
 
                     <label for="season-selector">
-                        <i class="fa-solid fa-filter"></i>
+                        <i class="fa-solid fa-list"></i>
                         Select Season
                     </label>
 
                     <select
                         id="season-selector"
-                        class="season-selector"
-                    >
-                        <option value="">All Seasons</option>
+                        class="season-selector">
                     </select>
 
                 </div>
 
 
-                <!-- EPISODES GRID -->
                 <div
-                    class="episodes-grid"
                     id="episodes-grid"
-                >
-
-                    <!-- Episodes generated by watch.js -->
-
+                    class="episodes-grid">
                 </div>
 
             </section>
@@ -551,14 +554,14 @@
                  COMMENTS
             ================================================== -->
 
-            <section class="comments-section" id="comments-section">
-
+            <section
+                id="comments-section"
+                class="comments-section">
 
                 <div class="watch-section-heading">
 
                     <div>
-
-                        <span class="section-eyebrow">
+                        <span class="watch-small-label">
                             COMMUNITY
                         </span>
 
@@ -568,21 +571,17 @@
                         </h2>
 
                         <p>
-                            Share your thoughts about this movie or series.
+                            Share your thoughts about this title.
                         </p>
-
                     </div>
 
-
                     <span
-                        class="comments-count"
                         id="comments-count"
-                    >
-                        0 Comments
+                        class="comments-count">
+                        0
                     </span>
 
                 </div>
-
 
 
                 <!-- COMMENT FORM -->
@@ -590,22 +589,27 @@
 
                     <div class="comment-form-heading">
 
-                        <i class="fa-solid fa-pen-to-square"></i>
+                        <div class="comment-form-icon">
+                            <i class="fa-solid fa-pen"></i>
+                        </div>
 
-                        <h3>Leave a Comment</h3>
+                        <div>
+                            <h3>Join the conversation</h3>
+
+                            <p>
+                                Your comment will be reviewed before appearing.
+                            </p>
+                        </div>
 
                     </div>
 
 
                     <form id="comment-form">
 
-
-                        <!-- NAME -->
                         <div class="comment-field">
 
                             <label for="comment-name">
                                 Your Name
-                                <span>*</span>
                             </label>
 
                             <input
@@ -613,69 +617,80 @@
                                 id="comment-name"
                                 name="name"
                                 placeholder="Enter your name"
-                                maxlength="50"
+                                minlength="2"
+                                maxlength="60"
                                 required
                             >
 
                         </div>
 
 
-                        <!-- MESSAGE -->
                         <div class="comment-field">
 
-                            <div class="comment-label-row">
-
-                                <label for="comment-message">
-                                    Your Comment
-                                    <span>*</span>
-                                </label>
-
-                                <span id="comment-character-count">
-                                    0 / 500
-                                </span>
-
-                            </div>
+                            <label for="comment-message">
+                                Your Comment
+                            </label>
 
                             <textarea
                                 id="comment-message"
-                                name="message"
+                                name="comment"
                                 placeholder="Write your thoughts..."
-                                maxlength="500"
-                                required
-                            ></textarea>
+                                minlength="2"
+                                maxlength="2000"
+                                rows="5"
+                                required>
+                            </textarea>
+
+                            <div class="comment-character-counter">
+                                <span>Maximum 2000 characters</span>
+
+                                <span>
+                                    <span id="comment-character-count">0</span>/2000
+                                </span>
+                            </div>
 
                         </div>
 
 
-                        <!-- SUBMIT -->
+                        <div
+                            id="comment-feedback"
+                            class="comment-feedback"
+                            aria-live="polite">
+                        </div>
+
+
                         <button
-                            type="submit"
-                            class="post-comment-btn"
                             id="post-comment-btn"
-                        >
+                            class="post-comment-btn"
+                            type="submit">
+
                             <i class="fa-solid fa-paper-plane"></i>
                             Post Comment
+
                         </button>
-
-
-                        <p
-                            class="comment-feedback"
-                            id="comment-feedback"
-                        ></p>
 
                     </form>
 
                 </div>
 
 
-
                 <!-- COMMENTS LIST -->
-                <div
-                    class="comments-list"
-                    id="comments-list"
-                >
+                <div class="comments-list-wrapper">
 
-                    <!-- Comments generated by watch.js -->
+                    <h3 class="comments-list-title">
+                        <i class="fa-solid fa-message"></i>
+                        Recent Comments
+                    </h3>
+
+                    <div
+                        id="comments-list"
+                        class="comments-list">
+
+                        <p class="comments-empty">
+                            Loading comments...
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -687,17 +702,13 @@
                  RELATED CONTENT
             ================================================== -->
 
-            <section
-                class="related-section"
-                id="related-content"
-            >
+            <section class="related-section">
 
                 <div class="watch-section-heading">
 
                     <div>
-
-                        <span class="section-eyebrow">
-                            MORE TO EXPLORE
+                        <span class="watch-small-label">
+                            KEEP EXPLORING
                         </span>
 
                         <h2>
@@ -706,53 +717,54 @@
                         </h2>
 
                         <p>
-                            Discover more movies and series you might enjoy.
+                            Discover more entertainment on CINEVA.
                         </p>
-
                     </div>
-
 
                     <a
                         href="genre.html"
-                        class="related-view-all"
-                    >
+                        class="related-view-all">
+
                         View All
                         <i class="fa-solid fa-arrow-right"></i>
+
                     </a>
 
                 </div>
 
 
-                <!-- RELATED SLIDER -->
                 <div class="related-slider-wrapper">
 
                     <button
-                        type="button"
-                        class="related-arrow related-prev"
                         id="related-prev"
-                        aria-label="Previous related content"
-                    >
+                        class="related-arrow related-prev"
+                        type="button"
+                        aria-label="Previous titles">
+
                         <i class="fa-solid fa-chevron-left"></i>
+
                     </button>
 
 
                     <div
-                        class="related-grid related-horizontal-grid"
-                        id="related-grid"
-                    >
+                        id="related-content"
+                        class="related-grid related-horizontal-grid">
 
-                        <!-- Related cards generated by watch.js -->
+                        <p class="related-empty">
+                            Loading recommendations...
+                        </p>
 
                     </div>
 
 
                     <button
-                        type="button"
-                        class="related-arrow related-next"
                         id="related-next"
-                        aria-label="Next related content"
-                    >
+                        class="related-arrow related-next"
+                        type="button"
+                        aria-label="Next titles">
+
                         <i class="fa-solid fa-chevron-right"></i>
+
                     </button>
 
                 </div>
@@ -763,13 +775,12 @@
         </div>
         <!-- END WATCH CONTENT -->
 
-
     </main>
 
 
 
     <!-- =================================================
-         CINEVA FOOTER — HOMEPAGE STYLE
+         SHARED CINEVA FOOTER
     ================================================== -->
 
     <footer class="main-footer">
@@ -783,7 +794,7 @@
                 <a href="index.html" class="logo">
 
                     <span class="brand-icon">
-                        <img src="assets/images/logo.png" alt="CINEVA logo">
+                        <img src="/assets/images/logo.png" alt="CINEVA logo">
                     </span>
 
                     <span class="logo-text">
@@ -794,14 +805,15 @@
                 </a>
 
 
-                <p>
-                    Your destination for movies, series and unlimited
-                    entertainment. Discover your next favourite story
-                    with CINEVA.
+                <p class="footer-nav-description">
+                    Your destination for movies, series and unlimited entertainment.
+                    Discover your next favorite story with CINEVA.
                 </p>
 
 
                 <div class="social-links">
+
+                    <!-- Replace # with the same social URLs used on index.html -->
 
                     <a href="#" aria-label="Facebook">
                         <i class="fa-brands fa-facebook-f"></i>
@@ -823,16 +835,8 @@
                         <i class="fa-brands fa-tiktok"></i>
                     </a>
 
-                    <a href="#" aria-label="X">
-                        <i class="fa-brands fa-x-twitter"></i>
-                    </a>
-
                     <a href="#" aria-label="Telegram">
                         <i class="fa-brands fa-telegram"></i>
-                    </a>
-
-                    <a href="#" aria-label="GitHub">
-                        <i class="fa-brands fa-github"></i>
                     </a>
 
                 </div>
@@ -846,26 +850,36 @@
 
                 <h3>Explore</h3>
 
-                <ul>
+                <ul class="footer-links">
 
                     <li>
-                        <a href="index.html">Home</a>
+                        <a href="index.html" class="footer-link">
+                            Home
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?type=movie">Movies</a>
+                        <a href="genre.html?type=movie" class="footer-link">
+                            Movies
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?type=series">Series</a>
+                        <a href="genre.html?type=series" class="footer-link">
+                            Series
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?category=Animation">Animation</a>
+                        <a href="categories.html" class="footer-link">
+                            Categories
+                        </a>
                     </li>
 
                     <li>
-                        <a href="categories.html">Categories</a>
+                        <a href="profile.html#favorites" class="footer-link">
+                            My Favorites
+                        </a>
                     </li>
 
                 </ul>
@@ -879,26 +893,36 @@
 
                 <h3>Categories</h3>
 
-                <ul>
+                <ul class="footer-links">
 
                     <li>
-                        <a href="genre.html?category=Action">Action</a>
+                        <a href="genre.html?category=Action" class="footer-link">
+                            Action
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?category=Horror">Horror</a>
+                        <a href="genre.html?category=Drama" class="footer-link">
+                            Drama
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?category=Drama">Drama</a>
+                        <a href="genre.html?category=Horror" class="footer-link">
+                            Horror
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?category=Comedy">Comedy</a>
+                        <a href="genre.html?category=Comedy" class="footer-link">
+                            Comedy
+                        </a>
                     </li>
 
                     <li>
-                        <a href="genre.html?category=Highschool">Highschool</a>
+                        <a href="genre.html?category=Animation" class="footer-link">
+                            Animation
+                        </a>
                     </li>
 
                 </ul>
@@ -910,28 +934,32 @@
             <!-- INFORMATION -->
             <div class="footer-column">
 
-                <h3>Explore CINEVA</h3>
+                <h3>Information</h3>
 
-                <ul>
+                <ul class="footer-links">
 
                     <li>
-                        <a href="profile.html">My Profile</a>
+                        <a href="privacy.html" class="footer-link">
+                            Privacy Policy
+                        </a>
                     </li>
 
                     <li>
-                        <a href="profile.html#favorites">My Favorites</a>
+                        <a href="terms.html" class="footer-link">
+                            Terms of Service
+                        </a>
                     </li>
 
                     <li>
-                        <a href="vip.html">VIP Membership</a>
+                        <a href="dmca.html" class="footer-link">
+                            DMCA
+                        </a>
                     </li>
 
                     <li>
-                        <a href="privacy.html">Privacy Policy</a>
-                    </li>
-
-                    <li>
-                        <a href="terms.html">Terms of Service</a>
+                        <a href="contact.html" class="footer-link">
+                            Contact
+                        </a>
                     </li>
 
                 </ul>
@@ -946,16 +974,14 @@
         <!-- FOOTER BOTTOM -->
         <div class="footer-bottom">
 
-            <div class="footer-bottom-content">
+            <div class="footer-bottom-content container">
 
                 <p>
-                    &copy;
-                    <span id="currentYear"></span>
-                    <strong>CINEVA</strong>.
-                    All rights reserved.
+                    &copy; <span id="footer-year"></span>
+                    CINEVA. All rights reserved.
                 </p>
 
-                <p class="footer-bottom-links">
+                <p>
                     Developed with
                     <i class="fa-solid fa-heart"></i>
                     by <strong>IT HAWK_RW</strong>
@@ -970,16 +996,17 @@
 
 
     <!-- =================================================
-         BACK TO TOP — HOMEPAGE STYLE
+         BACK TO TOP
     ================================================== -->
 
     <button
         class="scroll-top"
-        id="scrollTop"
+        id="back-to-top"
         type="button"
-        aria-label="Scroll to top"
-    >
+        aria-label="Scroll to top">
+
         <i class="fa-solid fa-chevron-up"></i>
+
     </button>
 
 
@@ -1020,23 +1047,14 @@
 
 
     <!-- =================================================
-         JAVASCRIPT
+         SCRIPTS
     ================================================== -->
 
     <script type="module" src="/js/watch.js"></script>
     <script type="module" src="/js/search.js"></script>
     <script type="module" src="/js/navigation.js"></script>
+
     <script src="/js/contact-widget.js" defer></script>
-
-
-    <!-- CURRENT YEAR -->
-    <script>
-        const yearElement = document.getElementById("currentYear");
-
-        if (yearElement) {
-            yearElement.textContent = new Date().getFullYear();
-        }
-    </script>
 
 </body>
 </html>
