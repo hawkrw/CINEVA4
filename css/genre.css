@@ -880,3 +880,16 @@
         animation: none;
     }
 }
+
+/* Genre back navigation */
+.genre-hero-actions { display:flex; justify-content:flex-start; margin:0 0 18px; }
+.genre-back-button {
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    min-height:40px; padding:0 15px; border-radius:11px;
+    color:#eee8ff; background:rgba(255,255,255,.055);
+    border:1px solid rgba(192,132,252,.25); font-size:12px; font-weight:800;
+    cursor:pointer; transition:all .2s ease;
+}
+.genre-back-button:hover { background:rgba(139,53,245,.2); border-color:#a855f7; transform:translateX(-2px); }
+.genre-back-button i { color:#c084fc; }
+@media(max-width:600px) { .genre-hero-actions { margin-bottom:14px; } .genre-back-button { min-height:38px; padding:0 13px; } }
