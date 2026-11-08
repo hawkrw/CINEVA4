@@ -263,13 +263,12 @@ function safeImageURL(image) {
 
 function getWatchLink(item) {
     const type = getContentType(item);
-    const id = type === "series"
-        ? item.id
-        : (item.public_id ?? item.id);
+    // Legacy watch navigation uses the original database primary key.
+    const id = item.id;
 
     if (id == null) return "watch.html";
 
-    return `/${type}/${encodeURIComponent(id)}`;
+    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
 }
 
 /* =========================================================
