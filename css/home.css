@@ -1868,3 +1868,124 @@
         padding-bottom: 105px;
     }
 }
+
+
+/* =========================================================
+   CINEVA — COMPACT TRANSLATORS STRIP
+   Sits directly below Trending Now
+========================================================= */
+.translators-section {
+    margin-top: 8px;
+    margin-bottom: 26px;
+    padding: 12px 0 8px;
+}
+
+.translators-section .section-header {
+    margin-bottom: 13px;
+}
+
+.translators-section .section-subtitle {
+    margin-bottom: 5px;
+    font-size: 9px;
+    letter-spacing: 1.7px;
+}
+
+.translators-section .section-title h2 {
+    font-size: clamp(18px, 2.2vw, 23px);
+    line-height: 1.2;
+}
+
+.translators-section .section-title p {
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+.translators-wrapper {
+    min-height: 66px;
+    border-radius: 12px;
+}
+
+.translators-track {
+    gap: 11px;
+    animation-duration: 38s;
+    will-change: transform;
+}
+
+.translator-card {
+    min-width: 158px;
+    padding: 10px 14px;
+    gap: 10px;
+    border-radius: 11px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, .14);
+}
+
+.translator-card:hover {
+    transform: translateY(-2px);
+}
+
+.translator-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+}
+
+.translator-details h3 {
+    max-width: 135px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.translator-details span {
+    margin-top: 3px;
+    font-size: 9px;
+}
+
+.translator-loading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 62px;
+    padding: 12px 16px;
+    font-size: 11px;
+}
+
+@media (max-width: 600px) {
+    .translators-section {
+        margin-top: 2px;
+        margin-bottom: 20px;
+        padding: 10px 0 5px;
+    }
+
+    .translators-section .section-header {
+        margin-bottom: 10px;
+    }
+
+    .translators-section .section-title p {
+        max-width: 290px;
+        font-size: 10px;
+    }
+
+    .translators-track {
+        gap: 9px;
+        animation-duration: 32s;
+    }
+
+    .translator-card {
+        min-width: 145px;
+        padding: 9px 11px;
+    }
+
+    .translator-avatar {
+        width: 31px;
+        height: 31px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .translators-track {
+        animation: none !important;
+        will-change: auto;
+    }
+}
