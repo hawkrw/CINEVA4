@@ -1,218 +1,220 @@
-
 /* =========================================================
-   CINEVA GLOBAL FLOATING WHATSAPP & CALL
+   CINEVA — GLOBAL WHATSAPP FLOATING WIDGET
 ========================================================= */
 
 .cineva-floating-contacts {
     position: fixed;
-    right: 25px;
-    bottom: 25px;
-    z-index: 99999;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100000;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 15px;
+    gap: 14px;
+    font-family: inherit;
 }
 
-/* FLOATING BUTTONS */
-
-.cineva-float-button {
+.cineva-whatsapp-float {
     position: relative;
-    width: 58px;
-    height: 58px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 25px;
-    cursor: pointer;
     isolation: isolate;
-    transition: transform .3s ease, box-shadow .3s ease;
-}
-
-.cineva-whatsapp {
-    background: #20c96b;
-    box-shadow: 0 6px 25px rgba(32, 201, 107, .35);
-}
-
-.cineva-call {
-    background: linear-gradient(135deg, #9164ff, #5926c9);
-    box-shadow: 0 6px 25px rgba(120, 75, 230, .4);
-}
-
-.cineva-float-button:hover {
-    transform: translateY(-5px) scale(1.06);
-}
-
-.cineva-float-label {
-    position: absolute;
-    right: 70px;
-    padding: 8px 13px;
-    border-radius: 8px;
-    background: #171525;
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(8px);
-    transition: .25s ease;
-}
-
-.cineva-float-button:hover .cineva-float-label {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-}
-
-/* PULSE WAVES */
-
-.cineva-float-wave {
-    position: absolute;
-    inset: -5px;
-    z-index: -1;
-    border: 2px solid currentColor;
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    padding: 0;
+    border: 0;
     border-radius: 50%;
-    animation: cinevaFloatWave 2s infinite;
-    opacity: .65;
+    color: #fff;
+    background: linear-gradient(145deg, #2be477, #0aa84f);
+    box-shadow: 0 8px 28px rgba(18, 190, 91, .38),
+                0 2px 8px rgba(0, 0, 0, .28);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+
+.cineva-whatsapp-float svg {
+    position: relative;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+}
+
+.cineva-whatsapp-float:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 12px 32px rgba(18, 190, 91, .48);
+}
+
+.cineva-whatsapp-float:focus-visible,
+.cineva-whatsapp-option:focus-visible {
+    outline: 3px solid #b99aff;
+    outline-offset: 4px;
+}
+
+.cineva-whatsapp-float.is-open {
+    transform: rotate(8deg);
+}
+
+.cineva-whatsapp-pulse {
+    position: absolute;
+    z-index: -1;
+    inset: -5px;
+    border: 2px solid rgba(36, 220, 119, .72);
+    border-radius: inherit;
+    animation: cinevaWhatsAppPulse 2.2s ease-out infinite;
     pointer-events: none;
 }
 
-.cineva-call .cineva-float-wave {
-    color: #956cff;
+@keyframes cinevaWhatsAppPulse {
+    0% { transform: scale(.9); opacity: .75; }
+    100% { transform: scale(1.55); opacity: 0; }
 }
 
-.cineva-whatsapp .cineva-float-wave {
-    color: #20c96b;
+.cineva-whatsapp-panel {
+    width: min(330px, calc(100vw - 32px));
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 18px;
+    background: rgba(15, 15, 29, .97);
+    color: #f8f7ff;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .5);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    transform-origin: bottom right;
+    animation: cinevaWhatsAppPanelIn .2s ease both;
 }
 
-@keyframes cinevaFloatWave {
-    0% {
-        transform: scale(.9);
-        opacity: .7;
-    }
-
-    100% {
-        transform: scale(1.55);
-        opacity: 0;
-    }
-}
-
-/* NUMBER MENUS */
-
-.cineva-contact-menu {
-    width: 260px;
-    padding: 15px;
-    margin-bottom: 2px;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 15px;
-    background: rgba(19,17,32,.97);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 12px 40px rgba(0,0,0,.45);
-    animation: cinevaMenuAppear .25s ease;
-}
-
-.cineva-contact-menu[hidden] {
+.cineva-whatsapp-panel[hidden] {
     display: none !important;
 }
 
-@keyframes cinevaMenuAppear {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes cinevaWhatsAppPanelIn {
+    from { opacity: 0; transform: translateY(9px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.cineva-menu-heading {
+.cineva-whatsapp-panel-header {
     display: flex;
     align-items: center;
-    gap: 9px;
-    margin-bottom: 12px;
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
+    gap: 11px;
+    padding: 5px 5px 14px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
 }
 
-.whatsapp-menu .cineva-menu-heading i {
-    color: #20c96b;
-    font-size: 19px;
+.cineva-whatsapp-panel-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(135deg, #8b35f5, #ef315e);
+    font-size: 20px;
 }
 
-.call-menu .cineva-menu-heading i {
-    color: #956cff;
+.cineva-whatsapp-panel-header strong,
+.cineva-whatsapp-panel-header small,
+.cineva-whatsapp-option-copy strong,
+.cineva-whatsapp-option-copy small {
+    display: block;
+}
+
+.cineva-whatsapp-panel-header strong {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.cineva-whatsapp-panel-header small {
+    margin-top: 4px;
+    color: #aaa6bb;
+    font-size: 11px;
+}
+
+.cineva-whatsapp-option {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-height: 62px;
+    padding: 10px;
+    margin-top: 7px;
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 12px;
+    color: inherit;
+    background: rgba(255, 255, 255, .045);
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.cineva-whatsapp-option:hover {
+    transform: translateX(-2px);
+    border-color: rgba(37, 211, 102, .45);
+    background: rgba(37, 211, 102, .1);
+}
+
+.cineva-whatsapp-option-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: rgba(37, 211, 102, .12);
+    font-size: 18px;
+}
+
+.cineva-whatsapp-option-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.cineva-whatsapp-option-copy strong {
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.cineva-whatsapp-option-copy small {
+    margin-top: 4px;
+    color: #aaa6bb;
+    font-size: 10px;
+}
+
+.cineva-whatsapp-option-arrow {
+    color: #6ee7a0;
     font-size: 17px;
 }
-
-.cineva-contact-menu a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 11px;
-    margin-top: 7px;
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 9px;
-    background: rgba(255,255,255,.045);
-    color: #eeeaf8;
-    font-size: 12px;
-    text-decoration: none;
-    transition: .25s ease;
-}
-
-.cineva-contact-menu a:hover {
-    border-color: #8b5cf6;
-    background: rgba(139,92,246,.15);
-    color: white;
-}
-
-.cineva-contact-menu a i {
-    color: #a78bfa;
-    font-size: 12px;
-}
-
-/* MOBILE */
 
 @media (max-width: 600px) {
     .cineva-floating-contacts {
         right: 16px;
-        bottom: 20px;
-        gap: 13px;
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        gap: 12px;
     }
 
-    .cineva-float-button {
-        width: 52px;
-        height: 52px;
-        font-size: 22px;
+    .cineva-whatsapp-float {
+        width: 56px;
+        height: 56px;
     }
 
-    .cineva-contact-menu {
-        width: min(260px, calc(100vw - 32px));
+    .cineva-whatsapp-float svg {
+        width: 31px;
+        height: 31px;
     }
 
-    .cineva-float-label {
-        display: none;
+    .cineva-whatsapp-panel {
+        width: min(320px, calc(100vw - 32px));
+        padding: 12px;
     }
 }
 
-/* ACCESSIBILITY */
-
 @media (prefers-reduced-motion: reduce) {
-    .cineva-float-wave {
+    .cineva-whatsapp-pulse {
         animation: none;
     }
 
-    .cineva-float-button,
-    .cineva-contact-menu,
-    .cineva-float-label {
+    .cineva-whatsapp-float,
+    .cineva-whatsapp-option {
         transition: none;
     }
 }
-
