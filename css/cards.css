@@ -1404,7 +1404,7 @@ main > .content-section + .content-section {
     border: 1px solid rgba(168, 85, 247, 0.65);
     border-radius: 6px;
 
-    font-family: 'Inter', sans-serif;
+    font-family:;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.45px;
