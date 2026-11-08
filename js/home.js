@@ -691,6 +691,7 @@ function createHeroSlide(item, index) {
     );
 
     const backdrop = getBackdrop(item);
+    const posterFallback = getPoster(item);
 
     const type = getContentType(item) === "series"
         ? "SERIES"
@@ -718,13 +719,14 @@ function createHeroSlide(item, index) {
             <img
                 class="hero-image"
                 src="${escapeHTML(backdrop)}"
+                data-fallback="${escapeHTML(posterFallback)}"
                 alt="${title}"
                 ${index === 0
                     ? 'fetchpriority="high"'
                     : 'loading="lazy"'
                 }
                 decoding="async"
-                onerror="this.remove()"
+                onerror="if(this.dataset.fallback && this.src !== this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback='';}else{this.remove();}"
             >
         `
         : "";
