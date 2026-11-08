@@ -25,7 +25,7 @@ html { background: var(--cineva-bg); }
 body {
   background-color: var(--cineva-bg);
   color: var(--cineva-text);
-  font-family: Inter, sans-serif;
+  /* Do not override page typography. Each page keeps its original font stack. */
 }
 ::selection { color:#fff; background:rgba(139,53,245,.72); }
 :focus-visible {
