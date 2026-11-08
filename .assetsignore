@@ -1,0 +1,6 @@
+# Worker source and Wrangler configuration are deployed as Worker code/config,
+# not exposed as public static website assets.
+worker.js
+wrangler.jsonc
+.assetsignore
+.gitignore
