@@ -339,6 +339,26 @@
            NOTIFICATIONS
         ===================================== */
 
+        /* =====================================
+           BACK TO TOP
+        ===================================== */
+
+        const scrollTopButton = document.querySelector("#scrollTop");
+
+        if (scrollTopButton) {
+            const updateScrollTopVisibility = () => {
+                scrollTopButton.classList.toggle("show", window.scrollY > 320);
+            };
+
+            window.addEventListener("scroll", updateScrollTopVisibility, { passive: true });
+
+            scrollTopButton.addEventListener("click", () => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            updateScrollTopVisibility();
+        }
+
         if (notificationBtn) {
             notificationBtn.addEventListener("click", () => {
                 notificationBtn.classList.toggle(
