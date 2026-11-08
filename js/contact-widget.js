@@ -13,21 +13,6 @@
     widget.className = "cineva-floating-contacts";
 
     widget.innerHTML = `
-        <div class="cineva-contact-menu whatsapp-menu" id="cinevaWhatsAppMenu" hidden>
-            <div class="cineva-menu-heading">
-                <i class="fa-brands fa-whatsapp"></i>
-                <span>Choose WhatsApp number</span>
-            </div>
-            ${contacts.map(contact => `
-                <a href="https://wa.me/${contact.number.replace("+", "")}"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    <span>${contact.display}</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
-            `).join("")}
-        </div>
-
         <div class="cineva-contact-menu call-menu" id="cinevaCallMenu" hidden>
             <div class="cineva-menu-heading">
                 <i class="fa-solid fa-phone"></i>
@@ -41,14 +26,17 @@
             `).join("")}
         </div>
 
-        <button class="cineva-float-button cineva-whatsapp"
-                id="cinevaWhatsAppButton"
-                aria-label="WhatsApp CINEVA"
-                aria-expanded="false">
+        <a class="cineva-float-button cineva-whatsapp"
+           id="cinevaWhatsAppButton"
+           href="https://chat.whatsapp.com/FgsooLes8rQAQRjGbpfqY5"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Join the CINEVA WhatsApp group"
+           title="Join the CINEVA WhatsApp group">
             <i class="fa-brands fa-whatsapp"></i>
-            <span class="cineva-float-label">WhatsApp</span>
+            <span class="cineva-float-label">Join WhatsApp Group</span>
             <span class="cineva-float-wave"></span>
-        </button>
+        </a>
 
         <button class="cineva-float-button cineva-call"
                 id="cinevaCallButton"
@@ -63,37 +51,15 @@
     function initializeWidget() {
         if (document.querySelector(".cineva-floating-contacts")) return;
 
-        if (!document.querySelector(".cineva-hawk-signature")) {
-            const signature = document.createElement("div");
-            signature.className = "cineva-hawk-signature";
-            signature.setAttribute("aria-label", "IT HAWK RW — Creative Developer");
-            signature.innerHTML = '<span>IT</span> HAWK <b>RW</b><small>CREATIVE DEVELOPER</small>';
-            document.body.appendChild(signature);
-        }
-
         document.body.appendChild(widget);
 
-        const whatsappButton = document.getElementById("cinevaWhatsAppButton");
         const callButton = document.getElementById("cinevaCallButton");
-        const whatsappMenu = document.getElementById("cinevaWhatsAppMenu");
         const callMenu = document.getElementById("cinevaCallMenu");
 
         function closeMenus() {
-            whatsappMenu.hidden = true;
             callMenu.hidden = true;
-            whatsappButton.setAttribute("aria-expanded", "false");
             callButton.setAttribute("aria-expanded", "false");
         }
-
-        whatsappButton.addEventListener("click", event => {
-            event.stopPropagation();
-
-            const shouldOpen = whatsappMenu.hidden;
-            closeMenus();
-
-            whatsappMenu.hidden = !shouldOpen;
-            whatsappButton.setAttribute("aria-expanded", String(shouldOpen));
-        });
 
         callButton.addEventListener("click", event => {
             event.stopPropagation();
@@ -105,7 +71,6 @@
             callButton.setAttribute("aria-expanded", String(shouldOpen));
         });
 
-        whatsappMenu.addEventListener("click", event => event.stopPropagation());
         callMenu.addEventListener("click", event => event.stopPropagation());
 
         document.addEventListener("click", closeMenus);
