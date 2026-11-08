@@ -12,12 +12,19 @@ const PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 ===================================================== */
 
 const params = new URLSearchParams(window.location.search);
+const pathParts = window.location.pathname.split("/").filter(Boolean);
+const cleanRouteType = ["movie", "series"].includes(pathParts[0])
+    ? pathParts[0]
+    : null;
 
-const contentId = params.get("id");
+const contentId = cleanRouteType
+    ? pathParts[1] || null
+    : params.get("id");
 
-const contentType = params.get("type") === "series"
-    ? "series"
-    : "movie";
+const contentType = cleanRouteType ||
+    (params.get("type") === "series" ? "series" : "movie");
+
+const isCleanMovieRoute = cleanRouteType === "movie";
 
 const table = contentType === "series"
     ? APP_CONFIG.seriesTable
@@ -354,12 +361,33 @@ function showContent() {
 ===================================================== */
 
 async function fetchContent() {
-    const { data, error } = await supabase
+    let query = supabase
         .from(table)
         .select("*")
-        .eq("id", contentId)
-        .eq("is_active", true)
-        .maybeSingle();
+        .eq("is_active", true);
+
+    // Clean movie URLs resolve through movies.public_id. Legacy query-string
+    // URLs continue to resolve through the original UUID primary key.
+    query = query.eq(
+        isCleanMovieRoute ? "public_id" : "id",
+        isCleanMovieRoute ? Number(contentId) : contentId
+    );
+
+    let { data, error } = await query.maybeSingle();
+
+    // Graceful compatibility while the public_id migration is being applied.
+    if (error && isCleanMovieRoute &&
+        /public_id|column .* does not exist/i.test(error.message || "")) {
+        const fallback = await supabase
+            .from(table)
+            .select("*")
+            .eq("id", contentId)
+            .eq("is_active", true)
+            .maybeSingle();
+
+        data = fallback.data;
+        error = fallback.error;
+    }
 
     if (error) {
         console.error("Content query error:", error);
@@ -1705,7 +1733,7 @@ function renderRelated(items) {
 
         return `
             <a
-                href="watch.html?id=${encodeURIComponent(item.id)}&type=${contentType}"
+                href="/${contentType}/${encodeURIComponent(contentType === "series" ? item.id : (item.public_id ?? item.id))}"
                 class="movie-card"
             >
                 <div class="movie-poster">
