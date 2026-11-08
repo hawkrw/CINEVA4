@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "CINEVA — Movies & Series",
+  "short_name": "CINEVA",
+  "description": "Discover and watch movies and series on CINEVA.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080812",
+  "theme_color": "#080812",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
