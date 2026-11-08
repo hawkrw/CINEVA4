@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /profile.html
+Disallow: /login.html
+
+Sitemap: https://cineva4.djhawkrw.workers.dev/sitemap.xml
