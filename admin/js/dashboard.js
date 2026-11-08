@@ -1460,6 +1460,45 @@ async function refreshSeriesLatestAdded(seriesId) {
    when an episode is added or edited.
 ========================================= */
 
+/* =========================================
+   DUPLICATE MOVIE / SERIES TITLE GUARD
+   Case-insensitive; trims and normalizes spaces.
+========================================= */
+async function findDuplicateContentTitle(table, title, excludeId = null) {
+    const normalizedTitle = String(title || "")
+        .trim()
+        .replace(/\\s+/g, " ")
+        .toLocaleLowerCase();
+
+    if (!normalizedTitle) return null;
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("id,title")
+        .ilike("title", normalizedTitle);
+
+    if (error) throw error;
+
+    return (data || []).find(record => {
+        if (excludeId && String(record.id) === String(excludeId)) return false;
+
+        return String(record.title || "")
+            .trim()
+            .replace(/\\s+/g, " ")
+            .toLocaleLowerCase() === normalizedTitle;
+    }) || null;
+}
+
+async function rejectDuplicateContentTitle(table, title, excludeId = null) {
+    const duplicate = await findDuplicateContentTitle(table, title, excludeId);
+    if (!duplicate) return false;
+
+    alert(
+        `This ${table === "movies" ? "movie" : "series"} already exists: "${duplicate.title}".\\n\\nEdit the existing content instead of uploading it again.`
+    );
+    return true;
+}
+
 async function saveContentForm(event) {
     event.preventDefault();
 
@@ -1629,6 +1668,16 @@ async function saveContentForm(event) {
     if (!payload.title) {
         alert("A title is required.");
         return;
+    }
+
+    if (isSeries) {
+        try {
+            if (await rejectDuplicateContentTitle("series", payload.title, contentId)) return;
+        } catch (error) {
+            console.error("Series duplicate check failed:", error);
+            alert("Unable to verify the series title. Please try again.");
+            return;
+        }
     }
 
     /* =====================================
@@ -2489,6 +2538,16 @@ async function processBulkUpload(event) {
                 const table = kind === "movie"
                     ? "movies"
                     : "episodes";
+
+                if (kind === "movie") {
+                    const duplicate = await findDuplicateContentTitle(
+                        "movies",
+                        entry.payload.title
+                    );
+                    if (duplicate) {
+                        throw new Error(`Movie already exists: "${duplicate.title}".`);
+                    }
+                }
 
                 const { error } = await supabase
                     .from(table)
@@ -4369,6 +4428,14 @@ async function saveMovie(event) {
              payload.runtime < 0))
     ) {
         alert("Please enter a valid year and runtime.");
+        return;
+    }
+
+    try {
+        if (await rejectDuplicateContentTitle("movies", payload.title, movieId)) return;
+    } catch (error) {
+        console.error("Movie duplicate check failed:", error);
+        alert("Unable to verify the movie title. Please try again.");
         return;
     }
 
