@@ -216,37 +216,3 @@
     }
 }
 
-/* =========================================================
-   IT HAWK RW — SHARED FLOATING SIGNATURE
-========================================================= */
-.cineva-hawk-signature {
-    position:fixed; left:22px; bottom:22px; z-index:900; pointer-events:none;
-    display:flex; flex-direction:column; gap:1px; padding:10px 15px 9px;
-    color:#f7f0ff; font-family:'Outfit','Inter',sans-serif; font-size:15px;
-    font-weight:900; letter-spacing:1.4px; line-height:1.1;
-    background:linear-gradient(145deg,rgba(31,20,55,.76),rgba(9,8,22,.72));
-    border:1px solid rgba(168,85,247,.38); border-radius:12px;
-    box-shadow:0 10px 28px rgba(0,0,0,.24),0 0 22px rgba(139,53,245,.13);
-    text-shadow:1px 1px 0 #7130c7,0 0 13px rgba(168,85,247,.42);
-    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-    animation:cinevaHawkDrift 6s ease-in-out infinite;
-}
-.cineva-hawk-signature > span { color:#c084fc; }
-.cineva-hawk-signature b { color:#c084fc; }
-.cineva-hawk-signature small {
-    margin-top:4px; color:#aaa0c5; font-family:'Inter',sans-serif;
-    font-size:7px; letter-spacing:2px; text-shadow:none;
-}
-@keyframes cinevaHawkDrift { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-@media(max-width:600px) {
-    .cineva-hawk-signature { left:10px; bottom:12px; padding:8px 10px 7px; font-size:11px; border-radius:10px; opacity:.86; }
-    .cineva-hawk-signature small { font-size:6px; letter-spacing:1.4px; }
-}
-@media(prefers-reduced-motion:reduce) { .cineva-hawk-signature { animation:none; } }
-
-@media(max-width:600px) {
-    .watch-page-body .cineva-hawk-signature,
-    .genre-page .cineva-hawk-signature {
-        bottom:78px;
-    }
-}
