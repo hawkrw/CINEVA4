@@ -846,6 +846,15 @@ function resetFilters() {
 ========================================= */
 
 function bindEvents() {
+    const backButton = document.getElementById("genreBackButton");
+    backButton?.addEventListener("click", () => {
+        if (window.history.length > 1 && document.referrer) {
+            window.history.back();
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
     elements.contentFilter.addEventListener("change", () => {
         state.type = elements.contentFilter.value;
         state.currentPage = 1;
