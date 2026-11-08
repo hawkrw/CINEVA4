@@ -1,12 +1,27 @@
-# Never publish repository metadata or local deployment artifacts.
+# Explicitly exclude root and nested Git metadata.
+.git
+.git/**
 **/.git
 **/.git/**
+**/.git/**
+
+# Exclude local Wrangler and dependency artifacts.
+.wrangler
+.wrangler/**
 **/.wrangler
 **/.wrangler/**
+node_modules
+node_modules/**
 **/node_modules
 **/node_modules/**
 
-# Worker source and deployment configuration are not public website assets.
+# Exclude local secrets and environment files.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+
+# Worker source and deployment configuration are not public assets.
 worker.js
 wrangler.jsonc
 .assetsignore
