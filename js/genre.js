@@ -98,14 +98,12 @@ function getContentType(item) {
 function getContentUrl(item) {
     const type = getContentType(item) === "series" ? "series" : "movie";
 
-    // Clean movie routes must use the numeric public_id, while series use id.
-    const id = type === "series" ? item.id : item.public_id;
+    // Legacy watch navigation uses the original primary key for both tables.
+    const id = item.id;
 
-    if (id == null || !/^\d+$/.test(String(id))) {
-        return "genre.html";
-    }
+    if (id == null) return "genre.html";
 
-    return `/${type}/${encodeURIComponent(id)}`;
+    return `watch.html?id=${encodeURIComponent(id)}&type=${type}`;
 }
 
 function getTitle(item) {
