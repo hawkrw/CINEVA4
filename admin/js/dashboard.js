@@ -1678,6 +1678,12 @@ async function saveContentForm(event) {
             alert("Unable to verify the series title. Please try again.");
             return;
         }
+
+        // Editing series details must not make an old series look newly added.
+        // Only a newly inserted series receives its initial update timestamp.
+        if (contentId) {
+            delete payload.updated_at;
+        }
     }
 
     /* =====================================
@@ -1721,9 +1727,9 @@ async function saveContentForm(event) {
            REFRESH PARENT SERIES TIMESTAMP
         ================================= */
 
-        if (!isSeries) {
-            // Every successful episode addition or edit
-            // makes its parent series newly updated.
+        if (!isSeries && !contentId) {
+            // Only a newly added episode refreshes the parent series
+            // into Latest Added. Editing an existing episode does not.
             await refreshSeriesLatestAdded(selectedSeriesId);
         }
 
@@ -1738,7 +1744,7 @@ async function saveContentForm(event) {
                 ? (
                     isSeries
                         ? "Series updated successfully."
-                        : "Episode updated successfully. The series has been refreshed in Latest Added."
+                        : "Episode updated successfully."
                 )
                 : (
                     isSeries
