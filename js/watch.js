@@ -358,6 +358,7 @@ async function fetchContent() {
         .from(table)
         .select("*")
         .eq("id", contentId)
+        .eq("is_active", true)
         .maybeSingle();
 
     if (error) {
@@ -1666,6 +1667,7 @@ async function fetchRelated(item) {
     let query = supabase
         .from(table)
         .select("*")
+        .eq("is_active", true)
         .neq("id", item.id)
         .limit(8);
 
