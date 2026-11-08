@@ -869,7 +869,7 @@ function createSearchModal() {
             <footer class="cineva-search-footer">
 
                 <span>
-                    Powered by <strong>CINEVA PRO</strong>
+                    DESIGNED by <strong>IT HAWK RW</strong>
                 </span>
 
                 <span>
