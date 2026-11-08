@@ -1462,48 +1462,34 @@ async function fetchComments(item) {
         console.error("Comments loading error:", error);
         return [];
     }
-
     return data || [];
 }
 
 function renderComments(comments) {
     if (!el.commentsList) return;
-
-    if (el.commentsCount) {
-        el.commentsCount.textContent = comments.length;
-    }
+    if (el.commentsCount) el.commentsCount.textContent = comments.length;
 
     if (!comments.length) {
         el.commentsList.innerHTML = `
-            <p class="comments-empty">
-                No comments yet. Be the first to comment!
-            </p>
+            <p class="comments-empty">No comments yet. Be the first to comment!</p>
         `;
         return;
     }
 
     el.commentsList.innerHTML = comments.map(comment => {
-        const name = escapeHTML(comment.display_name || "Guest");
-
-        const date = comment.created_at
-            ? new Date(comment.created_at).toLocaleDateString()
-            : "";
+        const name = escapeHTML(comment.display_name || comment.username || "Guest");
+        const body = comment.comment || comment.text || "";
+        const date = comment.created_at ? new Date(comment.created_at).toLocaleDateString() : "";
 
         return `
             <article class="comment-item">
-                <div class="comment-avatar">
-                    ${escapeHTML(name.charAt(0).toUpperCase())}
-                </div>
-
+                <div class="comment-avatar">${escapeHTML(name.charAt(0).toUpperCase())}</div>
                 <div class="comment-content">
                     <div class="comment-user-row">
                         <strong>${name}</strong>
                         <span>${escapeHTML(date)}</span>
                     </div>
-
-                    <p class="comment-text">
-                        ${escapeHTML(comment.comment)}
-                    </p>
+                    <p class="comment-text">${escapeHTML(body)}</p>
                 </div>
             </article>
         `;
@@ -1515,14 +1501,12 @@ function setupCommentForm(item) {
 
     if (el.characterCount && el.commentMessage) {
         el.commentMessage.addEventListener("input", () => {
-            el.characterCount.textContent =
-                el.commentMessage.value.length;
+            el.characterCount.textContent = el.commentMessage.value.length;
         });
     }
 
     el.commentForm.addEventListener("submit", async event => {
         event.preventDefault();
-
         const name = el.commentName?.value.trim() || "";
         const message = el.commentMessage?.value.trim() || "";
 
@@ -1530,7 +1514,6 @@ function setupCommentForm(item) {
             setCommentFeedback("Name must be between 2 and 60 characters.");
             return;
         }
-
         if (message.length < 2 || message.length > 2000) {
             setCommentFeedback("Comment must be between 2 and 2000 characters.");
             return;
@@ -1538,39 +1521,37 @@ function setupCommentForm(item) {
 
         if (el.commentButton) {
             el.commentButton.disabled = true;
-            el.commentButton.textContent = "Submitting...";
+            el.commentButton.textContent = "Posting...";
         }
 
-        const { error } = await supabase
-            .from("comments")
-            .insert({
-                content_id: String(item.id),
-                content_type: contentType,
-                display_name: name,
-                comment: message,
-                is_approved: false
-            });
+        try {
+            const { error } = await supabase
+                .from("comments")
+                .insert({
+                    content_id: String(item.id),
+                    content_type: contentType,
+                    display_name: name,
+                    comment: message,
+                    text: message,
+                    is_approved: true
+                });
 
-        if (error) {
-            console.error("Comment submission error:", error);
-            setCommentFeedback(
-                "Unable to submit your comment. Please try again."
-            );
-        } else {
+            if (error) throw error;
+
             el.commentForm.reset();
-
-            if (el.characterCount) {
-                el.characterCount.textContent = "0";
+            if (el.characterCount) el.characterCount.textContent = "0";
+            setCommentFeedback("Your comment is now published.");
+            renderComments(await fetchComments(item));
+        } catch (error) {
+            console.error("Comment submission error:", error);
+            setCommentFeedback(error?.message
+                ? `Unable to publish comment: ${error.message}`
+                : "Unable to submit your comment. Please try again.");
+        } finally {
+            if (el.commentButton) {
+                el.commentButton.disabled = false;
+                el.commentButton.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Post Comment';
             }
-
-            setCommentFeedback(
-                "Your comment was submitted and is awaiting approval."
-            );
-        }
-
-        if (el.commentButton) {
-            el.commentButton.disabled = false;
-            el.commentButton.textContent = "Post Comment";
         }
     });
 }
