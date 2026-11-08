@@ -1946,7 +1946,36 @@ if (contentType === "movie" && parts.length > 0) {
         );
     }
 }
+/* =========================================
+   WATCH PAGE — CLOSE SEARCH
+========================================= */
 
+function setupWatchSearchClose() {
+    const searchBox = document.querySelector("#search-form");
+    const searchInput = document.querySelector("#search-input");
+    const searchResults = document.querySelector("#search-results");
+    const closeButton = document.querySelector("#watchSearchClose");
+
+    if (!searchBox || !searchInput || !closeButton) return;
+
+    searchInput.addEventListener("focus", () => {
+        searchBox.classList.add("search-active");
+    });
+
+    closeButton.addEventListener("click", () => {
+        searchInput.value = "";
+        searchBox.classList.remove("search-active");
+
+        if (searchResults) {
+            searchResults.innerHTML = "";
+            searchResults.classList.remove("active", "show");
+        }
+
+        searchInput.blur();
+    });
+}
+
+setupWatchSearchClose();
 /* =====================================================
    START CINEVA WATCH APPLICATION
 ===================================================== */
