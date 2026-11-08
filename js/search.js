@@ -626,7 +626,6 @@ function openSearchModal() {
 /* =========================================================
    CLOSE MODAL
 ========================================================= */
-
 function closeSearchModal() {
     if (!isOpen) return;
 
@@ -636,25 +635,46 @@ function closeSearchModal() {
     document.body.classList.remove("cineva-search-open");
 
     clearTimeout(searchTimeout);
+
+    // Cancel previous pending search requests
     activeRequest++;
+    selectedIndex = -1;
+
+    // Clear search input and results
+    modalInput.value = "";
+
+    if (existingInput) {
+        existingInput.value = "";
+    }
+
+    resetSearchView();
 
     if (existingResults) {
-        existingResults.classList.remove("active");
+        existingResults.innerHTML = "";
+        existingResults.classList.remove("active", "show");
     }
 
-    if (previousFocus?.isConnected) {
+    modalInput.blur();
+
+    // Never restore focus to the homepage search input:
+    // its focus listener would immediately reopen the modal.
+    const focusIsInsideHeader =
+        previousFocus &&
+        (
+            previousFocus === existingInput ||
+            existingForm?.contains(previousFocus)
+        );
+
+    if (
+        previousFocus?.isConnected &&
+        !focusIsInsideHeader &&
+        typeof previousFocus.focus === "function"
+    ) {
         previousFocus.focus({ preventScroll: true });
     }
+
+    previousFocus = null;
 }
-
-closeButton.addEventListener("click", closeSearchModal);
-
-modal.addEventListener("click", event => {
-    if (event.target === modal) {
-        closeSearchModal();
-    }
-});
-
 /* =========================================================
    RESET VIEW
 ========================================================= */
@@ -930,24 +950,49 @@ modalInput.addEventListener("keydown", event => {
    EXISTING HEADER SEARCH INTEGRATION
 ========================================================= */
 
+/* =========================================================
+   EXISTING HEADER SEARCH INTEGRATION
+========================================================= */
+
 if (existingInput) {
     existingInput.setAttribute("readonly", "readonly");
 
-    existingInput.addEventListener("focus", event => {
+    existingInput.setAttribute(
+        "aria-label",
+        "Open CINEVA search"
+    );
+
+    existingInput.addEventListener("focus", () => {
+        openSearchModal();
+    });
+
+    existingInput.addEventListener("click", event => {
+        event.preventDefault();
+        openSearchModal();
+    });
+}
+
+if (existingForm) {
+
+    // Open search when the header search button is tapped.
+    existingForm.addEventListener("click", event => {
+
+        const trigger = event.target.closest(
+            'button[type="submit"], #watchSearchButton, .search-submit'
+        );
+
+        if (!trigger) return;
+
         event.preventDefault();
         openSearchModal();
     });
 
-    existingInput.addEventListener("click", openSearchModal);
-}
-
-if (existingForm) {
+    // Also support Enter and form submission.
     existingForm.addEventListener("submit", event => {
         event.preventDefault();
         openSearchModal();
     });
 }
-
 /* =========================================================
    MOBILE SEARCH BUTTON SUPPORT
 ========================================================= */
