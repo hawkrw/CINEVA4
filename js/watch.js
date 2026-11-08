@@ -566,28 +566,73 @@ function showPlayerMessage(title, message) {
 }
 
 function normalizeEmbedUrl(value) {
-    if (!isSafeHttpUrl(value)) return "";
+    if (typeof value !== "string" || !value.trim()) return "";
+
+    let input = value.trim();
+
+    // Accept a pasted iframe embed snippet as well as a plain URL.
+    if (/<iframe\\b/i.test(input)) {
+        const match = input.match(/<iframe\\b[^>]*\\bsrc\\s*=\\s*["']([^"']+)["']/i);
+        if (!match) return "";
+        input = match[1].replace(/&amp;/g, "&");
+    }
+
+    if (!isSafeHttpUrl(input)) return "";
 
     try {
-        const url = new URL(value.trim());
-        const host = url.hostname.toLowerCase().replace(/^www\./, "");
-        const pathId = url.pathname.split("/").filter(Boolean)[0];
+        const url = new URL(input);
+        const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+        const parts = url.pathname.split("/").filter(Boolean);
+        const first = parts[0] || "";
+        const second = parts[1] || "";
+
+        // YouTube watch, short, live and youtu.be links.
+        if (host === "youtu.be") {
+            return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(first)}`;
+        }
+        if (["youtube.com", "m.youtube.com", "youtube-nocookie.com"].includes(host)) {
+            const id = url.searchParams.get("v") ||
+                (["embed", "shorts", "live"].includes(first) ? second : "");
+            if (id) return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`;
+        }
+
+        // Vimeo public video links.
+        if (host === "vimeo.com" || host === "player.vimeo.com") {
+            const id = host === "player.vimeo.com"
+                ? (first === "video" ? second : first)
+                : first;
+            if (/^\\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+        }
+
+        // Google Drive share links.
+        if (host === "drive.google.com" || host === "docs.google.com") {
+            const fileMatch = url.pathname.match(/\\/file\\/d\\/([^/]+)/);
+            const id = fileMatch?.[1] || url.searchParams.get("id");
+            if (id) return `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`;
+        }
+
+        // Dropbox share links are best served as a browser preview.
+        if (host === "dropbox.com" || host === "www.dropbox.com") {
+            url.searchParams.delete("dl");
+            url.searchParams.set("raw", "1");
+            return url.href;
+        }
 
         // StreamHG share-page links use the HGCloud embed endpoint.
         if (
             (host === "audinifer.com" || host === "streamhg.com") &&
-            pathId &&
-            !["e", "embed"].includes(pathId.toLowerCase())
+            first &&
+            !["e", "embed"].includes(first.toLowerCase())
         ) {
-            return `https://hgcloud.to/e/${encodeURIComponent(pathId)}`;
+            return `https://hgcloud.to/e/${encodeURIComponent(first)}`;
         }
 
+        // Generic providers: use their supplied player/embed URL.
         return url.href;
     } catch {
         return "";
     }
 }
-
 function isDirectMediaUrl(value) {
     return /\.(mp4|m4v|webm|ogv|ogg|m3u8)(?:$|[?#])/i.test(value);
 }
