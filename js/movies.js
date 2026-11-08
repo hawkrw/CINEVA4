@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const translator = escapeHTML(getTranslator(movie));
         const poster = escapeHTML(getImageURL(movie));
 
-        const id = encodeURIComponent(movie.id);
+        const id = encodeURIComponent(movie.public_id ?? movie.id);
 
         const translatorHTML = translator
             ? `
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
             <a
                 class="movie-card"
-                href="watch.html?id=${id}&type=movie"
+                href="/movie/${id}"
                 aria-label="Watch ${title}"
             >
 
