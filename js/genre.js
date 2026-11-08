@@ -95,6 +95,19 @@ function getContentType(item) {
     return item._contentType || item.content_type || "movie";
 }
 
+function getContentUrl(item) {
+    const type = getContentType(item) === "series" ? "series" : "movie";
+
+    // Clean movie routes must use the numeric public_id, while series use id.
+    const id = type === "series" ? item.id : item.public_id;
+
+    if (id == null || !/^\\d+$/.test(String(id))) {
+        return "genre.html";
+    }
+
+    return `/${type}/${encodeURIComponent(id)}`;
+}
+
 function getTitle(item) {
     return item.title || item.name || "Untitled";
 }
@@ -585,8 +598,7 @@ function createMovieCard(item) {
 
     const link = document.createElement("a");
     link.className = "movie-card-link";
-    link.href =
-        `watch.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(type)}`;
+    link.href = getContentUrl(item);
     link.setAttribute("aria-label", `Watch ${title}`);
 
     const posterWrap = document.createElement("div");
