@@ -291,11 +291,17 @@ function getContentType(item) {
 
 function getContentUrl(item) {
 
-    const id = encodeURIComponent(item.id);
-
     const type = getContentType(item);
 
-    return `watch.html?id=${id}&type=${type}`;
+    // Series already use their automatically generated bigint ID.
+    // Movies use the separate numeric public_id added by the database migration.
+    const id = type === "series"
+        ? item.id
+        : (item.public_id ?? item.id);
+
+    if (id == null) return "watch.html";
+
+    return `/${type}/${encodeURIComponent(id)}`;
 
 }
 
