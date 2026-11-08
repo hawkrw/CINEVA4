@@ -2637,3 +2637,29 @@
 .episode-download-btn span {
     display: none !important;
 }
+/* =========================================
+   WATCH PAGE — SEARCH CLOSE BUTTON
+========================================= */
+
+.watch-page-body .search-close-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transition: .25s ease;
+}
+
+.watch-page-body .search-close-btn:hover {
+    color: #a855f7;
+    background: rgba(168, 85, 247, .15);
+}
+
+.watch-page-body .search-box.search-active .search-close-btn {
+    display: flex;
+}
