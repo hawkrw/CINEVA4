@@ -2252,3 +2252,68 @@ body.light-theme {
         height: 42px;
     }
 }
+
+
+/* =====================================================
+   CINEVA UPDATES & PUBLIC COMMUNITY CENTER
+===================================================== */
+.cineva-community-overlay{position:fixed;inset:0;z-index:10050;display:flex;justify-content:flex-end;align-items:stretch;padding:0;background:rgba(3,3,10,.72);backdrop-filter:blur(9px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
+.cineva-community-overlay.open{opacity:1;visibility:visible}
+body.cineva-community-open{overflow:hidden}
+.cineva-community-modal{width:min(620px,100%);height:100%;display:flex;flex-direction:column;background:#0c0c17;border-left:1px solid rgba(168,85,247,.28);box-shadow:-20px 0 70px rgba(0,0,0,.38);transform:translateX(35px);transition:transform .28s ease;color:#f7f5fc;min-height:0}
+.cineva-community-overlay.open .cineva-community-modal{transform:translateX(0)}
+.cineva-community-header{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 18px;border-bottom:1px solid rgba(255,255,255,.08);gap:14px}
+.cineva-community-brand{display:flex;align-items:center;gap:13px;min-width:0}
+.cineva-community-brand-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#8b35f5,#ef315e);font-size:18px}
+.cineva-community-brand h2{font-size:20px;margin:0 0 3px;font-weight:850;color:#fff}
+.cineva-community-brand p{font-size:12px;color:#a6a1b5;margin:0}
+.cineva-community-close{width:40px;height:40px;flex:0 0 40px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);color:#fff;font-size:18px;cursor:pointer}
+.cineva-community-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.07)}
+.cineva-community-tabs button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 7px;border:1px solid transparent;border-radius:11px;background:transparent;color:#aaa5b8;font-size:12px;font-weight:750;cursor:pointer}
+.cineva-community-tabs button.active{background:rgba(139,53,245,.16);border-color:rgba(168,85,247,.3);color:#d8baff}
+.cineva-community-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.cineva-community-pane{display:none;padding:22px 24px 28px}
+.cineva-community-pane.active{display:block}
+.cineva-community-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+.cineva-community-section-heading h3{font-size:18px;margin:0 0 5px;color:#fff}
+.cineva-community-section-heading p{font-size:12px;margin:0;color:#9691a5;line-height:1.5}
+.cineva-live-pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(67,210,147,.22);background:rgba(67,210,147,.08);color:#75e4b1;border-radius:30px;padding:6px 9px;font-size:9px;font-weight:850;letter-spacing:.6px}
+.cineva-live-pill span{width:6px;height:6px;border-radius:50%;background:#54d99c;box-shadow:0 0 8px #54d99c}
+.cineva-latest-list,.cineva-announcement-list{display:grid;gap:10px}
+.cineva-latest-item{display:flex;align-items:center;gap:13px;min-width:0;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035);text-decoration:none;color:inherit;transition:border-color .2s,background .2s}
+.cineva-latest-item:hover{border-color:rgba(168,85,247,.45);background:rgba(139,53,245,.08)}
+.cineva-latest-poster{width:53px;height:70px;flex:0 0 53px;display:grid;place-items:center;overflow:hidden;border-radius:8px;background:#191629;color:#a855f7}
+.cineva-latest-poster img{width:100%;height:100%;object-fit:cover}
+.cineva-latest-info{display:grid;gap:5px;min-width:0}
+.cineva-latest-info strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.cineva-latest-info small{font-size:11px;color:#9e99ad}
+.cineva-latest-arrow{margin-left:auto;color:#8f899f;font-size:12px}
+.cineva-announcement-card{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:linear-gradient(145deg,rgba(139,53,245,.09),rgba(255,255,255,.025))}
+.cineva-announcement-type{display:inline-flex;padding:5px 8px;border-radius:7px;background:rgba(168,85,247,.16);color:#c99aff;text-transform:uppercase;font-size:9px;font-weight:850;letter-spacing:.7px}
+.cineva-announcement-type.notice{background:rgba(239,49,94,.13);color:#ff8da7}
+.cineva-announcement-card h4{font-size:15px;color:#fff;margin:11px 0 6px}
+.cineva-announcement-card p{font-size:13px;line-height:1.65;color:#c0bbcb;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.cineva-announcement-card time{display:block;margin-top:12px;font-size:10px;color:#858095}
+.cineva-chat-notice{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;margin-bottom:13px;border:1px solid rgba(239,184,76,.2);border-radius:11px;background:rgba(239,184,76,.07);color:#e8c77f;font-size:11px;line-height:1.55}
+.cineva-chat-notice i{margin-top:2px}
+.cineva-chat-messages{height:min(43vh,430px);min-height:190px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:2px 3px 10px;scroll-behavior:smooth}
+.cineva-chat-message{padding:12px 13px;border:1px solid rgba(255,255,255,.075);border-radius:12px;background:rgba(255,255,255,.035);overflow-wrap:anywhere}
+.cineva-chat-message-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cineva-chat-message-top strong{font-size:12px;color:#c9a4ff}
+.cineva-chat-message-top time{font-size:9px;color:#858095}
+.cineva-chat-message p{font-size:13px;line-height:1.6;color:#e4e0eb;margin:7px 0 5px;white-space:normal}
+.cineva-reply-button{border:0;background:transparent;color:#a98bd4;font-size:10px;padding:4px 0;cursor:pointer}
+.cineva-chat-reply-context{padding:7px 9px;margin-bottom:8px;border-left:2px solid #a855f7;background:rgba(168,85,247,.08);font-size:10px;color:#aaa3b8}
+.cineva-chat-form{border-top:1px solid rgba(255,255,255,.08);padding-top:13px;margin-top:7px}
+.cineva-chat-form label{display:block;margin-bottom:6px;color:#aaa4b8;font-size:10px;font-weight:750}
+.cineva-chat-form input,.cineva-chat-form textarea{width:100%;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#141321;color:#fff;padding:11px 12px;font:inherit;font-size:13px;outline:none}
+.cineva-chat-form input:focus,.cineva-chat-form textarea:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.1)}
+.cineva-chat-compose{display:flex;align-items:stretch;gap:8px;margin-top:9px}
+.cineva-chat-compose textarea{resize:vertical;min-height:48px;max-height:120px}
+.cineva-chat-compose button{width:49px;flex:0 0 49px;border:0;border-radius:11px;background:linear-gradient(135deg,#8b35f5,#c23a9a);color:#fff;font-size:17px;cursor:pointer}
+.cineva-chat-compose button:disabled{opacity:.5;cursor:wait}
+.cineva-chat-form-footer{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:#827d90;font-size:9px}
+.cineva-community-loading,.cineva-community-empty{padding:28px 14px;text-align:center;color:#9691a5;font-size:12px;line-height:1.6}
+.cineva-community-loading i{margin-right:7px;color:#b77bff}
+@media(max-width:600px){.cineva-community-overlay{align-items:flex-end}.cineva-community-modal{width:100%;height: min(92dvh,900px);height:min(92vh,900px);border:1px solid rgba(168,85,247,.24);border-bottom:0;border-radius:20px 20px 0 0;transform:translateY(35px)}.cineva-community-overlay.open .cineva-community-modal{transform:translateY(0)}.cineva-community-header{padding:16px 16px 13px}.cineva-community-tabs{padding:10px 9px;gap:4px}.cineva-community-tabs button{font-size:10px;gap:5px;padding:8px 3px}.cineva-community-pane{padding:17px 14px 22px}.cineva-community-section-heading h3{font-size:16px}.cineva-community-section-heading p{font-size:11px}.cineva-chat-messages{height:34vh;min-height:170px}.cineva-chat-form-footer{font-size:8px}.cineva-latest-item{padding:8px}.cineva-latest-poster{width:47px;height:63px;flex-basis:47px}}
+@media(prefers-reduced-motion:reduce){.cineva-community-overlay,.cineva-community-modal,.cineva-latest-item{transition:none}}
