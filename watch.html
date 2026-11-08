@@ -89,31 +89,38 @@
             <!-- HEADER ACTIONS -->
             <div class="nav-actions">
 
-                <!-- SEARCH -->
-                <form
-                    class="search-box"
-                    id="search-form"
-                    role="search"
-                >
+             
+<!-- SEARCH -->
+<form class="search-box" id="search-form" role="search">
 
-                    <input
-                        type="search"
-                        id="search-input"
-                        placeholder="Search movies, series..."
-                        autocomplete="off"
-                        aria-label="Search movies and series"
-                    >
+    <input
+        type="search"
+        id="search-input"
+        placeholder="Search movies, series..."
+        autocomplete="off"
+        aria-label="Search movies and series"
+    >
 
-                    <button type="submit" aria-label="Search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
+    <button type="submit" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
 
-                    <div
-                        class="search-results"
-                        id="search-results"
-                    ></div>
+    <button
+        type="button"
+        class="search-close-btn"
+        id="watchSearchClose"
+        aria-label="Close search"
+    >
+        <i class="fa-solid fa-xmark"></i>
+    </button>
 
-                </form>
+    <div
+        class="search-results"
+        id="search-results"
+    ></div>
+
+</form>
+
 
                 <!-- FAVORITES -->
                 <a
