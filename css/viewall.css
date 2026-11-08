@@ -2,7 +2,7 @@
 /* =========================================================
    CINEVA PRO — VIEW ALL / EXPLORE COLLECTION
    Premium cinematic catalogue experience
-   IT HAWK_RW 3D Signature Edition
+   CINEVA Catalogue
 ========================================================= */
 
 /* -------------------------
@@ -803,20 +803,6 @@ body {
     .viewall-hero-content > p {
         max-width: 100%;
         font-size: 13px;
-    }
-
-    .viewall-hero-content::after {
-        position: relative;
-        display: block;
-        width: fit-content;
-        right: auto;
-        bottom: auto;
-
-        margin-top: 30px;
-        margin-left: auto;
-
-        font-size: 24px;
-        letter-spacing: 2px;
     }
 
     .viewall-statistics {
