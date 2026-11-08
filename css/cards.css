@@ -1544,3 +1544,82 @@ main .content-section .section-heading,
         gap: 11px;
     }
 }
+
+
+/* =========================================================
+   CINEVA — CONSISTENT CONTENT CARDS & TRANSLATOR LABELS
+   Shared by homepage, category, movie, series and discovery grids.
+========================================================= */
+.movie-grid {
+    align-items: stretch;
+}
+
+.movie-grid .movie-card,
+.content-section .movie-card,
+#category-sections .movie-card {
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.movie-card .movie-poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: inherit;
+    background: #121221;
+}
+
+.movie-card .movie-poster > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.movie-card .movie-info {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.movie-translator-badge {
+    top: 10px;
+    right: 9px;
+    max-width: calc(100% - 18px);
+    min-height: 25px;
+    padding: 5px 9px;
+    gap: 5px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .35px;
+    line-height: 1.15;
+    border-radius: 7px;
+    color: #fff;
+    background: rgba(10, 8, 20, .88);
+    border: 1px solid rgba(192, 132, 252, .55);
+    box-shadow: 0 5px 16px rgba(0,0,0,.32);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.movie-translator-badge i {
+    color: #d8b4fe;
+    font-size: 10px;
+}
+
+@media (max-width: 600px) {
+    .movie-translator-badge {
+        top: 7px;
+        right: 7px;
+        min-height: 22px;
+        max-width: calc(100% - 14px);
+        padding: 4px 7px;
+        font-size: 9px;
+        letter-spacing: .2px;
+    }
+}
