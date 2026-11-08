@@ -57,6 +57,22 @@ function combineContent(movies, series) {
         }))
     ]);
 }
+const HOMEPAGE_MOVIE_FIELDS = [
+    "id", "title", "category", "created_at", "updated_at", "is_active",
+    "views", "translator", "year", "release_date", "rating", "vote_average",
+    "overview", "tagline", "poster", "poster_path", "backdrop", "backdrop_path",
+    "genres", "quality", "stream_type", "featured", "is_featured",
+    "featured_order", "tmdb_id", "original_title", "vote_count", "popularity"
+].join(",");
+
+const HOMEPAGE_SERIES_FIELDS = [
+    "id", "title", "category", "created_at", "updated_at", "last_activity_at",
+    "is_active", "views", "translator", "year", "release_date", "rating",
+    "overview", "description", "tagline", "image", "banner", "poster",
+    "poster_path", "backdrop", "backdrop_path", "genres", "total_seasons",
+    "tmdb_id", "original_title", "vote_count", "popularity"
+].join(",");
+
 /* =========================================
    02.1. SHARED HOMEPAGE DATA LOADER
 ========================================= */
@@ -89,7 +105,7 @@ export async function getHomepageData({
         // Latest movies
         supabase
             .from(APP_CONFIG.moviesTable)
-            .select("*")
+            .select(HOMEPAGE_MOVIE_FIELDS)
             .eq("is_active", true)
             .order("created_at", { ascending: false })
             .limit(latestCount),
@@ -97,7 +113,7 @@ export async function getHomepageData({
         // Latest series
         supabase
             .from(APP_CONFIG.seriesTable)
-            .select("*")
+            .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
             .order("updated_at", { ascending: false })
             .limit(latestCount),
@@ -105,7 +121,7 @@ export async function getHomepageData({
         // Trending movies
         supabase
             .from(APP_CONFIG.moviesTable)
-            .select("*")
+            .select(HOMEPAGE_MOVIE_FIELDS)
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
@@ -114,7 +130,7 @@ export async function getHomepageData({
         // Trending series
         supabase
             .from(APP_CONFIG.seriesTable)
-            .select("*")
+            .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
@@ -127,7 +143,7 @@ export async function getHomepageData({
         requests.push(
             supabase
                 .from(APP_CONFIG.moviesTable)
-                .select("*")
+            .select(HOMEPAGE_MOVIE_FIELDS)
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
@@ -135,7 +151,7 @@ export async function getHomepageData({
 
             supabase
                 .from(APP_CONFIG.seriesTable)
-                .select("*")
+            .select(HOMEPAGE_SERIES_FIELDS)
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
