@@ -212,7 +212,7 @@ function injectSearchStyles() {
 
             color: white;
 
-            font-family: 'Outfit', sans-serif;
+            font-family:;
             font-size: 14px;
             font-weight: 900;
             letter-spacing: 1.5px;
@@ -316,7 +316,7 @@ function injectSearchStyles() {
             border: 0;
             outline: none;
 
-            font-family: 'Inter', sans-serif;
+            font-family:;
             font-size: 15px;
         }
 
@@ -445,7 +445,7 @@ function injectSearchStyles() {
 
             color: white;
 
-            font-family: 'Outfit', sans-serif;
+            font-family:;
             font-size: 12px;
             font-weight: 800;
             line-height: 1.5;
@@ -544,7 +544,7 @@ function injectSearchStyles() {
             border: 0;
             border-radius: 9px;
 
-            font-family: inherit;
+            font-family:;
             font-size: 11px;
             font-weight: 800;
 
