@@ -750,11 +750,7 @@ body {
         gap: 20px 14px;
     }
 
-    .viewall-hero-content::after {
-        right: 2%;
-        bottom: 0;
     }
-}
 
 @media (max-width: 950px) {
     .viewall-grid {
