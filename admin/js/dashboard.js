@@ -3177,7 +3177,8 @@ showDashboard();
 platformAdmin = initializePlatformAdmin({
     getMovies: () => moviesCache,
     getSeries: () => seriesCache,
-    adminUser: result.user
+    adminUser: result.user,
+    refreshContent: () => refreshContent()
 });
 await platformAdmin.initialize();
 
