@@ -1614,6 +1614,7 @@ function renderSeason(seasonNumber) {
                     return;
                 }
 
+                window.dispatchEvent(new CustomEvent("cineva:episode-selected", { detail: { episode, series: currentContent } }));
                 setSelectedMedia(part, true);
                 scrollToPlayer();
                 return;
@@ -1646,6 +1647,7 @@ function renderSeason(seasonNumber) {
                     return;
                 }
 
+                window.dispatchEvent(new CustomEvent("cineva:episode-selected", { detail: { episode, series: currentContent } }));
                 setSelectedMedia(episode, true);
                 scrollToPlayer();
                 return;
@@ -2165,6 +2167,14 @@ displayContent(item);
 
         renderEpisodes(episodes);
         renderParts(parts);
+        const resumeEpisodeId = params.get("episode");
+        if (contentType === "series" && resumeEpisodeId) {
+            const resumeEpisode = episodes.find(episode => String(episode.id) === String(resumeEpisodeId));
+            if (resumeEpisode) {
+                window.dispatchEvent(new CustomEvent("cineva:episode-selected", { detail: { episode: resumeEpisode, series: item } }));
+                setSelectedMedia(resumeEpisode, true);
+            }
+        }
        // Do not automatically play the main movie when
 // separate movie parts are available.
 if (contentType === "movie" && parts.length > 0) {
