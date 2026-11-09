@@ -585,7 +585,7 @@ function createMovieCard(item) {
 
     return `
         <article class="movie-card">
-            <a class="movie-card-link` href="${getContentUrl(item)}" aria-label="Watch ${title}">
+            <a class="movie-card-link" href="${getContentUrl(item)}" aria-label="Watch ${title}">
 
             <div class="movie-poster">
 
