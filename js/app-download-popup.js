@@ -1,17 +1,23 @@
 (() => {
 "use strict";
-// The download prompt belongs only on the public homepage.
+// Show on every public website page load. Never interrupt the installed app or admin panel.
 const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
-if (currentPath !== "/" && currentPath !== "/index.html") return;
+if (currentPath.startsWith("/admin/")) return;
 if (window.__CINEVA_APP_DOWNLOAD_POPUP__) return;
 // Native CINEVA app: never show the install prompt inside an installed app.
 const capacitor = window.Capacitor;
-const isNativeApp = Boolean(capacitor && (
+const isStandaloneApp = Boolean(
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    window.matchMedia?.("(display-mode: fullscreen)").matches ||
+    navigator.standalone === true
+);
+const ua = navigator.userAgent || "";
+const isAndroidWebView = /Android/i.test(ua) && ( /;\s*wv\)/i.test(ua) || /Version\/\d+\.\d+.*Chrome\//i.test(ua) );
+const isNativeApp = Boolean(isStandaloneApp || isAndroidWebView || (capacitor && (
     (typeof capacitor.isNativePlatform === "function" && capacitor.isNativePlatform()) ||
     (typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web")
-));
-if (isNativeApp) return;
-try { if (Number(localStorage.getItem("cineva-app-popup-dismissed-until") || 0) > Date.now()) return; } catch (_) {}
+)));
+if (isNativeApp || window.CINEVA_NATIVE_APP === true) return;
 window.__CINEVA_APP_DOWNLOAD_POPUP__ = true;
 const REPO = "hawkrw/CINEVA4";
 const RELEASE_API = "https://api.github.com/repos/" + REPO + "/releases/tags/cineva-android-latest";
@@ -45,7 +51,7 @@ const status = backdrop.querySelector("#cvAppStatus");
 const actions = backdrop.querySelector("#cvAppActions");
 const help = backdrop.querySelector("#cvAppHelp");
 const meta = backdrop.querySelector("#cvAppMeta");
-function closePopup(){backdrop.classList.remove("cv-open");document.body.style.removeProperty("overflow");try{localStorage.setItem("cineva-app-popup-dismissed-until",String(Date.now()+12*60*60*1000));}catch(_){} }
+function closePopup(){backdrop.classList.remove("cv-open");document.body.style.removeProperty("overflow");}
 backdrop.querySelector(".cv-app-close").addEventListener("click",closePopup);
 backdrop.querySelector(".cv-app-secondary").addEventListener("click",closePopup);
 backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePopup();});
@@ -95,5 +101,5 @@ if(!IOS){setPrimary(DIRECT_APK_URL,"Download CINEVA APK");help.textContent="The 
 }
 }
 loadLatestBuild();
-window.setTimeout(() => { requestAnimationFrame(showPopup); }, 900);
+window.setTimeout(() => { requestAnimationFrame(showPopup); }, 650);
 })();
