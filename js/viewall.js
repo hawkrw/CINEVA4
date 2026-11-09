@@ -305,7 +305,7 @@ function createContentCard(item) {
         ? `<span>${escapeHTML(year)}</span>`
         : "";
 
-    const favoritePayload = escapeHTML(JSON.stringify({
+    const favoritePayload = escapeHTML(encodeURIComponent(JSON.stringify({
         id: item.id,
         title,
         poster,
@@ -313,7 +313,7 @@ function createContentCard(item) {
         category,
         year,
         rating
-    }));
+    )));
 
     return `
         <article class="movie-card">
