@@ -596,6 +596,8 @@ function createMovieCard(item) {
                     ${type}
                 </span>
 
+                ${item.has_new_episode ? '<span class="movie-new-episode-badge" aria-label="New episode added">NEW EP</span>' : ""}
+
                 ${translatorHTML}
 
                 <div class="movie-overlay">
