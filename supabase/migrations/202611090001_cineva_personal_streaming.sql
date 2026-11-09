@@ -46,6 +46,7 @@ create policy "Users manage own watch progress" on public.watch_progress for all
 grant select, insert, update, delete on public.watch_progress to authenticated;
 revoke all on public.watch_progress from anon;
 create index watch_progress_user_profile_recent_idx on public.watch_progress(user_id, profile_id, last_watched_at desc);
+create index watch_progress_profile_owner_idx on public.watch_progress(profile_id,user_id);
 
 create table public.series_follows (
   id uuid primary key default gen_random_uuid(),
