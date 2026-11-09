@@ -18,7 +18,7 @@ on:
       - ".github/workflows/build-android.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   android:
@@ -57,10 +57,22 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload CINEVA APK
+      - name: Upload CINEVA APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: CINEVA-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish public APK download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cineva-android-latest
+          name: CINEVA Android APK
+          body: Latest automatically generated CINEVA Android APK. Download app-debug.apk below.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          overwrite_files: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
