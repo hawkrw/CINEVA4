@@ -176,6 +176,8 @@ function writeStorage(key, data) {
         );
         if (key === STORAGE_KEYS.favorites) {
             window.dispatchEvent(new Event("cineva:favorites-updated"));
+        } else if (key === STORAGE_KEYS.watchlist) {
+            window.dispatchEvent(new Event("cineva:watchlist-updated"));
         }
 
         return true;
