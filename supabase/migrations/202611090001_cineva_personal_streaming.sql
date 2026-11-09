@@ -63,7 +63,7 @@ create index series_follows_series_id_idx on public.series_follows(series_id);
 create table public.user_notifications (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  event_type text not null check (event_type in ('new_movie','new_episode','system')),
+  event_type text not null check (event_type in ('new_movie','new_series','new_episode','system')),
   title text not null,
   message text not null,
   content_type text,
@@ -109,3 +109,18 @@ revoke all on function cineva_private.notify_users_new_movie() from public, anon
 
 create trigger cineva_notify_followers_new_episode after insert on public.episodes for each row execute function cineva_private.notify_followers_new_episode();
 create trigger cineva_notify_users_new_movie after insert on public.movies for each row execute function cineva_private.notify_users_new_movie();
+
+create or replace function cineva_private.notify_users_new_series()
+returns trigger language plpgsql security definer set search_path = '' as $
+begin
+  if new.is_active is distinct from true then return new; end if;
+  insert into public.user_notifications(user_id,event_type,title,message,content_type,content_id,href)
+  select distinct vp.user_id,'new_series','New series on CINEVA: ' || new.title,
+    'A new series has just been added to the library.','series',new.id::text,
+    '/watch.html?id=' || new.id::text || '&type=series'
+  from public.viewer_profiles vp on conflict do nothing;
+  return new;
+end; $;
+revoke all on function cineva_private.notify_users_new_series() from public, anon, authenticated;
+
+create trigger cineva_notify_users_new_series after insert on public.series for each row execute function cineva_private.notify_users_new_series();
