@@ -1714,7 +1714,8 @@ input:focus-visible {
 
 /* MOBILE MENU BUTTON */
 
-.mobile-menu-btn {
+.mobile-menu-btn,
+.menu-toggle {
     display: none;
     width: 41px;
     height: 41px;
@@ -1728,7 +1729,8 @@ input:focus-visible {
     transition: all .25s ease;
 }
 
-.mobile-menu-btn:hover,\n.menu-toggle:hover {
+.mobile-menu-btn:hover,
+.menu-toggle:hover {
     background: var(--gradient-primary);
 }
 
