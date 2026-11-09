@@ -1178,6 +1178,46 @@
 ========================================== -->
 
 <!-- Main application module -->
+<script id="cineva-boot-safety">
+    (() => {
+        "use strict";
+        const revealHomepage = (reason) => {
+            const loader = document.getElementById("pageLoader");
+            if (loader && getComputedStyle(loader).display !== "none") {
+                loader.classList.add("hidden");
+                loader.style.opacity = "0";
+                loader.style.visibility = "hidden";
+                loader.style.pointerEvents = "none";
+                loader.style.display = "none";
+                loader.setAttribute("aria-hidden", "true");
+            }
+            if (reason && !document.getElementById("cinevaBootNotice")) {
+                const notice = document.createElement("div");
+                notice.id = "cinevaBootNotice";
+                notice.setAttribute("role", "status");
+                notice.style.cssText = "position:relative;z-index:20;margin:14px auto;padding:12px 16px;max-width:900px;border:1px solid rgba(168,85,247,.35);border-radius:12px;background:#121221;color:#e8def8;font:13px/1.5 Arial,sans-serif;text-align:center";
+                notice.textContent = "CINEVA is taking longer than expected to load its content. Check your internet connection and tap to retry.";
+                notice.tabIndex = 0;
+                notice.addEventListener("click", () => window.location.reload());
+                const main = document.querySelector("main") || document.body;
+                main.prepend(notice);
+            }
+        };
+        window.setTimeout(() => revealHomepage("timeout"), 10000);
+        window.addEventListener("unhandledrejection", (event) => {
+            console.error("CINEVA startup promise failed:", event.reason);
+            revealHomepage("startup");
+        });
+        window.addEventListener("error", (event) => {
+            if (event && (event.filename || event.message)) {
+                console.error("CINEVA startup resource failed:", event.message || event.filename);
+                if (/home\\.js|supabase\\.js|config\\.js|cdn\\.jsdelivr/i.test((event.filename || "") + " " + (event.message || ""))) {
+                    revealHomepage("module");
+                }
+            }
+        });
+    })();
+    </script>
 <script type="module" src="js/home.js"></script>
 
 <!-- Search system -->
@@ -1196,7 +1236,7 @@
     }
     </script>
 
-<script src="/js/app-download-popup.js?v=20261109-3" defer></script>
+<script src="/js/app-download-popup.js?v=20261109-4" defer></script>
 </body>
 
 </html>
