@@ -44,7 +44,8 @@
       header:has(> .cineva-mobile-menu-toggle), header:has(.cineva-mobile-menu-toggle) { position:relative; }
       .info-header, .profile-header, .translator-header { gap:10px; }
     }
-    .cineva-header-favorites { position:relative; display:inline-flex !important; align-items:center; justify-content:center; }
+    .cineva-header-favorites { position:relative; display:inline-flex !important; align-items:center; justify-content:center; width:40px; min-width:40px; height:40px; border-radius:12px; color:#fff !important; text-decoration:none !important; font-size:18px; -webkit-tap-highlight-color:transparent; }
+    .cineva-header-favorites:hover { background:rgba(139,53,245,.16); }
     .cineva-favorite-count { position:absolute; top:-5px; right:-7px; min-width:17px; height:17px; padding:0 4px; display:none; align-items:center; justify-content:center; border-radius:999px; background:#ef315e; color:#fff; font-size:9px; font-weight:900; line-height:1; border:2px solid #0d0d19; }
     .cineva-favorite-count.is-visible { display:inline-flex; }
     .cineva-header-favorites[aria-current="page"] { color:#d5a7ff !important; }
