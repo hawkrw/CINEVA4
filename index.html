@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <meta name="description" content="Discover movies, TV series and animation on CINEVA. Explore recently added titles, trending entertainment and curated categories.">
 
@@ -45,12 +45,46 @@
     <link rel="stylesheet" href="css/cards.css?v=20261109-3">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/contact-widget.css?v=20261109-1">
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
->
 
     <link rel="stylesheet" href="css/cineva-theme.css">
+
+    <!-- Homepage-only layout safeguards for narrow screens -->
+    <style>
+        .main-header, .navbar { max-width: 100%; }
+        .navbar { min-width: 0; }
+        .navbar > *, .nav-actions, .logo { min-width: 0; }
+        .logo { flex-shrink: 0; }
+        .search-box {
+            flex: 1 1 220px;
+            min-width: 0;
+            max-width: 420px;
+        }
+        .search-box input { width: 100%; min-width: 0; }
+        .search-box button { flex: 0 0 auto; white-space: nowrap; }
+        .nav-actions { flex-shrink: 0; }
+        img, video, iframe { max-width: 100%; }
+        @media (max-width: 950px) {
+            .navbar { gap: 10px; }
+            .search-box { flex: 1 1 150px; max-width: none; }
+        }
+        @media (max-width: 600px) {
+            .navbar { gap: 7px; }
+            .search-box { flex: 1 1 90px; }
+            .search-box input { font-size: 11px; }
+            .search-box input::placeholder { opacity: .75; }
+            .search-box button { padding: 8px 9px; font-size: 10px; }
+            .logo-text small { white-space: nowrap; }
+            .hero-buttons { flex-wrap: wrap; }
+            .section-heading, .section-title { min-width: 0; }
+            .section-title > div { min-width: 0; }
+            .footer-container { min-width: 0; }
+        }
+        @media (max-width: 360px) {
+            .search-box input::placeholder { color: transparent; }
+            .search-box { flex-basis: 64px; }
+            .logo-text small { display: none; }
+        }
+    </style>
 
     <link rel="canonical" href="https://cineva4.djhawkrw.workers.dev/">
     <meta property="og:type" content="website">
