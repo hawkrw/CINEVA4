@@ -29,7 +29,7 @@ const HOME_CONFIG = {
     // Automatically change hero every 4 seconds
     sliderInterval: 4000,
 
-    requestTimeout: 6000,
+    requestTimeout: 12000,
 
     tmdbImageBase: "https://image.tmdb.org/t/p/",
 
