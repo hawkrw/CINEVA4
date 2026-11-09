@@ -74,11 +74,9 @@ window.addEventListener("storage", event => {
 });
 
 async function syncSavedListsToRemote() {
-  if (!user || !activeProfile || hydratingLists) return;
-  const { data: existing, error } = await supabase.from("viewer_saved_items")
-    .select("id,list_type,content_type,content_id")
-    .eq("user_id", user.id).eq("profile_id", activeProfile.id);
-  if (error) { console.warn("CINEVA saved-list sync:", error.message); return; }
+  const syncUser = user;
+  const syncProfile = activeProfile;
+  if (!syncUser || !syncProfile || hydratingLists) return;
   const desired = [];
   for (const [listType, storageKey] of [["favorites",FAV_KEY],["watchlist",LIST_KEY]]) {
     let items = [];
@@ -87,17 +85,21 @@ async function syncSavedListsToRemote() {
     for (const item of items) {
       if (!item?.id || !item?.title) continue;
       desired.push({
-        user_id:user.id, profile_id:activeProfile.id, list_type:listType,
+        user_id:syncUser.id, profile_id:syncProfile.id, list_type:listType,
         content_type:(item.content_type || item.type || "movie").toLowerCase()==="series"?"series":"movie",
         content_id:String(item.id), title:String(item.title).slice(0,300),
         poster_url:posterOf(item), category:item.category || null
       });
     }
   }
+  const { data: existing, error } = await supabase.from("viewer_saved_items")
+    .select("id,list_type,content_type,content_id")
+    .eq("user_id", syncUser.id).eq("profile_id", syncProfile.id);
+  if (error) { console.warn("CINEVA saved-list sync:", error.message); return; }
   const keys = new Set(desired.map(x=>`${x.list_type}:${x.content_type}:${x.content_id}`));
   const removed = (existing || []).filter(x=>!keys.has(`${x.list_type}:${x.content_type}:${x.content_id}`));
   for (const row of removed) {
-    await supabase.from("viewer_saved_items").delete().eq("id",row.id).eq("user_id",user.id);
+    await supabase.from("viewer_saved_items").delete().eq("id",row.id).eq("user_id",syncUser.id);
   }
   if (desired.length) {
     const {error:saveError}=await supabase.from("viewer_saved_items").upsert(desired,{onConflict:"profile_id,list_type,content_type,content_id"});
@@ -105,11 +107,14 @@ async function syncSavedListsToRemote() {
   }
 }
 async function syncSavedListsFromRemote() {
-  if (!user || !activeProfile) return;
+  const syncUser = user;
+  const syncProfile = activeProfile;
+  if (!syncUser || !syncProfile) return;
   const {data,error}=await supabase.from("viewer_saved_items").select("*")
-    .eq("user_id",user.id).eq("profile_id",activeProfile.id)
+    .eq("user_id",syncUser.id).eq("profile_id",syncProfile.id)
     .order("created_at",{ascending:false});
   if(error){console.warn("CINEVA saved-list download:",error.message);return;}
+  if(activeProfile?.id !== syncProfile.id || user?.id !== syncUser.id) return;
   if(!data?.length) {
     await syncSavedListsToRemote();
     return;
@@ -120,8 +125,8 @@ async function syncSavedListsFromRemote() {
   hydratingLists=true;
   localStorage.setItem(FAV_KEY,JSON.stringify(favorites));
   localStorage.setItem(LIST_KEY,JSON.stringify(watchlist));
-  localStorage.setItem(`${FAV_KEY}:${activeProfile.id}`,JSON.stringify(favorites));
-  localStorage.setItem(`${LIST_KEY}:${activeProfile.id}`,JSON.stringify(watchlist));
+  localStorage.setItem(`${FAV_KEY}:${syncProfile.id}`,JSON.stringify(favorites));
+  localStorage.setItem(`${LIST_KEY}:${syncProfile.id}`,JSON.stringify(watchlist));
   window.dispatchEvent(new Event("cineva:favorites-updated"));
   window.dispatchEvent(new Event("cineva:watchlist-updated"));
   hydratingLists=false;
