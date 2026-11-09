@@ -1415,3 +1415,156 @@ td {
     font-size: 10px;
     line-height: 1.5;
 }
+
+
+/* =========================================
+   CINEVA PRO — CATEGORY LIBRARY
+========================================= */
+.admin-eyebrow {
+    display: inline-block;
+    margin-bottom: 9px;
+    color: #b77aff;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+}
+.category-management-heading { margin-bottom: 22px; }
+.category-total-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 15px;
+    border: 1px solid rgba(150,60,255,.25);
+    border-radius: 999px;
+    background: rgba(150,60,255,.09);
+    color: #c8a5ff;
+    font-size: 11px;
+}
+.category-total-pill strong { color: #fff; font-size: 15px; }
+.category-total-dot, .visitor-live-label i {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #26d99a; box-shadow: 0 0 10px rgba(38,217,154,.7);
+}
+.category-overview-strip {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px; padding: 19px 21px;
+    border: 1px solid rgba(150,60,255,.2); border-radius: 13px;
+    background: linear-gradient(110deg, rgba(150,60,255,.13), rgba(237,52,122,.045));
+}
+.category-overview-icon {
+    width: 45px; height: 45px; flex: 0 0 45px;
+    display: grid; place-items: center; border-radius: 12px;
+    background: rgba(150,60,255,.18); color: #c69aff; font-size: 22px;
+}
+.category-overview-strip strong { font-size: 13px; }
+.category-overview-strip p { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.category-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 15px; margin-bottom: 18px;
+}
+.category-search-wrap {
+    width: min(100%, 430px); display: flex; align-items: center; gap: 10px;
+    min-height: 44px; padding: 0 14px; border: 1px solid #2b2940;
+    border-radius: 10px; background: #10101d; color: #a98bd5;
+}
+.category-search-wrap span { font-size: 22px; }
+.category-search-wrap input {
+    width: 100%; min-width: 0; border: 0; outline: 0;
+    background: transparent; color: #fff; font: inherit; font-size: 12px;
+}
+.category-source-note { color: #77758b; font-size: 10px; }
+.category-admin-grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px;
+}
+.category-admin-card {
+    min-width: 0; padding: 19px; border: 1px solid #29283e;
+    border-radius: 14px; background: linear-gradient(145deg, #151525, #10101b);
+    transition: border-color .2s, transform .2s, background .2s;
+}
+.category-admin-card:hover {
+    transform: translateY(-2px); border-color: rgba(150,60,255,.55);
+    background: linear-gradient(145deg, #1a172b, #11111f);
+}
+.category-card-top { display: flex; align-items: center; justify-content: space-between; }
+.category-card-icon {
+    width: 39px; height: 39px; display: grid; place-items: center;
+    border-radius: 11px; background: rgba(150,60,255,.15);
+    color: #c49aff; font-size: 18px;
+}
+.category-card-index { color: #64627b; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+.category-admin-card h3 { margin-top: 18px; color: #fff; font-size: 16px; }
+.category-admin-card > p { margin-top: 6px; color: var(--muted); font-size: 10px; }
+.category-card-counts {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px;
+}
+.category-card-counts span {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 9px; border: 1px solid #2b2a40;
+    border-radius: 7px; color: #c9c5d9; font-size: 10px;
+}
+.category-count-dot { width: 6px; height: 6px; display: inline-block; border-radius: 50%; }
+.category-count-dot.movie { background: #a66cff; }
+.category-count-dot.series { background: #f078a4; }
+.category-card-footer {
+    display: flex; justify-content: space-between; gap: 8px;
+    margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--border);
+}
+.category-card-footer span { color: #77758b; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
+.category-card-footer strong { color: #c8a5ff; font-size: 10px; }
+.category-loading, .category-empty {
+    grid-column: 1 / -1; padding: 35px 18px; text-align: center;
+    color: var(--muted); border: 1px dashed #343149; border-radius: 12px; font-size: 12px;
+}
+
+/* =========================================
+   CINEVA PRO — VISITOR ANALYTICS
+========================================= */
+.visitor-stats-grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px; margin-bottom: 20px;
+}
+.visitor-stat-card {
+    position: relative; overflow: hidden; min-width: 0;
+    padding: 21px; border: 1px solid #2b2940; border-radius: 14px;
+    background: linear-gradient(145deg, #171629, #11111e);
+}
+.visitor-stat-card::after {
+    content: ""; position: absolute; width: 110px; height: 110px;
+    right: -45px; bottom: -55px; border-radius: 50%;
+    background: rgba(150,60,255,.11); filter: blur(2px);
+}
+.visitor-stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #a6a2ba; font-size: 11px; }
+.visitor-stat-icon {
+    width: 34px; height: 34px; display: grid; place-items: center;
+    border-radius: 10px; background: rgba(150,60,255,.15); color: #c69aff; font-size: 17px;
+}
+.visitor-stat-card > strong { display: block; margin-top: 19px; color: #fff; font-size: clamp(27px, 4vw, 35px); letter-spacing: -1px; }
+.visitor-stat-card > small { display: block; margin-top: 5px; color: #85839a; font-size: 10px; }
+.visitor-trend-panel { padding: 22px; }
+.visitor-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.visitor-live-label { display: inline-flex; align-items: center; gap: 7px; color: #75dcb7; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
+.visitor-live-label i { display: inline-block; width: 6px; height: 6px; }
+.visitor-trend-list { display: grid; gap: 12px; }
+.visitor-trend-row { display: grid; grid-template-columns: 65px minmax(0,1fr) 38px; align-items: center; gap: 12px; }
+.visitor-trend-date { color: #a5a1b8; font-size: 10px; }
+.visitor-trend-track { height: 8px; overflow: hidden; border-radius: 99px; background: #242236; }
+.visitor-trend-bar { height: 100%; min-width: 0; border-radius: inherit; background: linear-gradient(90deg, #7734d6, #c04ce9); transition: width .35s ease; }
+.visitor-trend-value { color: #e7e2f2; text-align: right; font-size: 10px; font-variant-numeric: tabular-nums; }
+.visitor-updated { margin-top: 18px; color: #77758b; font-size: 9px; text-align: right; }
+.analytics-footnote { margin: 0 2px; color: #77758b; font-size: 10px; line-height: 1.6; }
+
+@media (max-width: 900px) {
+    .category-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+    .category-admin-grid, .visitor-stats-grid { grid-template-columns: 1fr; }
+    .category-toolbar { align-items: stretch; flex-direction: column; }
+    .category-search-wrap { width: 100%; }
+    .category-source-note { text-align: right; }
+    .category-overview-strip { align-items: flex-start; padding: 15px; }
+    .visitor-stat-card { padding: 18px; }
+    .visitor-trend-panel { padding: 16px; }
+    .visitor-trend-row { grid-template-columns: 52px minmax(0,1fr) 30px; gap: 8px; }
+    .analytics-heading { align-items: stretch; flex-direction: column; }
+    .analytics-heading .primary-btn { width: 100%; }
+}
