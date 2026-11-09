@@ -44,6 +44,10 @@
       header:has(> .cineva-mobile-menu-toggle), header:has(.cineva-mobile-menu-toggle) { position:relative; }
       .info-header, .profile-header, .translator-header { gap:10px; }
     }
+    .cineva-header-favorites { position:relative; display:inline-flex !important; align-items:center; justify-content:center; }
+    .cineva-favorite-count { position:absolute; top:-5px; right:-7px; min-width:17px; height:17px; padding:0 4px; display:none; align-items:center; justify-content:center; border-radius:999px; background:#ef315e; color:#fff; font-size:9px; font-weight:900; line-height:1; border:2px solid #0d0d19; }
+    .cineva-favorite-count.is-visible { display:inline-flex; }
+    .cineva-header-favorites[aria-current="page"] { color:#d5a7ff !important; }
     .mobile-bottom-nav .cineva-vip-bottom-link { color:#d5a7ff !important; }
     .mobile-bottom-nav .cineva-vip-bottom-link i { color:#c084fc; }
     @media(max-width:768px) {
@@ -65,6 +69,48 @@
     a.setAttribute("aria-label","Explore CINEVA VIP Membership");
     return a;
   };
+
+  // Keep one consistent Favorites shortcut in every site header.
+  document.querySelectorAll("header").forEach(header => {
+    const actions = header.querySelector(".nav-actions") || header;
+    let favorite = [...header.querySelectorAll('a[href*="profile.html#favorites"],a[href*="#favorites"]')][0];
+    if (!favorite) {
+      favorite = document.createElement("a");
+      favorite.href = "/profile.html#favorites";
+      favorite.innerHTML = '<i class="fa-regular fa-heart" aria-hidden="true"></i>';
+      favorite.setAttribute("aria-label","Open saved favorites");
+      actions.prepend(favorite);
+    }
+    favorite.classList.add("cineva-header-favorites");
+    favorite.href = "/profile.html#favorites";
+    favorite.setAttribute("aria-label","Open saved favorites");
+    favorite.setAttribute("title","Saved favorites");
+    let count = favorite.querySelector(".cineva-favorite-count");
+    if (!count) {
+      count = document.createElement("span");
+      count.className = "cineva-favorite-count";
+      count.setAttribute("aria-live","polite");
+      favorite.appendChild(count);
+    }
+    const updateCount = () => {
+      let items = [];
+      try { const parsed = JSON.parse(localStorage.getItem("cineva_favorites") || "[]"); items = Array.isArray(parsed) ? parsed : []; } catch (_) {}
+      count.textContent = items.length > 99 ? "99+" : String(items.length);
+      count.classList.toggle("is-visible", items.length > 0);
+    };
+    updateCount();
+    if (!favorite.dataset.cinevaCountBound) {
+      favorite.dataset.cinevaCountBound = "true";
+      window.addEventListener("storage", event => { if (event.key === "cineva_favorites") updateCount(); });
+      window.addEventListener("cineva:favorites-updated", updateCount);
+    }
+  });
+
+  // Mobile and desktop Movies/Series controls always open their dedicated catalogues.
+  document.querySelectorAll('a[href*="genre.html?type=movie"],a[href*="genre.html?type=series"]').forEach(link => {
+    const href = link.getAttribute("href") || "";
+    link.href = /type=series/i.test(href) ? "/series.html" : "/movies.html";
+  });
 
   document.querySelectorAll("header").forEach((header) => {
     const nav = header.querySelector("nav");
