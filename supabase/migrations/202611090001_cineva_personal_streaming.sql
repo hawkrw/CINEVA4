@@ -125,3 +125,25 @@ end; $;
 revoke all on function cineva_private.notify_users_new_series() from public, anon, authenticated;
 
 create trigger cineva_notify_users_new_series after insert on public.series for each row execute function cineva_private.notify_users_new_series();
+
+ 
+-- Cloud-synced favorites and watchlists, isolated per viewer profile.
+create table public.viewer_saved_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  profile_id uuid not null,
+  list_type text not null check (list_type in ('favorites','watchlist')),
+  content_type text not null check (content_type in ('movie','series')),
+  content_id text not null,
+  title text not null,
+  poster_url text,
+  category text,
+  created_at timestamptz not null default now(),
+  unique(profile_id,list_type,content_type,content_id),
+  constraint viewer_saved_items_profile_owner_fk foreign key(profile_id,user_id) references public.viewer_profiles(id,user_id) on delete cascade
+);
+alter table public.viewer_saved_items enable row level security;
+create policy "Users manage own saved items" on public.viewer_saved_items for all to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
+grant select,insert,update,delete on public.viewer_saved_items to authenticated;
+revoke all on public.viewer_saved_items from anon;
+create index viewer_saved_items_profile_list_idx on public.viewer_saved_items(profile_id,user_id,list_type,created_at desc);
