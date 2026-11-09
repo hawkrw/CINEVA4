@@ -124,12 +124,14 @@ export async function getHomepageData({
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
-        // Latest series
+        // Latest series are based only on original creation date.
+        // View counts, playback activity and episode updates must not make
+        // an existing title appear as newly added.
         supabase
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
-            .order("updated_at", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(latestCount),
 
         // Trending movies
@@ -199,10 +201,8 @@ export async function getHomepageData({
     )
         .map(item => ({
             ...item,
-            latest_activity_at:
-                item.content_type === "series"
-                    ? item.updated_at || item.created_at
-                    : item.created_at
+            // "Latest Added" always means the original publish/insert date.
+            latest_activity_at: item.created_at
         }))
         .sort((a, b) =>
             (Date.parse(b.latest_activity_at || "") || 0) -
@@ -508,9 +508,9 @@ export async function searchContent(searchTerm) {
 
 /* =========================================
    14. FETCH LATEST MOVIES AND SERIES
-   Movies: created_at
-   Series: updated_at
-   New episodes refresh their parent series.
+   Both content types use created_at only.
+   Views, clicks and episode updates never reset
+   a title's position in "Latest Added".
 ========================================= */
 
 export async function getLatestContent(
@@ -527,12 +527,12 @@ export async function getLatestContent(
             .order("created_at", { ascending: false })
             .limit(safeResultLimit),
 
-        // Latest series are based on their latest update
+        // Latest series are based on original creation date, not activity.
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
-            .order("updated_at", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(safeResultLimit)
     ]);
 
@@ -548,7 +548,7 @@ export async function getLatestContent(
     const series = (seriesResult.data || []).map(item => ({
         ...item,
         content_type: "series",
-        latest_activity_at: item.updated_at || item.created_at
+        latest_activity_at: item.created_at
     }));
 
     return [...movies, ...series]
