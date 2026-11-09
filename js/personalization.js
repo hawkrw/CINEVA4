@@ -423,6 +423,7 @@ function renderProfileManager() {
   host.querySelectorAll("[data-manage-profile]").forEach(button=>button.addEventListener("click",async()=>{
     const selected=profiles.find(p=>p.id===button.dataset.manageProfile); if(!selected)return;
     persistLocalLists(); activeProfile=selected; localStorage.setItem(PROFILE_KEY(user.id),selected.id); activateLocalLists(selected);
+    await syncSavedListsFromRemote();
     renderProfileBadge(); await refreshPersonalSections();
   }));
   host.querySelector("#cinevaInlineProfileForm")?.addEventListener("submit",async event=>{
@@ -430,7 +431,7 @@ function renderProfileManager() {
     if(!name||profiles.length>=5)return;
     const used=new Set(profiles.map(p=>p.slot)); const slot=[1,2,3,4,5].find(n=>!used.has(n));
     const {data,error}=await supabase.from("viewer_profiles").insert({user_id:user.id,slot,name,avatar_emoji:["🍿","🎬","🌟","🚀","🦁"][slot-1]}).select("*").single();
-    if(error){alert(error.message);return;} profiles.push(data); persistLocalLists(); activeProfile=data; localStorage.setItem(PROFILE_KEY(user.id),data.id); activateLocalLists(data); await refreshPersonalSections();
+    if(error){alert(error.message);return;} profiles.push(data); persistLocalLists(); activeProfile=data; localStorage.setItem(PROFILE_KEY(user.id),data.id); activateLocalLists(data); await syncSavedListsFromRemote(); await refreshPersonalSections();
   });
 }
 async function refreshPersonalSections() {
