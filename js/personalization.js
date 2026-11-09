@@ -16,7 +16,7 @@ const posterOf = item => {
   if (/^https?:\/\//i.test(value)) return value;
   return value.startsWith("/") ? `https://image.tmdb.org/t/p/w500${value}` : value;
 };
-const watchHref = item => `/watch.html?id=${encodeURIComponent(item.content_id ?? item.id)}&type=${item.content_type || "movie"}`;
+const watchHref = item => `/watch.html?id=${encodeURIComponent(item.content_id ?? item.id)}&type=${item.content_type || "movie"}${item.episode_id ? `&episode=${encodeURIComponent(item.episode_id)}` : ""}`;
 let user = null, profiles = [], activeProfile = null, currentItem = null;
 let progressTimer = null, lastSavedSecond = -1, hydratingLists = false;
 
@@ -262,7 +262,7 @@ function ensureHomeSections() {
 async function loadContinueAndRecommendations() {
   if (!user || !activeProfile) return;
   const { data: progress, error } = await supabase.from("watch_progress")
-    .select("content_type,content_id,title,poster_url,category,position_seconds,duration_seconds,last_watched_at")
+    .select("content_type,content_id,episode_id,title,poster_url,category,position_seconds,duration_seconds,last_watched_at")
     .eq("user_id", user.id).eq("profile_id", activeProfile.id)
     .order("last_watched_at", { ascending: false }).limit(12);
   if (error) { console.warn("CINEVA progress:", error.message); return; }
@@ -359,18 +359,18 @@ async function renderWatchDetails() {
   }
 }
 async function saveProgress(position, duration) {
-  if (!user || !activeProfile || !currentItem?.id) return;
+  if (!user || !activeProfile || !currentItem?.id) return;\n  if (currentItem.content_type === "series" && !currentItem.episode_id) return;
   let positionSeconds=Math.max(0,Math.floor(Number(position)||0));
   const durationValue=Number(duration);
   const durationSeconds=Number.isFinite(durationValue)?Math.max(0,Math.floor(durationValue)):0;
   if (durationSeconds>0 && positionSeconds>=durationSeconds-15) positionSeconds=durationSeconds;
   const record={
     user_id:user.id,profile_id:activeProfile.id,content_type:currentItem.content_type,
-    content_id:String(currentItem.id),title:currentItem.title || "Untitled",
+    content_id:String(currentItem.id),episode_id:currentItem.episode_id ? String(currentItem.episode_id) : null,title:currentItem.title || "Untitled",
     poster_url:posterOf(currentItem),category:currentItem.category || null,
     position_seconds:positionSeconds,duration_seconds:durationSeconds,last_watched_at:new Date().toISOString()
   };
-  const {error}=await supabase.from("watch_progress").upsert(record,{onConflict:"profile_id,content_type,content_id"});
+  const {error}=await supabase.from("watch_progress").upsert(record,{onConflict:"profile_id,content_type,content_id,progress_key"});
   if(error) console.warn("CINEVA watch progress not saved:",error.message);
 }
 async function restoreProgress(video) {
@@ -440,7 +440,19 @@ function initializeWatchPageExperience() {
   window.addEventListener("cineva:content-ready",event=>{
     currentItem={...event.detail.item,content_type:event.detail.contentType||type};
     renderWatchDetails();
-
+  });
+  window.addEventListener("cineva:episode-selected",event=>{
+    const episode=event.detail?.episode;
+    const series=event.detail?.series || currentItem;
+    if(!episode || !series?.id) return;
+    const season=episode.season_number ?? episode.season ?? 1;
+    const number=episode.episode_number ?? episode.episode ?? 1;
+    currentItem={
+      ...series,
+      content_type:"series",
+      episode_id:String(episode.id),
+      title:`${series.title || "Series"} — S${season} E${number}`
+    };
   });
   setupProgressTracking();
 }
