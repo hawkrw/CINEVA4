@@ -664,6 +664,16 @@ if (elements.footerYear) {
         new Date().getFullYear();
 }
 
+
+window.addEventListener("storage", event => {
+    if (event.key === STORAGE_KEYS.favorites) {
+        renderFavorites();
+    }
+    if (event.key === STORAGE_KEYS.watchlist) {
+        renderWatchlist();
+    }
+});
+
 /* =========================================================
    INITIALIZE CINEVA PROFILE
 ========================================================= */
