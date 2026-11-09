@@ -149,3 +149,13 @@ create policy "Users manage own saved items" on public.viewer_saved_items for al
 grant select,insert,update,delete on public.viewer_saved_items to authenticated;
 revoke all on public.viewer_saved_items from anon;
 create index viewer_saved_items_profile_list_idx on public.viewer_saved_items(profile_id,user_id,list_type,created_at desc);
+
+
+-- Limit browser roles to row-level-security-governed CRUD only.
+-- In particular, TRUNCATE bypasses RLS and must not be granted to clients.
+revoke all privileges on table public.viewer_profiles, public.watch_progress,
+  public.series_follows, public.user_notifications, public.viewer_saved_items
+  from anon, authenticated;
+grant select, insert, update, delete on table public.viewer_profiles,
+  public.watch_progress, public.series_follows, public.user_notifications,
+  public.viewer_saved_items to authenticated;
