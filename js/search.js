@@ -17,7 +17,7 @@
    - No dependency on additional CSS files
 ========================================================= */
 
-import { searchContent } from "./supabase.js?v=20261109-search-1";
+import { searchContent } from "./supabase.js?v=20261109-search-2";
 
 /* =========================================================
    CONFIGURATION
@@ -862,9 +862,9 @@ function createSearchModal() {
                     <input
                         id="cinevaSearchInput"
                         type="search"
-                        placeholder="Search movies, series..."
+                        placeholder="Search titles, translators, categories..."
                         autocomplete="off"
-                        aria-label="Search movies and series"
+                        aria-label="Search titles, translators and categories"
                         aria-controls="cinevaSearchResults"
                     >
 
@@ -893,7 +893,7 @@ function createSearchModal() {
 
                     <div class="cineva-search-status">
                         <i class="fa-solid fa-film"></i>
-                        Find your next favorite movie or series.
+                        Search by title, translator or category.
                     </div>
 
                 </div>
@@ -907,7 +907,7 @@ function createSearchModal() {
                 </span>
 
                 <span>
-                    Movies • Series • Entertainment
+                    Movies • Series • Translators • Categories
                 </span>
 
             </footer>
@@ -1106,7 +1106,7 @@ function renderResults(results, query) {
             <div class="cineva-search-status">
                 <i class="fa-solid fa-face-frown"></i>
 
-                No movies or series found for
+                No matching content found for
                 <strong>${escapeHTML(query)}</strong>.
             </div>
 
@@ -1139,6 +1139,7 @@ function renderResults(results, query) {
             );
 
             const year = escapeHTML(getSearchYear(item));
+            const translator = escapeHTML(String(item.translator || "").trim());
 
             const type =
                 item.content_type === "series" ||
@@ -1171,6 +1172,8 @@ function renderResults(results, query) {
                             <span>${type}</span>
 
                             <span>${category}</span>
+
+                            ${translator ? `<span>Translator: ${translator}</span>` : ""}
 
                             ${year ? `<span>${year}</span>` : ""}
 
