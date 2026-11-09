@@ -1728,7 +1728,7 @@ input:focus-visible {
     transition: all .25s ease;
 }
 
-.mobile-menu-btn:hover {
+.mobile-menu-btn:hover,\n.menu-toggle:hover {
     background: var(--gradient-primary);
 }
 
@@ -1761,7 +1761,7 @@ input:focus-visible {
 
 /* MOBILE NAVIGATION */
 
-@media (max-width: 900px) {
+@media (max-width: 950px) {
     :root {
         --nav-height: 68px;
     }
