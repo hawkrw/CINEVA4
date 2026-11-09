@@ -313,7 +313,7 @@ function createContentCard(item) {
         category,
         year,
         rating
-    )));
+    })));
 
     return `
         <article class="movie-card">
