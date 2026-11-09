@@ -44,6 +44,12 @@
       header:has(> .cineva-mobile-menu-toggle), header:has(.cineva-mobile-menu-toggle) { position:relative; }
       .info-header, .profile-header, .translator-header { gap:10px; }
     }
+    .mobile-bottom-nav .cineva-vip-bottom-link { color:#d5a7ff !important; }
+    .mobile-bottom-nav .cineva-vip-bottom-link i { color:#c084fc; }
+    @media(max-width:768px) {
+      .mobile-bottom-nav > a { min-width:0; padding-left:2px; padding-right:2px; }
+      .mobile-bottom-nav > a span { white-space:nowrap; }
+    }
     @media(max-width:380px) {
       .cineva-mobile-menu-toggle { min-width:38px; height:38px; }
       .cineva-vip-nav-link { padding:8px 11px !important; font-size:12px; }
@@ -114,5 +120,19 @@
       }
     });
     header.appendChild(button);
+  });
+
+  // Keep VIP reachable from the persistent mobile bottom navigation too.
+  document.querySelectorAll(".mobile-bottom-nav").forEach(nav => {
+    const exists = [...nav.querySelectorAll("a")].some(a =>
+      /(^|\\/)vip(?:\\.html)?(?:[?#]|$)/i.test(a.getAttribute("href") || "")
+    );
+    if (exists) return;
+    const link = document.createElement("a");
+    link.href = "/vip.html";
+    link.className = "cineva-vip-bottom-link";
+    link.innerHTML = '<i class="fa-solid fa-crown" aria-hidden="true"></i><span>VIP</span>';
+    link.setAttribute("aria-label", "VIP Membership");
+    nav.appendChild(link);
   });
 })();
