@@ -11,6 +11,8 @@ if (isNativeApp) return;
 window.__CINEVA_APP_DOWNLOAD_POPUP__ = true;
 const REPO = "hawkrw/CINEVA4";
 const RELEASE_API = "https://api.github.com/repos/" + REPO + "/releases/tags/cineva-android-latest";
+const RELEASE_URL = "https://github.com/" + REPO + "/releases/tag/cineva-android-latest";
+const DIRECT_APK_URL = "https://github.com/" + REPO + "/releases/download/cineva-android-latest/app-debug.apk";
 const ACTIONS_URL = "https://github.com/" + REPO + "/actions/workflows/build-android.yml";
 const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const style = document.createElement("style");
@@ -48,7 +50,7 @@ function showPopup(){backdrop.classList.add("cv-open");document.body.style.overf
 function setStatus(message){status.innerHTML='<i class="cv-app-dot"></i><span></span>';status.querySelector("span").textContent=message;}
 function setPrimary(url,label){
 actions.innerHTML="";
-const link=document.createElement("a");link.className="cv-app-primary";link.href=url;link.textContent=label;link.target="_blank";link.rel="noopener";actions.appendChild(link);
+const link=document.createElement("a");link.className="cv-app-primary";link.href=url;link.textContent=label;link.target="_self";link.rel="noopener";if(!IOS){link.setAttribute("download","CINEVA.apk");link.setAttribute("aria-label","Download the latest CINEVA Android APK");}actions.appendChild(link);
 const button=document.createElement("button");button.className="cv-app-secondary";button.type="button";button.textContent="Continue on CINEVA";button.addEventListener("click",closePopup);actions.appendChild(button);
 }
 function formatDate(value){return value?new Date(value).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Date unavailable";}
@@ -77,7 +79,7 @@ setPrimary("https://cineva4.djhawkrw.workers.dev/","Open CINEVA");
 help.textContent="On iPhone: open this site in Safari, tap Share, then choose “Add to Home Screen”. A signed iOS IPA is not currently published.";
 }else{
 setPrimary(asset.browser_download_url,"Download Android APK");
-help.textContent="This is a direct public APK download. When it finishes, open the file and follow Android's install prompt.";
+help.textContent="Direct download for Chrome, Firefox, Samsung Internet and other Android browsers. When it finishes, open CINEVA.apk and follow Android's install prompt. If your browser asks, allow it to install unknown apps.";
 }
 meta.textContent="Published "+formatDate(release.published_at||release.created_at)+" · "+Math.max(1,Math.round((asset.size||0)/1024/1024))+" MB · "+(release.tag_name||"Latest release");
 }catch(error){
@@ -85,7 +87,7 @@ console.warn("CINEVA public APK details could not be fetched:",error);
 setStatus("APK details are temporarily unavailable");
 setPrimary(ACTIONS_URL,"Open official app builds");
 help.textContent=IOS?"On iPhone, use Safari → Share → Add to Home Screen to install CINEVA.":"The download link will update automatically once the public APK release is available.";
-meta.textContent="This popup uses the public CINEVA release feed and does not require GitHub sign-in.";
+if(!IOS){setPrimary(DIRECT_APK_URL,"Download CINEVA APK");help.textContent="The latest public APK has a direct download address. If your browser does not start the download, open the official release page.";const fallback=document.createElement("a");fallback.className="cv-app-secondary";fallback.href=RELEASE_URL;fallback.textContent="Open official release page";fallback.target="_blank";fallback.rel="noopener";actions.insertBefore(fallback,actions.lastChild);}else{setPrimary("https://cineva4.djhawkrw.workers.dev/","Open CINEVA");}meta.textContent="Official CINEVA APK link · No GitHub sign-in required.";
 }
 }
 loadLatestBuild();
