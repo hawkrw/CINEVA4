@@ -449,6 +449,8 @@ function setActiveTab(tab) {
     const allowedTabs = [
         "favorites",
         "watchlist",
+        "dashboard",
+        "profiles",
         "account"
     ];
 
