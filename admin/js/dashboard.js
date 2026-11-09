@@ -316,6 +316,8 @@ async function loadMovies() {
     year,
     is_active,
     is_featured,
+    views,
+    likes,
     created_at,
     overview,
     translator,
@@ -532,6 +534,8 @@ async function loadSeries() {
     poster,
     backdrop,
     is_active,
+    views,
+    likes,
     created_at,
     updated_at
 `)
