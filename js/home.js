@@ -1280,98 +1280,87 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v2";
+const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+
+function readHomepageCache() {
+    try {
+        const cached = JSON.parse(localStorage.getItem(HOMEPAGE_CACHE_KEY) || "null");
+        return cached && cached.data && cached.savedAt
+            ? cached
+            : null;
+    } catch {
+        return null;
+    }
+}
+
+function saveHomepageCache(data) {
+    try {
+        localStorage.setItem(HOMEPAGE_CACHE_KEY, JSON.stringify({
+            savedAt: Date.now(),
+            data
+        }));
+    } catch (error) {
+        // Storage may be full or unavailable; live content still works.
+        console.warn("CINEVA: Homepage cache could not be saved.", error);
+    }
+}
+
+function renderHomepageData(homepageData) {
+    loadFeatured(homepageData.latest || []);
+    loadLatest(homepageData.latest || []);
+    loadTrending(homepageData.trending || []);
+    loadCategories(homepageData.categories || {});
+}
+
 async function initializeHome() {
-    console.log("CINEVA: Initializing optimized homepage...");
+    console.log("CINEVA: Starting fast homepage...");
 
-    // Show loading states
-    showLoading(
-        elements.latest,
-        "Loading latest movies and series..."
+    // Translator content is independent; never block the main catalogue on it.
+    loadOurTranslators().catch(error =>
+        console.warn("CINEVA: Translator section deferred.", error)
     );
 
-    showLoading(
-        elements.trending,
-        "Finding the most watched content..."
-    );
-
-    if (elements.categorySections) {
-        elements.categorySections.innerHTML = "";
+    const cached = readHomepageCache();
+    if (cached) {
+        renderHomepageData(cached.data);
+        hidePageLoader();
+        console.log("CINEVA: Homepage rendered from local cache.");
+    } else {
+        showLoading(elements.latest, "Loading latest movies and series...");
+        showLoading(elements.trending, "Finding the most watched content...");
+        if (elements.categorySections) elements.categorySections.innerHTML = "";
     }
 
     try {
-        // Fetch shared homepage data and translators concurrently.
-        const results = await Promise.allSettled([
-            withTimeout(
-                getHomepageData({
-                    latestLimit: HOME_CONFIG.heroLimit,
-                    trendingLimit: HOME_CONFIG.trendingLimit,
-                    categoryLimit: HOME_CONFIG.categoryLimit,
-                    categories: CATEGORIES
-                }),
-                "Homepage content request timed out."
-            ),
-
-            loadOurTranslators()
-        ]);
-
-        const homepageResult = results[0];
-
-        if (homepageResult.status === "fulfilled") {
-            const homepageData = homepageResult.value;
-
-            // Reuse the same latest data for hero and Latest Added.
-            loadFeatured(homepageData.latest || []);
-
-            loadLatest(homepageData.latest || []);
-
-            // Render trending content.
-            loadTrending(homepageData.trending || []);
-
-            // Render all category sections.
-            loadCategories(homepageData.categories || {});
-
-            console.log(
-                "CINEVA: Homepage content loaded successfully.",
-                {
-                    latest: homepageData.latest?.length || 0,
-                    trending: homepageData.trending?.length || 0,
-                    categories: Object.keys(
-                        homepageData.categories || {}
-                    ).length
-                }
-            );
-
-        } else {
-            throw homepageResult.reason;
-        }
-
-        console.log(
-            "CINEVA: Homepage initialized successfully."
+        // Refresh in the background and keep the previous catalogue visible
+        // until fresh data is ready. A slow connection no longer blocks cached UI.
+        const homepageData = await withTimeout(
+            getHomepageData({
+                latestLimit: HOME_CONFIG.heroLimit,
+                trendingLimit: HOME_CONFIG.trendingLimit,
+                categoryLimit: HOME_CONFIG.categoryLimit,
+                categories: CATEGORIES
+            }),
+            "Homepage content request timed out."
         );
 
+        saveHomepageCache(homepageData);
+        renderHomepageData(homepageData);
+        console.log("CINEVA: Fresh homepage data loaded.", {
+            latest: homepageData.latest?.length || 0,
+            trending: homepageData.trending?.length || 0,
+            categories: Object.keys(homepageData.categories || {}).length
+        });
     } catch (error) {
-        console.error(
-            "CINEVA homepage initialization failed:",
-            error
-        );
+        console.warn("CINEVA: Live homepage refresh failed; cached content is retained.", error);
 
-        // Keep the page usable even when Supabase is unavailable.
-        loadFeatured([]);
-
-        showEmpty(
-            elements.latest,
-            "Unable to load latest content. Please try again."
-        );
-
-        showEmpty(
-            elements.trending,
-            "Unable to load trending content. Please try again."
-        );
-
-        if (elements.categorySections) {
-            elements.categorySections.innerHTML = "";
+        if (!cached) {
+            loadFeatured([]);
+            showEmpty(elements.latest, "CINEVA is having trouble connecting. Check your internet and try again.");
+            showEmpty(elements.trending, "Trending titles will appear when your connection returns.");
+            if (elements.categorySections) elements.categorySections.innerHTML = "";
         }
-
     } finally {
         hidePageLoader();
     }
