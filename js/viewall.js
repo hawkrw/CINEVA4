@@ -307,7 +307,7 @@ function createContentCard(item) {
 
     return `
         <article class="movie-card">
-            <a class="movie-card-link` href="${escapeHTML(getWatchLink(item))}" aria-label="Watch ${escapeHTML(title)}">
+            <a class="movie-card-link" href="${escapeHTML(getWatchLink(item))}" aria-label="Watch ${escapeHTML(title)}">
             <div class="movie-poster">
 
                 <img
