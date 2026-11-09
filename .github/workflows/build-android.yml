@@ -48,6 +48,14 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Generate CINEVA launcher icon from the website logo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          mkdir -p resources
+          convert assets/images/logo.png -background '#080812' -alpha remove -alpha off -resize 1024x1024^ -gravity center -extent 1024x1024 resources/icon.png
+          npx --yes @capacitor/assets generate --android
+
       - name: Sync Capacitor
         run: npx cap sync android
 
