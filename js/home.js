@@ -583,12 +583,23 @@ function createMovieCard(item) {
         `
         : "";
 
+    const favoritePayload = escapeHTML(JSON.stringify({
+        id: item.id,
+        title: item.title || item.name || "Untitled",
+        poster: getPoster(item),
+        content_type: getContentType(item),
+        category: getCategory(item),
+        year: getYear(item),
+        rating: getRating(item)
+    }));
+
     return `
-        <a
-            class="movie-card"
-            href="${getContentUrl(item)}"
-            aria-label="Watch ${title}"
-        >
+        <article class="movie-card">
+            <button class="card-favorite" type="button" data-favorite="${favoritePayload}"
+                aria-label="Add ${title} to favorites" aria-pressed="false" title="Add to favorites">
+                <i class="fa-regular fa-heart" aria-hidden="true"></i>
+            </button>
+            <a class="movie-card-link" href="${getContentUrl(item)}" aria-label="Watch ${title}">
 
             <div class="movie-poster">
 
@@ -633,7 +644,8 @@ function createMovieCard(item) {
 
             </div>
 
-        </a>
+            </a>
+        </article>
     `;
 }
 
