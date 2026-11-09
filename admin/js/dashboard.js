@@ -1349,17 +1349,26 @@ function attachImageUploader(urlInput, bucket, label) {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/jpeg,image/png,image/webp,image/avif";
-    fileInput.hidden = true;
     fileInput.setAttribute("aria-label", `Choose ${label.toLowerCase()} image from device`);
+    fileInput.style.position = "absolute";
+    fileInput.style.width = "1px";
+    fileInput.style.height = "1px";
+    fileInput.style.padding = "0";
+    fileInput.style.margin = "-1px";
+    fileInput.style.overflow = "hidden";
+    fileInput.style.clip = "rect(0,0,0,0)";
+    fileInput.style.whiteSpace = "nowrap";
+    fileInput.style.border = "0";
 
-    const drop = document.createElement("label");
+    const drop = document.createElement("div");
     drop.className = "cineva-image-drop";
     drop.tabIndex = 0;
+    drop.setAttribute("role", "button");
+    drop.setAttribute("aria-label", `Choose ${label.toLowerCase()} image from your device or drop a file here`);
     drop.innerHTML = `
         <span class="cineva-image-pick-icon" aria-hidden="true">▧</span>
         <span><strong>Choose ${label} from this device</strong><small>Tap to browse or drag an image here · JPG, PNG, WebP or AVIF · Up to 15 MB</small></span>
     `;
-    drop.appendChild(fileInput);
 
     const preview = document.createElement("div");
     preview.className = "cineva-image-preview" + (bucket === "banners" ? " backdrop" : "");
@@ -1374,7 +1383,7 @@ function attachImageUploader(urlInput, bucket, label) {
     status.setAttribute("role", "status");
     status.setAttribute("aria-live", "polite");
 
-    picker.append(drop, preview, status);
+    picker.append(drop, fileInput, preview, status);
     field.appendChild(picker);
 
     const showPreview = (url, name = "Current image") => {
@@ -1429,13 +1438,25 @@ function attachImageUploader(urlInput, bucket, label) {
             const path = `admin/${authData.user.id}/${Date.now()}-${unique}-${safeName}.${safeExtension}`;
 
             setStatus("Uploading image to CINEVA storage...");
-            const { error: uploadError } = await supabase.storage
-                .from(bucket)
-                .upload(path, file, {
-                    cacheControl: "31536000",
-                    contentType: file.type,
-                    upsert: false
-                });
+            let uploadError = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                const result = await supabase.storage
+                    .from(bucket)
+                    .upload(path, file, {
+                        cacheControl: "31536000",
+                        contentType: file.type,
+                        upsert: true
+                    });
+                uploadError = result.error;
+                if (!uploadError) break;
+
+                const transient = !uploadError.statusCode ||
+                    ["408", "429", "500", "502", "503", "504"].includes(String(uploadError.statusCode));
+                if (!transient || attempt === 3) break;
+
+                setStatus(`Connection interrupted. Retrying upload (${attempt}/2)...`);
+                await new Promise(resolve => setTimeout(resolve, attempt * 900));
+            }
 
             if (uploadError) throw uploadError;
 
@@ -1456,6 +1477,9 @@ function attachImageUploader(urlInput, bucket, label) {
         }
     };
 
+    drop.addEventListener("click", event => {
+        if (event.target !== fileInput) fileInput.click();
+    });
     fileInput.addEventListener("change", () => uploadFile(fileInput.files?.[0]));
     drop.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
