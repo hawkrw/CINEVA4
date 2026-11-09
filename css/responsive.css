@@ -104,6 +104,8 @@
         visibility: hidden;
 
         transform: translateY(-12px);
+        pointer-events: none;
+        z-index: 2001;
 
         transition: all 0.3s ease;
 
@@ -116,6 +118,7 @@
         visibility: visible;
 
         transform: translateY(0);
+        pointer-events: auto;
 
     }
 
@@ -129,8 +132,12 @@
 
     }
 
-    .mobile-menu-btn {
-        display: flex;
+    .mobile-menu-btn,
+    .menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
     .footer-container {
@@ -624,13 +631,14 @@
    09. HIDE MOBILE ELEMENTS ON DESKTOP
 ========================================================= */
 
-@media (min-width: 769px) {
+@media (min-width: 951px) {
 
     .mobile-bottom-nav {
         display: none !important;
     }
 
-    .mobile-menu-btn {
+    .mobile-menu-btn,
+    .menu-toggle {
         display: none !important;
     }
 
