@@ -11,6 +11,7 @@ const isNativeApp = Boolean(capacitor && (
     (typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web")
 ));
 if (isNativeApp) return;
+try { if (sessionStorage.getItem("cineva-app-popup-dismissed") === "1") return; } catch (_) {}
 window.__CINEVA_APP_DOWNLOAD_POPUP__ = true;
 const REPO = "hawkrw/CINEVA4";
 const RELEASE_API = "https://api.github.com/repos/" + REPO + "/releases/tags/cineva-android-latest";
@@ -44,7 +45,7 @@ const status = backdrop.querySelector("#cvAppStatus");
 const actions = backdrop.querySelector("#cvAppActions");
 const help = backdrop.querySelector("#cvAppHelp");
 const meta = backdrop.querySelector("#cvAppMeta");
-function closePopup(){backdrop.classList.remove("cv-open");document.body.style.removeProperty("overflow");}
+function closePopup(){backdrop.classList.remove("cv-open");document.body.style.removeProperty("overflow");try{sessionStorage.setItem("cineva-app-popup-dismissed","1");}catch(_){} }
 backdrop.querySelector(".cv-app-close").addEventListener("click",closePopup);
 backdrop.querySelector(".cv-app-secondary").addEventListener("click",closePopup);
 backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePopup();});
