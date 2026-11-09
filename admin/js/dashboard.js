@@ -2474,6 +2474,15 @@ function createBulkItem(index, kind) {
         input.name = name;
         input.autocomplete = "off";
 
+        // Native form validation prevents an episode row from being
+        // submitted without its own independent playback and download URLs.
+        if (
+            kind === "episode" &&
+            ["title", "video_url", "download_url"].includes(name)
+        ) {
+            input.required = true;
+        }
+
         if (type === "url") {
             input.placeholder = "https://example.com/...";
         }
@@ -2789,25 +2798,41 @@ async function processBulkUpload(event) {
             try { return new URL(String(url || "").trim()).href; }
             catch { return ""; }
         };
-        const seenWatch = new Set(
-            episodesCache.map(item => normalizeEpisodeUrl(item.video_url)).filter(Boolean)
-        );
-        const seenDownload = new Set(
-            episodesCache.map(item => normalizeEpisodeUrl(item.download_url || item.download_link)).filter(Boolean)
-        );
+        // All episode URLs share one uniqueness set. This prevents a
+        // Watch URL from accidentally reusing another episode's Download URL.
+        const usedUrls = new Set();
+
+        episodesCache.forEach(existing => {
+            const watch = normalizeEpisodeUrl(existing.video_url);
+            const download = normalizeEpisodeUrl(
+                existing.download_url || existing.download_link
+            );
+            if (watch) usedUrls.add(watch);
+            if (download) usedUrls.add(download);
+        });
 
         for (const entry of prepared) {
             const watchUrl = normalizeEpisodeUrl(entry.payload.video_url);
             const downloadUrl = normalizeEpisodeUrl(entry.payload.download_url);
 
-            if (watchUrl === downloadUrl || seenWatch.has(watchUrl) || seenDownload.has(downloadUrl)) {
-                setBulkItemStatus(entry.item, "failed", "Watch and Download must be different, unique URLs for every episode.");
+            if (
+                !watchUrl ||
+                !downloadUrl ||
+                watchUrl === downloadUrl ||
+                usedUrls.has(watchUrl) ||
+                usedUrls.has(downloadUrl)
+            ) {
+                setBulkItemStatus(
+                    entry.item,
+                    "failed",
+                    "Each episode needs two different URLs. Neither URL may be reused by another episode."
+                );
                 entry.invalid = true;
                 continue;
             }
 
-            seenWatch.add(watchUrl);
-            seenDownload.add(downloadUrl);
+            usedUrls.add(watchUrl);
+            usedUrls.add(downloadUrl);
         }
 
         for (let i = prepared.length - 1; i >= 0; i--) {
@@ -2852,11 +2877,38 @@ async function processBulkUpload(event) {
                     }
                 }
 
-                const { error } = await supabase
+                // Request the saved row back and verify the database kept
+                // this exact episode's separate Watch and Download URLs.
+                const insertQuery = supabase
                     .from(table)
                     .insert(entry.payload);
 
+                const { data: savedRows, error } = kind === "episode"
+                    ? await insertQuery.select(
+                        "id, series_id, season_number, episode_number, video_url, download_url"
+                    )
+                    : await insertQuery;
+
                 if (error) throw error;
+
+                if (kind === "episode") {
+                    const saved = Array.isArray(savedRows)
+                        ? savedRows[0]
+                        : savedRows;
+
+                    const expectedWatch = entry.payload.video_url;
+                    const expectedDownload = entry.payload.download_url;
+
+                    if (
+                        !saved ||
+                        String(saved.video_url || "").trim() !== expectedWatch ||
+                        String(saved.download_url || "").trim() !== expectedDownload
+                    ) {
+                        throw new Error(
+                            "The database did not confirm this episode's exact Watch and Download URLs. Please check the saved episode before continuing."
+                        );
+                    }
+                }
 
                 savedCount++;
 
