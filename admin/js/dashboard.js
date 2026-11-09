@@ -1911,11 +1911,19 @@ async function saveContentForm(event) {
             return;
         }
 
+        if (watchUrl === downloadUrl) {
+            alert("The Watch URL and Download URL must be two different links.");
+            return;
+        }
+
         const duplicate = episodesCache.find(item => {
             if (contentId && String(item.id) === String(contentId)) return false;
-            const sameWatch = normalizeEpisodeUrl(item.video_url) === watchUrl;
-            const sameDownload = normalizeEpisodeUrl(item.download_url || item.download_link) === downloadUrl;
-            return sameWatch || sameDownload;
+            const existingWatch = normalizeEpisodeUrl(item.video_url);
+            const existingDownload = normalizeEpisodeUrl(item.download_url || item.download_link);
+            return (
+                (existingWatch && existingWatch === watchUrl) ||
+                (existingDownload && existingDownload === downloadUrl)
+            );
         });
 
         if (duplicate) {
@@ -2792,8 +2800,8 @@ async function processBulkUpload(event) {
             const watchUrl = normalizeEpisodeUrl(entry.payload.video_url);
             const downloadUrl = normalizeEpisodeUrl(entry.payload.download_url);
 
-            if (seenWatch.has(watchUrl) || seenDownload.has(downloadUrl)) {
-                setBulkItemStatus(entry.item, "failed", "This URL is already assigned to another episode. Use unique Watch and Download URLs.");
+            if (watchUrl === downloadUrl || seenWatch.has(watchUrl) || seenDownload.has(downloadUrl)) {
+                setBulkItemStatus(entry.item, "failed", "Watch and Download must be different, unique URLs for every episode.");
                 entry.invalid = true;
                 continue;
             }
