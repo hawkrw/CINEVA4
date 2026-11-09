@@ -284,7 +284,7 @@ async function renderWatchDetails() {
   const followButton = block.querySelector("#cinevaFollowSeries");
   if (followButton && user && (new URLSearchParams(location.search).get("type")==="series")) {
     const {data:existing}=await supabase.from("series_follows").select("id").eq("user_id",user.id).eq("series_id",item.id).maybeSingle();
-    const followed=!!existing;
+    let followed=!!existing;
     const paint=active=>{followButton.classList.toggle("is-following",active);followButton.innerHTML=active?'<i class="fa-solid fa-bell"></i> Following this series':'<i class="fa-regular fa-bell"></i> Follow for new episode alerts';};
     paint(followed);
     followButton.addEventListener("click",async()=>{
