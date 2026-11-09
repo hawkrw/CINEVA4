@@ -51,6 +51,17 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Increase Gradle wrapper download reliability
+        working-directory: android
+        run: |
+          WRAPPER="gradle/wrapper/gradle-wrapper.properties"
+          sed -i 's/-all\\.zip/-bin.zip/' "$WRAPPER"
+          if grep -q '^networkTimeout=' "$WRAPPER"; then
+            sed -i 's/^networkTimeout=.*/networkTimeout=120000/' "$WRAPPER"
+          else
+            echo 'networkTimeout=120000' >> "$WRAPPER"
+          fi
+
       - name: Build debug APK
         working-directory: android
         run: |
