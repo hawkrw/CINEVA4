@@ -43,6 +43,7 @@ const el = {
     type: document.querySelector("#watch-type"),
 
     likeButton: document.querySelector("#like-btn"),
+    favoriteButton: document.querySelector("#favorite-btn"),
     likeCount: document.querySelector("#like-count"),
     shareButton: document.querySelector("#share-btn"),
 
@@ -1825,6 +1826,69 @@ function setupLikes(item) {
 }
 
 /* =====================================================
+   FAVORITES — SAVE / REMOVE TOGGLE
+===================================================== */
+function setupFavorite(item) {
+    if (!el.favoriteButton || !item?.id) return;
+
+    const key = String(item.id) + "::" + contentType;
+    const readFavorites = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem("cineva_favorites") || "[]");
+            return Array.isArray(saved) ? saved : [];
+        } catch (_) {
+            return [];
+        }
+    };
+
+    const updateButton = () => {
+        const active = readFavorites().some(saved =>
+            String(saved.id) + "::" +
+            (String(saved.content_type || saved.type || "movie").toLowerCase() === "series" ? "series" : "movie") === key
+        );
+        el.favoriteButton.classList.toggle("liked", active);
+        el.favoriteButton.setAttribute("aria-pressed", String(active));
+        el.favoriteButton.setAttribute("aria-label", active ? "Remove from favorites" : "Add to favorites");
+        const icon = el.favoriteButton.querySelector("i");
+        if (icon) icon.className = active ? "fa-solid fa-heart" : "fa-regular fa-heart";
+        const label = el.favoriteButton.querySelector("span");
+        if (label) label.textContent = active ? "Saved" : "Save";
+    };
+
+    updateButton();
+    el.favoriteButton.addEventListener("click", () => {
+        const favorites = readFavorites();
+        const exists = favorites.some(saved =>
+            String(saved.id) + "::" +
+            (String(saved.content_type || saved.type || "movie").toLowerCase() === "series" ? "series" : "movie") === key
+        );
+
+        const updated = exists
+            ? favorites.filter(saved =>
+                String(saved.id) + "::" +
+                (String(saved.content_type || saved.type || "movie").toLowerCase() === "series" ? "series" : "movie") !== key
+            )
+            : [...favorites, {
+                id: item.id,
+                title: item.title || "Untitled",
+                poster: getPoster(item),
+                content_type: contentType,
+                category: item.category || "",
+                year: getYear(item),
+                rating: getRating(item)
+            }];
+
+        try {
+            localStorage.setItem("cineva_favorites", JSON.stringify(updated));
+            updateButton();
+        } catch (error) {
+            console.error("CINEVA favorite toggle failed:", error);
+            alert("Unable to update favorites. Check your browser storage.");
+        }
+    });
+}
+
+/* =====================================================
    SHARE CONTENT
 ===================================================== */
 
@@ -2068,6 +2132,7 @@ displayContent(item);
 
         setupMainActions(item);
         setupLikes(item);
+        setupFavorite(item);
         setupShare(item);
         setupCommentForm(item);
        
