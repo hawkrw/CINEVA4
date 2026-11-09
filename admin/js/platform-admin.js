@@ -314,7 +314,7 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser }) {
             '<div class="platform-analytics-lower">' +
                 '<section class="platform-analytics-card"><div class="platform-analytics-card-heading"><div><h3>Most viewed content</h3><p>Top movies and series by recorded views</p></div></div><div id="platformTopContent" class="platform-ranking-list"><div class="category-loading">Loading...</div></div></section>' +
                 '<section class="platform-analytics-card"><div class="platform-analytics-card-heading"><div><h3>Category distribution</h3><p>Titles assigned to each category</p></div></div><div id="platformTopCategories" class="platform-ranking-list"><div class="category-loading">Loading...</div></div></section>' +
-            '</div>';
+            '</div><p id="platformAnalyticsUpdated" class="visitor-updated">Loading platform data...</p>';
         const visitorHeading = page.querySelector(".analytics-heading");
         if (visitorHeading) visitorHeading.insertAdjacentElement("beforebegin", panel);
         else page.prepend(panel);
