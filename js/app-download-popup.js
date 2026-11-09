@@ -50,7 +50,7 @@ function showPopup(){backdrop.classList.add("cv-open");document.body.style.overf
 function setStatus(message){status.innerHTML='<i class="cv-app-dot"></i><span></span>';status.querySelector("span").textContent=message;}
 function setPrimary(url,label){
 actions.innerHTML="";
-const link=document.createElement("a");link.className="cv-app-primary";link.href=url;link.textContent=label;link.target="_self";link.rel="noopener";if(!IOS){link.setAttribute("download","CINEVA.apk");link.setAttribute("aria-label","Download the latest CINEVA Android APK");}actions.appendChild(link);
+const link=document.createElement("a");link.className="cv-app-primary";link.href=url;link.textContent=label;link.target="_self";link.rel="noopener";if(!IOS&&/\.apk(?:$|\?)/i.test(url)){link.setAttribute("download","CINEVA.apk");link.setAttribute("aria-label","Download the latest CINEVA Android APK");}actions.appendChild(link);
 const button=document.createElement("button");button.className="cv-app-secondary";button.type="button";button.textContent="Continue on CINEVA";button.addEventListener("click",closePopup);actions.appendChild(button);
 }
 function formatDate(value){return value?new Date(value).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Date unavailable";}
