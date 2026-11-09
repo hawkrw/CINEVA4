@@ -2822,11 +2822,224 @@ async function refreshContent() {
     // Statistics run after movies load so category
     // totals use the latest movie records.
     await loadDashboardStatistics();
+    renderCategoryManagement();
 }
 
 bind("refreshMoviesBtn", "click", loadMovies);
 bind("refreshSeriesBtn", "click", loadSeries);
+bind("visitorRefreshBtn", "click", loadVisitorAnalytics);
+bind("categorySearch", "input", renderCategoryManagement);
 bind("closeEpisodeManager", "click", closeEpisodeManager);
+
+/* =========================================
+   CATEGORY LIBRARY
+   Categories are derived from existing movie
+   and series category values; no data is moved.
+========================================= */
+
+function renderCategoryManagement() {
+    const grid = $("categoryGrid");
+    if (!grid) return;
+
+    const search = getValue("categorySearch").trim().toLocaleLowerCase();
+    const grouped = new Map();
+
+    const addItems = (items, type) => {
+        (items || []).forEach(item => {
+            const name = String(item.category || "").trim();
+            if (!name) return;
+
+            const key = name.toLocaleLowerCase();
+            if (!grouped.has(key)) grouped.set(key, { name, movies: 0, series: 0 });
+            const category = grouped.get(key);
+            if (type === "movie") category.movies += 1;
+            else category.series += 1;
+        });
+    };
+
+    addItems(moviesCache, "movie");
+    addItems(seriesCache, "series");
+
+    const categories = [...grouped.values()]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter(item => item.name.toLocaleLowerCase().includes(search));
+
+    setText("categoryResultsCount", grouped.size);
+
+    grid.replaceChildren();
+
+    if (!categories.length) {
+        const empty = document.createElement("div");
+        empty.className = "category-empty";
+        empty.textContent = search
+            ? "No categories match your search."
+            : "No categories found yet. Add a category when creating a movie or series.";
+        grid.appendChild(empty);
+        return;
+    }
+
+    categories.forEach((category, index) => {
+        const card = document.createElement("article");
+        card.className = "category-admin-card";
+
+        const top = document.createElement("div");
+        top.className = "category-card-top";
+
+        const icon = document.createElement("div");
+        icon.className = "category-card-icon";
+        icon.textContent = ["✦", "▣", "◈", "▶", "✧"][index % 5];
+
+        const label = document.createElement("span");
+        label.className = "category-card-index";
+        label.textContent = String(index + 1).padStart(2, "0");
+
+        top.append(icon, label);
+
+        const title = document.createElement("h3");
+        title.textContent = category.name;
+
+        const total = category.movies + category.series;
+        const description = document.createElement("p");
+        description.textContent = total === 1 ? "1 title in this category" : `${total} titles in this category`;
+
+        const counts = document.createElement("div");
+        counts.className = "category-card-counts";
+
+        const movieCount = document.createElement("span");
+        movieCount.innerHTML = '<i class="category-count-dot movie"></i>';
+        movieCount.append(document.createTextNode(`${category.movies} Movies`));
+
+        const seriesCount = document.createElement("span");
+        seriesCount.innerHTML = '<i class="category-count-dot series"></i>';
+        seriesCount.append(document.createTextNode(`${category.series} Series`));
+
+        counts.append(movieCount, seriesCount);
+
+        const footer = document.createElement("div");
+        footer.className = "category-card-footer";
+        const footerLabel = document.createElement("span");
+        footerLabel.textContent = "CONTENT GROUP";
+        const totalLabel = document.createElement("strong");
+        totalLabel.textContent = `${total} total`;
+        footer.append(footerLabel, totalLabel);
+
+        card.append(top, title, description, counts, footer);
+        grid.appendChild(card);
+    });
+}
+
+
+/* =========================================
+   VISITOR ANALYTICS
+========================================= */
+
+function localDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+async function loadVisitorAnalytics() {
+    const trend = $("visitorTrend");
+    if (trend) {
+        trend.replaceChildren();
+        const loading = document.createElement("div");
+        loading.className = "category-loading";
+        loading.textContent = "Loading visitor activity...";
+        trend.appendChild(loading);
+    }
+
+    ["visitorToday", "visitorMonth", "visitorYear"].forEach(id => setText(id, "—"));
+
+    try {
+        const now = new Date();
+        const todayKey = localDateKey(now);
+        const monthKey = todayKey.slice(0, 7);
+        const yearKey = todayKey.slice(0, 4);
+        const yearStart = `${yearKey}-01-01`;
+
+        const { data, error } = await supabase
+            .from("site_visits")
+            .select("visitor_id, visit_day")
+            .gte("visit_day", yearStart)
+            .lte("visit_day", todayKey)
+            .order("visit_day", { ascending: true });
+
+        if (error) throw error;
+
+        const visits = data || [];
+        const todayVisitors = new Set();
+        const monthVisitors = new Set();
+        const yearVisitors = new Set();
+        const dailyCounts = new Map();
+
+        visits.forEach(visit => {
+            const day = String(visit.visit_day);
+            const visitor = String(visit.visitor_id);
+            dailyCounts.set(day, (dailyCounts.get(day) || 0) + 1);
+            yearVisitors.add(visitor);
+            if (day.slice(0, 7) === monthKey) monthVisitors.add(visitor);
+            if (day === todayKey) todayVisitors.add(visitor);
+        });
+
+        setText("visitorToday", todayVisitors.size.toLocaleString());
+        setText("visitorMonth", monthVisitors.size.toLocaleString());
+        setText("visitorYear", yearVisitors.size.toLocaleString());
+
+        if (trend) {
+            trend.replaceChildren();
+            const chartDays = [];
+            for (let offset = 13; offset >= 0; offset--) {
+                const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+                const key = localDateKey(day);
+                chartDays.push({
+                    key,
+                    label: day.toLocaleDateString(undefined, { weekday: "short", day: "numeric" }),
+                    count: dailyCounts.get(key) || 0
+                });
+            }
+
+            const maximum = Math.max(1, ...chartDays.map(day => day.count));
+
+            chartDays.forEach(day => {
+                const row = document.createElement("div");
+                row.className = "visitor-trend-row";
+
+                const label = document.createElement("span");
+                label.className = "visitor-trend-date";
+                label.textContent = day.label;
+
+                const track = document.createElement("div");
+                track.className = "visitor-trend-track";
+                const bar = document.createElement("div");
+                bar.className = "visitor-trend-bar";
+                bar.style.width = `${day.count ? Math.max(2, day.count / maximum * 100) : 0}%`;
+                track.appendChild(bar);
+
+                const value = document.createElement("strong");
+                value.className = "visitor-trend-value";
+                value.textContent = day.count.toLocaleString();
+
+                row.append(label, track, value);
+                trend.appendChild(row);
+            });
+        }
+
+        setText("visitorUpdated", `Updated ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • Kigali time`);
+    } catch (error) {
+        console.error("CINEVA visitor analytics error:", error);
+        if (trend) {
+            trend.replaceChildren();
+            const message = document.createElement("div");
+            message.className = "category-empty";
+            message.textContent = "Unable to load visitor data. Check the site_visits table and admin access.";
+            trend.appendChild(message);
+        }
+        setText("visitorUpdated", "Analytics unavailable");
+    }
+}
+
 /* =========================================
    NAVIGATION
 ========================================= */
@@ -2976,6 +3189,7 @@ initializeBulkUploadButtons();
 bind("logoutButton", "click", logout);
 
 await refreshContent();
+        await loadVisitorAnalytics();
 
         if (selectedSeriesId !== null) {
             await loadEpisodes();
