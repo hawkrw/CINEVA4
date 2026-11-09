@@ -1623,3 +1623,89 @@ main .content-section .section-heading,
         letter-spacing: .2px;
     }
 }
+
+
+/* =========================================================
+   CINEVA — FAVORITES: TOUCH-FIRST CARD CONTROLS
+========================================================= */
+.movie-card-link {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+.movie-card > .card-favorite {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 50%;
+    background: rgba(8,8,18,.88);
+    color: #fff;
+    font-size: 17px;
+    line-height: 1;
+    opacity: 1;
+    transform: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+}
+.movie-card > .card-favorite:active {
+    transform: scale(.92);
+}
+.movie-card > .card-favorite.active {
+    border-color: #ed304b;
+    background: #ed304b;
+    color: #fff;
+}
+.cineva-favorite-toast {
+    position: fixed;
+    z-index: 999980;
+    left: 50%;
+    bottom: 88px;
+    max-width: calc(100vw - 32px);
+    padding: 11px 16px;
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 999px;
+    background: rgba(18,18,33,.97);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 10px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+.cineva-favorite-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+@media (hover: none), (pointer: coarse) {
+    .movie-card > .card-favorite {
+        opacity: 1 !important;
+        transform: none !important;
+        width: 42px;
+        height: 42px;
+    }
+}
+@media (max-width: 480px) {
+    .movie-card > .card-favorite {
+        top: 7px;
+        right: 7px;
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
