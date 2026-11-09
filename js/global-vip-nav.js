@@ -37,7 +37,8 @@
         border-radius:0 0 17px 17px; box-shadow:0 18px 35px rgba(0,0,0,.42);
         backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
       }
-      header nav.cineva-mobile-nav-target.cineva-mobile-nav-open,\n      header nav.cineva-mobile-nav-target.active { display:flex !important; }
+      header nav.cineva-mobile-nav-target.cineva-mobile-nav-open,
+      header nav.cineva-mobile-nav-target.active { display:flex !important; }
       header nav.cineva-mobile-nav-target > a { width:100%; min-height:42px; padding:10px 13px !important; border-radius:10px; }
       header nav.cineva-mobile-nav-target .cineva-vip-nav-link { justify-content:flex-start; border-radius:11px !important; }
       header:has(> .cineva-mobile-menu-toggle), header:has(.cineva-mobile-menu-toggle) { position:relative; }
