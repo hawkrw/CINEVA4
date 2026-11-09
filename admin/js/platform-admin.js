@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const text = (id, value) => { const node = $(id); if (node) node.textContent = value ?? ""; };
 const escapeText = (value) => String(value ?? "");
 
-export function initializePlatformAdmin({ getMovies, getSeries, adminUser }) {
+export function initializePlatformAdmin({ getMovies, getSeries, adminUser, refreshContent }) {
     let categories = [];
     let categoryModal = null;
     let settings = {};
@@ -252,7 +252,8 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser }) {
             }
 
             closeCategoryModal();
-            await refreshCategories();
+            if (refreshContent) await refreshContent();
+            else await refreshCategories();
             window.dispatchEvent(new CustomEvent("cineva:categories-updated"));
             alert(editId ? "Category updated. Matching movie and series records were renamed." : "Category created. You can now assign it to new content.");
         } catch (error) {
@@ -279,7 +280,8 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser }) {
             alert("Unable to delete category: " + error.message);
             return;
         }
-        await refreshCategories();
+        if (refreshContent) await refreshContent();
+        else await refreshCategories();
     }
 
     function initializeCategoryEvents() {
