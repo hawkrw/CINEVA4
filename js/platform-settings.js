@@ -21,7 +21,7 @@ import { supabase } from "./config.js";
         const whatsappDigits = String(settings.support_whatsapp || "").replace(/\D/g, "");
 
         if (siteName) {
-            document.title = document.title.replace(/CINEVA/gi, siteName);
+            document.title = document.title.replace(/CINEVA/gi, () => siteName);
             document.querySelectorAll(".logo-text h2").forEach(node => {
                 const accentStart = Math.max(0, siteName.length - 2);
                 node.replaceChildren(document.createTextNode(siteName.slice(0, accentStart)));
