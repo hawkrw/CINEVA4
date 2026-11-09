@@ -73,6 +73,20 @@ const HOMEPAGE_SERIES_FIELDS = [
     "tmdb_id", "original_title", "vote_count", "popularity"
 ].join(",");
 
+// Category cards need only compact display fields; avoid transferring full
+// descriptions and metadata for hundreds of rows on mobile connections.
+const CATEGORY_MOVIE_FIELDS = [
+    "id", "title", "category", "created_at", "views", "translator",
+    "year", "release_date", "rating", "vote_average", "poster",
+    "poster_path", "backdrop", "backdrop_path"
+].join(",");
+
+const CATEGORY_SERIES_FIELDS = [
+    "id", "title", "category", "created_at", "updated_at", "views",
+    "translator", "year", "release_date", "rating", "poster",
+    "poster_path", "backdrop", "backdrop_path"
+].join(",");
+
 /* =========================================
    02.1. SHARED HOMEPAGE DATA LOADER
 ========================================= */
@@ -143,19 +157,19 @@ export async function getHomepageData({
         requests.push(
             supabase
                 .from(APP_CONFIG.moviesTable)
-            .select(HOMEPAGE_MOVIE_FIELDS)
+                .select(CATEGORY_MOVIE_FIELDS)
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
-                .limit(500),
+                .limit(250),
 
             supabase
                 .from(APP_CONFIG.seriesTable)
-            .select(HOMEPAGE_SERIES_FIELDS)
+                .select(CATEGORY_SERIES_FIELDS)
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
-                .limit(500)
+                .limit(250)
         );
     }
 
