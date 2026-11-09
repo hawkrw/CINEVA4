@@ -305,23 +305,9 @@ function createContentCard(item) {
         ? `<span>${escapeHTML(year)}</span>`
         : "";
 
-    const favoritePayload = escapeHTML(encodeURIComponent(JSON.stringify({
-        id: item.id,
-        title,
-        poster,
-        content_type: type,
-        category,
-        year,
-        rating
-    })));
-
     return `
         <article class="movie-card">
-            <button class="card-favorite" type="button" data-favorite="${favoritePayload}"
-                aria-label="Add ${escapeHTML(title)} to favorites" aria-pressed="false" title="Add to favorites">
-                <i class="fa-regular fa-heart" aria-hidden="true"></i>
-            </button>
-            <a class="movie-card-link" href="${escapeHTML(getWatchLink(item))}" aria-label="Watch ${escapeHTML(title)}">
+            <a class="movie-card-link` href="${escapeHTML(getWatchLink(item))}" aria-label="Watch ${escapeHTML(title)}">
             <div class="movie-poster">
 
                 <img
