@@ -52,30 +52,25 @@ self.addEventListener("fetch", (event) => {
 
   // HTML opens immediately from cache; the newest copy is saved for next visit.
   if (request.mode === "navigate") {
+    const update = refreshCache(request);
+    event.waitUntil(update);
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(request) || await cache.match("/index.html");
-      const update = refreshCache(request);
-      if (cached) {
-        event.waitUntil(update);
-        return cached;
-      }
-      const fresh = await update;
-      return fresh || Response.error();
+      if (cached) return cached;
+      return (await update) || Response.error();
     })());
     return;
   }
 
   // Cache-first assets make repeat page loads fast. Update quietly in the background.
   if (/\.(?:css|js|mjs|png|jpe?g|webp|avif|gif|svg|ico|woff2?|webmanifest)$/i.test(url.pathname)) {
+    const update = refreshCache(request);
+    event.waitUntil(update);
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(request);
-      const update = refreshCache(request);
-      if (cached) {
-        event.waitUntil(update);
-        return cached;
-      }
+      if (cached) return cached;
       return (await update) || Response.error();
     })());
   }
