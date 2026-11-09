@@ -672,6 +672,9 @@ if (elements.footerYear) {
 }
 
 
+window.addEventListener("cineva:favorites-updated", renderFavorites);
+window.addEventListener("cineva:watchlist-updated", renderWatchlist);
+
 window.addEventListener("storage", event => {
     if (event.key === STORAGE_KEYS.favorites) {
         renderFavorites();
