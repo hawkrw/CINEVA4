@@ -10,8 +10,8 @@ async function recordDailyVisit() {
         let visitorId = localStorage.getItem(VISITOR_KEY);
 
         if (!visitorId) {
-            visitorId = crypto?.randomUUID
-                ? crypto.randomUUID()
+            visitorId = window.crypto?.randomUUID
+                ? window.crypto.randomUUID()
                 : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, character => {
                     const random = Math.random() * 16 | 0;
                     return (character === "x" ? random : (random & 3 | 8)).toString(16);
