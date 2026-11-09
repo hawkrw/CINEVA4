@@ -82,5 +82,5 @@ meta.textContent="This popup uses the public CINEVA release feed and does not re
 }
 }
 loadLatestBuild();
-window.setTimeout(showPopup,850);
+window.setTimeout(showPopup,350);
 })();
