@@ -627,6 +627,14 @@ function normalizeEmbedUrl(value) {
             return "https://hgcloud.to/e/" + encodeURIComponent(first);
         }
 
+        // Dembed share links must use its embed endpoint.
+        if (host === "dembed.cc") {
+            if (first.toLowerCase() === "embed" && second) return url.href;
+            if (first.toLowerCase() === "v" && second) {
+                return "https://dembed.cc/embed/" + encodeURIComponent(second);
+            }
+        }
+
         // Voe.sx share-page links use /e/VIDEO_ID for embedding.
         if (host === "voe.sx") {
             if (["e", "embed"].includes(first.toLowerCase())) return url.href;
@@ -682,6 +690,25 @@ function playVideo(videoUrl, autoplay = false) {
         embed.title = currentContent?.title
             ? `CINEVA player — ${currentContent.title}`
             : "CINEVA embedded video player";
+
+        // Keep third-party players inside the CINEVA player and suppress
+        // unsolicited pop-up windows where the provider supports sandboxing.
+        // Voe.sx is intentionally excluded because its player rejects sandboxing.
+        const embedHost = new URL(playbackUrl).hostname.toLowerCase();
+        embed.removeAttribute("sandbox");
+        if (
+            embedHost === "dembed.cc" ||
+            embedHost.endsWith(".dembed.cc") ||
+            embedHost === "f4scdn.com" ||
+            embedHost.endsWith(".f4scdn.com")
+        ) {
+            embed.setAttribute(
+                "sandbox",
+                "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads"
+            );
+        }
+        embed.referrerPolicy = "strict-origin-when-cross-origin";
+        embed.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
         embed.src = playbackUrl;
         return;
     }
@@ -1210,21 +1237,34 @@ function watchSelectedEpisode(episode) {
    FETCH SERIES EPISODES
 ===================================================== */
 
+function getEpisodeNumber(episode = {}) {
+    const modern = Number(episode.episode_number) || 0;
+    const legacy = Number(episode.episode) || 0;
+    return legacy > 1 && modern <= 1 ? legacy : (modern || legacy || 1);
+}
+
+function getEpisodeSeason(episode = {}) {
+    const modern = Number(episode.season_number) || 0;
+    const legacy = Number(episode.season) || 0;
+    return legacy > 1 && modern <= 1 ? legacy : (modern || legacy || 1);
+}
+
 async function fetchEpisodes(seriesId) {
     const { data, error } = await supabase
         .from("episodes")
         .select("*")
         .eq("series_id", seriesId)
-        .eq("is_active", true)
-        .order("season_number", { ascending: true })
-        .order("episode_number", { ascending: true });
+        .eq("is_active", true);
 
     if (error) {
         console.error("Episode loading error:", error);
         return [];
     }
 
-    return data || [];
+    return (data || []).sort((a, b) =>
+        getEpisodeSeason(a) - getEpisodeSeason(b) ||
+        getEpisodeNumber(a) - getEpisodeNumber(b)
+    );
 }
 
 /* =====================================================
@@ -1266,9 +1306,7 @@ function renderEpisodes(episodes) {
 
     const seasons = [
         ...new Set(
-            currentEpisodes.map(episode =>
-                Number(episode.season_number) || 1
-            )
+            currentEpisodes.map(getEpisodeSeason)
         )
     ].sort((a, b) => a - b);
 
@@ -1413,13 +1451,8 @@ function renderSeason(seasonNumber) {
     const selectedSeason = Number(seasonNumber);
 
     const episodes = currentEpisodes
-        .filter(episode =>
-            (Number(episode.season_number) || 1) === selectedSeason
-        )
-        .sort((a, b) =>
-            (Number(a.episode_number) || 0) -
-            (Number(b.episode_number) || 0)
-        );
+        .filter(episode => getEpisodeSeason(episode) === selectedSeason)
+        .sort((a, b) => getEpisodeNumber(a) - getEpisodeNumber(b));
 
     if (!episodes.length) {
         el.episodesGrid.innerHTML = `
@@ -1431,8 +1464,7 @@ function renderSeason(seasonNumber) {
     }
 
     el.episodesGrid.innerHTML = episodes.map(episode => {
-        const episodeNumber =
-            episode.episode_number ?? episode.episode ?? "—";
+        const episodeNumber = getEpisodeNumber(episode);
 
         const parts = parseParts(episode);
         const hasParts = parts.length > 0;
@@ -1490,14 +1522,15 @@ function renderSeason(seasonNumber) {
                 <div class="episode-top">
 
                     <span class="episode-number">
-                        ${escapeHTML(episodeNumber)}
+                        EP ${escapeHTML(episodeNumber)}
                     </span>
 
                     <div class="episode-information">
                         <h3>
-                            ${escapeHTML(
-                                episode.title || `Episode ${episodeNumber}`
-                            )}
+                            ${escapeHTML(`Ep${episodeNumber}`)}
+                            ${episode.title && !/^episode\s*\d+$/i.test(episode.title.trim())
+                                ? ` — ${escapeHTML(episode.title)}`
+                                : ""}
                         </h3>
 
                         <p>
