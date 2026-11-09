@@ -219,11 +219,10 @@ async function loadDashboardStatistics() {
     });
 
     // Derive unique categories from the movie records.
-    const uniqueCategories = new Set(
-        moviesCache
-            .map(movie => movie.category?.trim())
-            .filter(Boolean)
-    );
+    const uniqueCategories = new Set([
+        ...moviesCache.map(movie => movie.category?.trim()),
+        ...seriesCache.map(series => series.category?.trim())
+    ].filter(Boolean));
 
     setText("totalCategories", uniqueCategories.size);
 }
@@ -2864,7 +2863,7 @@ function renderCategoryManagement() {
         .sort((a, b) => a.name.localeCompare(b.name))
         .filter(item => item.name.toLocaleLowerCase().includes(search));
 
-    setText("categoryResultsCount", grouped.size);
+    setText("categoryResultsCount", categories.length);
 
     grid.replaceChildren();
 
@@ -2959,16 +2958,27 @@ async function loadVisitorAnalytics() {
         const yearKey = todayKey.slice(0, 4);
         const yearStart = `${yearKey}-01-01`;
 
-        const { data, error } = await supabase
-            .from("site_visits")
-            .select("visitor_id, visit_day")
-            .gte("visit_day", yearStart)
-            .lte("visit_day", todayKey)
-            .order("visit_day", { ascending: true });
+        const visits = [];
+        const pageSize = 1000;
+        let offset = 0;
 
-        if (error) throw error;
+        // Read every page so high-traffic sites are not capped
+        // by Supabase's default 1,000-row response limit.
+        while (true) {
+            const { data, error } = await supabase
+                .from("site_visits")
+                .select("visitor_id, visit_day")
+                .gte("visit_day", yearStart)
+                .lte("visit_day", todayKey)
+                .order("visit_day", { ascending: true })
+                .range(offset, offset + pageSize - 1);
 
-        const visits = data || [];
+            if (error) throw error;
+
+            visits.push(...(data || []));
+            if (!data || data.length < pageSize) break;
+            offset += pageSize;
+        }
         const todayVisitors = new Set();
         const monthVisitors = new Set();
         const yearVisitors = new Set();
