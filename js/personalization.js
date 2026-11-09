@@ -318,27 +318,34 @@ async function saveProgress(position, duration) {
   const {error}=await supabase.from("watch_progress").upsert(record,{onConflict:"profile_id,content_type,content_id"});
   if(error) console.warn("CINEVA watch progress not saved:",error.message);
 }
+async function restoreProgress(video) {
+  if (!currentItem || !user || !activeProfile || !video || video.readyState < 1) return;
+  const { data } = await supabase.from("watch_progress")
+    .select("position_seconds")
+    .eq("user_id", user.id).eq("profile_id", activeProfile.id)
+    .eq("content_type", currentItem.content_type)
+    .eq("content_id", String(currentItem.id)).maybeSingle();
+  if (data?.position_seconds > 5 && Number.isFinite(video.duration) && video.duration > data.position_seconds + 10) {
+    video.currentTime = data.position_seconds;
+  }
+  saveProgress(video.currentTime, video.duration);
+}
 function setupProgressTracking() {
-  const video=document.getElementById("video-player");
-  if(!video) return;
-  video.addEventListener("loadedmetadata",async()=>{
-    if(!currentItem || !user || !activeProfile) return;
-    const {data}=await supabase.from("watch_progress").select("position_seconds").eq("user_id",user.id).eq("profile_id",activeProfile.id).eq("content_type",currentItem.content_type).eq("content_id",String(currentItem.id)).maybeSingle();
-    if(data?.position_seconds>5 && Number.isFinite(video.duration) && video.duration>data.position_seconds+10) {
-      video.currentTime=data.position_seconds;
-    }
-    saveProgress(video.currentTime,video.duration);
-  });
-  video.addEventListener("timeupdate",()=>{
-    if(!currentItem || !user || !activeProfile) return;
-    const second=Math.floor(video.currentTime||0);
-    if(second-lastSavedSecond<10) return;
-    lastSavedSecond=second;
+  const video = document.getElementById("video-player");
+  if (!video) return;
+  video.addEventListener("loadedmetadata", () => restoreProgress(video));
+  video.addEventListener("timeupdate", () => {
+    if (!currentItem || !user || !activeProfile) return;
+    const second = Math.floor(video.currentTime || 0);
+    if (second - lastSavedSecond < 10) return;
+    lastSavedSecond = second;
     clearTimeout(progressTimer);
-    progressTimer=setTimeout(()=>saveProgress(video.currentTime,video.duration),1200);
+    progressTimer = setTimeout(() => saveProgress(video.currentTime, video.duration), 1200);
   });
-  video.addEventListener("pause",()=>saveProgress(video.currentTime,video.duration));
-  window.addEventListener("pagehide",()=>{ if(video.duration) saveProgress(video.currentTime,video.duration); });
+  video.addEventListener("pause", () => saveProgress(video.currentTime, video.duration));
+  window.addEventListener("pagehide", () => {
+    if (Number.isFinite(video.duration) && video.duration > 0) saveProgress(video.currentTime, video.duration);
+  });
 }
 async function renderProfileDashboard() {
   const host=document.getElementById("cinevaPersonalDashboard");
@@ -384,14 +391,19 @@ function initializeWatchPageExperience() {
 }
 async function initialize() {
   try {
-    const authenticated=await getProfileContext();
+    if (document.querySelector("#watch-content")) initializeWatchPageExperience();
+    const authenticated = await getProfileContext();
     if (!authenticated) return;
     renderProfileBadge();
     loadAlerts();
     ensureHomeSections();
     await refreshPersonalSections();
-    if(document.querySelector("#watch-content")) initializeWatchPageExperience();
-  } catch(error) { console.warn("CINEVA personal experience:",error); }
+    if (currentItem) {
+      document.getElementById("cinevaEnhancedDetails")?.remove();
+      renderWatchDetails();
+      await restoreProgress(document.getElementById("video-player"));
+    }
+  } catch (error) {
+    console.warn("CINEVA personal experience:", error);
+  }
 }
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",initialize,{once:true});
-else initialize();
