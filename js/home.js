@@ -596,7 +596,7 @@ function createMovieCard(item) {
                     ${type}
                 </span>
 
-                ${item.has_new_episode ? '<span class="movie-new-episode-badge" aria-label="New episode added">NEW EP</span>' : ""}
+                ${(item.content_type === "series" || item.type === "series") && item.last_activity_at && Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000 ? '<span class="movie-new-episode-badge" aria-label="New episode added">NEW EP</span>' : ""}
 
                 ${translatorHTML}
 
