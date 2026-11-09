@@ -124,9 +124,10 @@
 
   // Keep VIP reachable from the persistent mobile bottom navigation too.
   document.querySelectorAll(".mobile-bottom-nav").forEach(nav => {
-    const exists = [...nav.querySelectorAll("a")].some(a =>
-      /(^|\\/)vip(?:\\.html)?(?:[?#]|$)/i.test(a.getAttribute("href") || "")
-    );
+    const exists = [...nav.querySelectorAll("a")].some(a => {
+      const href = (a.getAttribute("href") || "").toLowerCase().split(/[?#]/)[0];
+      return href === "vip.html" || href === "/vip.html" || href.endsWith("/vip.html");
+    });
     if (exists) return;
     const link = document.createElement("a");
     link.href = "/vip.html";
