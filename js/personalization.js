@@ -401,7 +401,9 @@ async function initialize() {
     if (currentItem) {
       document.getElementById("cinevaEnhancedDetails")?.remove();
       renderWatchDetails();
-      await restoreProgress(document.getElementById("video-player"));
+      const video = document.getElementById("video-player");
+      if (video && video.readyState >= 1) await restoreProgress(video);
+      else await saveProgress(0, 0);
     }
   } catch (error) {
     console.warn("CINEVA personal experience:", error);
