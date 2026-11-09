@@ -73,14 +73,14 @@
 
   // Keep one consistent Favorites shortcut in every site header.
   document.querySelectorAll("header").forEach(header => {
-    const actions = header.querySelector(".nav-actions") || header;
+    const actions = header.querySelector(".nav-actions") || header.querySelector(".header-container") || header.querySelector(".navbar") || header;
     let favorite = [...header.querySelectorAll('a[href*="profile.html#favorites"],a[href*="#favorites"]')][0];
     if (!favorite) {
       favorite = document.createElement("a");
       favorite.href = "/profile.html#favorites";
       favorite.innerHTML = '<i class="fa-regular fa-heart" aria-hidden="true"></i>';
       favorite.setAttribute("aria-label","Open saved favorites");
-      actions.prepend(favorite);
+      actions.appendChild(favorite);
     }
     favorite.classList.add("cineva-header-favorites");
     favorite.href = "/profile.html#favorites";
