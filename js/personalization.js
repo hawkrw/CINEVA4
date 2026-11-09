@@ -11,7 +11,7 @@ const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
 }[c]));
 const posterOf = item => {
-  const value = item.poster || item.poster_path || item.image || item.thumbnail || "";
+  const value = item.poster || item.poster_path || item.poster_url || item.image || item.thumbnail || "";
   if (!value) return "/assets/images/movie-placeholder.jpg";
   if (/^https?:\/\//i.test(value)) return value;
   return value.startsWith("/") ? `https://image.tmdb.org/t/p/w500${value}` : value;
@@ -303,7 +303,7 @@ async function renderWatchDetails() {
 async function saveProgress(position, duration) {
   if (!user || !activeProfile || !currentItem?.id) return;
   const positionSeconds=Math.max(0,Math.floor(Number(position)||0));
-  const durationSeconds=Math.max(0,Math.floor(Number(duration)||0));
+  const durationValue=Number(duration);\n  const durationSeconds=Number.isFinite(durationValue)?Math.max(0,Math.floor(durationValue)):0;
   if (durationSeconds>0 && positionSeconds>=durationSeconds-15) {
     await supabase.from("watch_progress").delete().eq("user_id",user.id).eq("profile_id",activeProfile.id).eq("content_type",currentItem.content_type).eq("content_id",String(currentItem.id));
     return;
@@ -377,7 +377,7 @@ function initializeWatchPageExperience() {
   window.addEventListener("cineva:content-ready",event=>{
     currentItem={...event.detail.item,content_type:event.detail.contentType||type};
     renderWatchDetails();
-    if (currentItem && user && activeProfile) saveProgress(0,0);
+
   });
   setupProgressTracking();
 }
