@@ -462,10 +462,27 @@
      CATEGORIES
 ========================================= -->
 <section class="dashboard-page" id="categoriesPage">
-    <div class="page-placeholder">
-        <div>▦</div>
-        <h2>Categories Management</h2>
-        <p>Category management will be added in a later stage.</p>
+    <div class="management-heading category-management-heading">
+        <div>
+            <span class="admin-eyebrow">CONTENT ORGANIZATION</span>
+            <h2>Category Library</h2>
+            <p>See how your movies and series are organized across CINEVA.</p>
+        </div>
+        <div class="category-total-pill"><span class="category-total-dot"></span><strong id="categoryResultsCount">0</strong> categories</div>
+    </div>
+
+    <div class="category-overview-strip">
+        <div class="category-overview-icon">▦</div>
+        <div><strong>Your content, organized.</strong><p>Categories are collected from the category field on your existing movie and series records.</p></div>
+    </div>
+
+    <div class="category-toolbar">
+        <label class="category-search-wrap" for="categorySearch"><span>⌕</span><input id="categorySearch" type="search" placeholder="Search categories..."></label>
+        <span class="category-source-note">Live from Supabase</span>
+    </div>
+
+    <div id="categoryGrid" class="category-admin-grid">
+        <div class="category-loading">Loading your categories...</div>
     </div>
 </section>
 
@@ -474,11 +491,40 @@
      ANALYTICS
 ========================================= -->
 <section class="dashboard-page" id="analyticsPage">
-    <div class="page-placeholder">
-        <div>◷</div>
-        <h2>Analytics</h2>
-        <p>Platform analytics will be added later.</p>
+    <div class="management-heading analytics-heading">
+        <div>
+            <span class="admin-eyebrow">AUDIENCE INSIGHTS</span>
+            <h2>Visitor Analytics</h2>
+            <p>Understand how many people visit CINEVA over time.</p>
+        </div>
+        <button type="button" id="visitorRefreshBtn" class="primary-btn">↻ Refresh analytics</button>
     </div>
+
+    <div class="visitor-stats-grid">
+        <article class="visitor-stat-card visitor-stat-today">
+            <div class="visitor-stat-top"><span>Today</span><span class="visitor-stat-icon">◷</span></div>
+            <strong id="visitorToday">—</strong><small>Unique visitors today</small>
+        </article>
+        <article class="visitor-stat-card visitor-stat-month">
+            <div class="visitor-stat-top"><span>This month</span><span class="visitor-stat-icon">▦</span></div>
+            <strong id="visitorMonth">—</strong><small>Unique visitors this month</small>
+        </article>
+        <article class="visitor-stat-card visitor-stat-year">
+            <div class="visitor-stat-top"><span>This year</span><span class="visitor-stat-icon">⌁</span></div>
+            <strong id="visitorYear">—</strong><small>Unique visitors this year</small>
+        </article>
+    </div>
+
+    <section class="dashboard-panel visitor-trend-panel">
+        <div class="panel-header visitor-panel-heading">
+            <div><h3>Daily visitor activity</h3><p>Unique visitors over the last 14 days</p></div>
+            <span class="visitor-live-label"><i></i> LIVE DATA</span>
+        </div>
+        <div id="visitorTrend" class="visitor-trend-list"><div class="category-loading">Loading visitor activity...</div></div>
+        <p id="visitorUpdated" class="visitor-updated">Waiting for analytics...</p>
+    </section>
+
+    <p class="analytics-footnote">Visitors are counted once per browser per day. Counts are based on visits recorded after tracking is enabled; earlier traffic cannot be reconstructed.</p>
 </section>
 
 
