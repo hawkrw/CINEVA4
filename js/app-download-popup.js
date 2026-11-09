@@ -1,6 +1,13 @@
 (() => {
 "use strict";
 if (window.__CINEVA_APP_DOWNLOAD_POPUP__) return;
+// Native CINEVA app: never show the install prompt inside an installed app.
+const capacitor = window.Capacitor;
+const isNativeApp = Boolean(capacitor && (
+    (typeof capacitor.isNativePlatform === "function" && capacitor.isNativePlatform()) ||
+    (typeof capacitor.getPlatform === "function" && capacitor.getPlatform() !== "web")
+));
+if (isNativeApp) return;
 window.__CINEVA_APP_DOWNLOAD_POPUP__ = true;
 const REPO = "hawkrw/CINEVA4";
 const RELEASE_API = "https://api.github.com/repos/" + REPO + "/releases/tags/cineva-android-latest";
