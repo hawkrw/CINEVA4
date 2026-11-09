@@ -1,6 +1,7 @@
 
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
+import { initializePlatformAdmin } from "./platform-admin.js";
 
 /* =========================================
    CINEVA PRO — DASHBOARD SECURITY
@@ -20,6 +21,7 @@ let initialized = false;
 let moviesCache = [];
 let seriesCache = [];
 let episodesCache = [];
+let platformAdmin = null;
 
 let selectedSeriesId = null;
 let selectedSeriesName = "";
@@ -103,6 +105,23 @@ function formatDate(value) {
     return Number.isNaN(date.getTime())
         ? "—"
         : date.toLocaleDateString();
+}
+
+function attachCategorySuggestions(input, listId) {
+    if (!input) return;
+    input.setAttribute("list", listId);
+    let list = document.getElementById(listId);
+    if (!list) {
+        list = document.createElement("datalist");
+        list.id = listId;
+        document.body.appendChild(list);
+    }
+    list.replaceChildren();
+    (platformAdmin?.getCategoryNames() || []).forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        list.appendChild(option);
+    });
 }
 
 function getStatus(value) {
@@ -342,11 +361,10 @@ function populateMovieCategories() {
     const previousValue = select.value;
 
     const categories = [
-        ...new Set(
-            moviesCache
-                .map(movie => movie.category?.trim())
-                .filter(Boolean)
-        )
+        ...new Set([
+            ...moviesCache.map(movie => movie.category?.trim()),
+            ...(platformAdmin?.getCategoryNames() || [])
+        ].filter(Boolean))
     ].sort((a, b) => a.localeCompare(b));
 
     select.replaceChildren();
@@ -1368,6 +1386,10 @@ function openContentForm(type, record = null) {
         );
 
         const input = field.querySelector("input, textarea");
+
+        if (name === "category") {
+            attachCategorySuggestions(input, "cinevaCategoryOptions");
+        }
 
         if (name === "title") {
             input.required = true;
@@ -2818,8 +2840,14 @@ async function refreshContent() {
         loadRecentMovies()
     ]);
 
-    // Statistics run after movies load so category
-    // totals use the latest movie records.
+    if (platformAdmin) {
+        try {
+            await platformAdmin.refreshCategories();
+        } catch (error) {
+            console.warn("CINEVA: Category registry refresh was unavailable.", error);
+        }
+    }
+
     await loadDashboardStatistics();
     renderCategoryManagement();
 }
@@ -2837,94 +2865,7 @@ bind("closeEpisodeManager", "click", closeEpisodeManager);
 ========================================= */
 
 function renderCategoryManagement() {
-    const grid = $("categoryGrid");
-    if (!grid) return;
-
-    const search = getValue("categorySearch").trim().toLocaleLowerCase();
-    const grouped = new Map();
-
-    const addItems = (items, type) => {
-        (items || []).forEach(item => {
-            const name = String(item.category || "").trim();
-            if (!name) return;
-
-            const key = name.toLocaleLowerCase();
-            if (!grouped.has(key)) grouped.set(key, { name, movies: 0, series: 0 });
-            const category = grouped.get(key);
-            if (type === "movie") category.movies += 1;
-            else category.series += 1;
-        });
-    };
-
-    addItems(moviesCache, "movie");
-    addItems(seriesCache, "series");
-
-    const categories = [...grouped.values()]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .filter(item => item.name.toLocaleLowerCase().includes(search));
-
-    setText("categoryResultsCount", categories.length);
-
-    grid.replaceChildren();
-
-    if (!categories.length) {
-        const empty = document.createElement("div");
-        empty.className = "category-empty";
-        empty.textContent = search
-            ? "No categories match your search."
-            : "No categories found yet. Add a category when creating a movie or series.";
-        grid.appendChild(empty);
-        return;
-    }
-
-    categories.forEach((category, index) => {
-        const card = document.createElement("article");
-        card.className = "category-admin-card";
-
-        const top = document.createElement("div");
-        top.className = "category-card-top";
-
-        const icon = document.createElement("div");
-        icon.className = "category-card-icon";
-        icon.textContent = ["✦", "▣", "◈", "▶", "✧"][index % 5];
-
-        const label = document.createElement("span");
-        label.className = "category-card-index";
-        label.textContent = String(index + 1).padStart(2, "0");
-
-        top.append(icon, label);
-
-        const title = document.createElement("h3");
-        title.textContent = category.name;
-
-        const total = category.movies + category.series;
-        const description = document.createElement("p");
-        description.textContent = total === 1 ? "1 title in this category" : `${total} titles in this category`;
-
-        const counts = document.createElement("div");
-        counts.className = "category-card-counts";
-
-        const movieCount = document.createElement("span");
-        movieCount.innerHTML = '<i class="category-count-dot movie"></i>';
-        movieCount.append(document.createTextNode(`${category.movies} Movies`));
-
-        const seriesCount = document.createElement("span");
-        seriesCount.innerHTML = '<i class="category-count-dot series"></i>';
-        seriesCount.append(document.createTextNode(`${category.series} Series`));
-
-        counts.append(movieCount, seriesCount);
-
-        const footer = document.createElement("div");
-        footer.className = "category-card-footer";
-        const footerLabel = document.createElement("span");
-        footerLabel.textContent = "CONTENT GROUP";
-        const totalLabel = document.createElement("strong");
-        totalLabel.textContent = `${total} total`;
-        footer.append(footerLabel, totalLabel);
-
-        card.append(top, title, description, counts, footer);
-        grid.appendChild(card);
-    });
+    platformAdmin?.renderCategories();
 }
 
 
@@ -3226,6 +3167,13 @@ async function initializeDashboard() {
        displayAdminProfile(result.user);
 showDashboard();
 
+platformAdmin = initializePlatformAdmin({
+    getMovies: () => moviesCache,
+    getSeries: () => seriesCache,
+    adminUser: result.user
+});
+await platformAdmin.initialize();
+
 initializeNavigation();
 initializeSeriesEpisodeForms();
 initializeBulkUploadButtons();
@@ -3233,7 +3181,10 @@ initializeBulkUploadButtons();
 bind("logoutButton", "click", logout);
 
 await refreshContent();
-        await loadVisitorAnalytics();
+        await Promise.all([
+            loadVisitorAnalytics(),
+            platformAdmin.loadAnalytics()
+        ]);
 
         if (selectedSeriesId !== null) {
             await loadEpisodes();
@@ -4577,6 +4528,8 @@ function openMovieForm(movie = null) {
         form.elements.namedItem(name).value =
             movie?.[name] ?? "";
     });
+
+    attachCategorySuggestions(form.elements.namedItem("category"), "cinevaCategoryOptions");
 
     form.elements.namedItem("is_active").checked =
         movie ? movie.is_active !== false : true;
