@@ -3,8 +3,7 @@
 if (window.__CINEVA_APP_DOWNLOAD_POPUP__) return;
 window.__CINEVA_APP_DOWNLOAD_POPUP__ = true;
 const REPO = "hawkrw/CINEVA4";
-const WORKFLOW_ID = 411482308;
-const RUNS_API = "https://api.github.com/repos/" + REPO + "/actions/workflows/" + WORKFLOW_ID + "/runs?per_page=12";
+const RELEASE_API = "https://api.github.com/repos/" + REPO + "/releases/tags/cineva-android-latest";
 const ACTIONS_URL = "https://github.com/" + REPO + "/actions/workflows/build-android.yml";
 const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const style = document.createElement("style");
@@ -48,24 +47,39 @@ const button=document.createElement("button");button.className="cv-app-secondary
 function formatDate(value){return value?new Date(value).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Date unavailable";}
 async function loadLatestBuild(){
 try{
-const response=await fetch(RUNS_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
-if(!response.ok)throw new Error("GitHub build lookup returned "+response.status);
-const data=await response.json();
-const runs=Array.isArray(data.workflow_runs)?data.workflow_runs:[];
-const latestSuccess=runs.find(run=>run.conclusion==="success");
-const latestRun=runs[0];
-if(!latestSuccess){setStatus(latestRun?"Android app build is being prepared":"No completed Android build found yet");setPrimary(latestRun?.html_url||ACTIONS_URL,"View Android build status");meta.textContent="Build status is live from the official CINEVA GitHub Actions workflow.";return;}
-const artifactResponse=await fetch("https://api.github.com/repos/"+REPO+"/actions/runs/"+latestSuccess.id+"/artifacts",{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
-if(!artifactResponse.ok)throw new Error("Could not read APK artifact details");
-const artifactData=await artifactResponse.json();
-const artifact=(artifactData.artifacts||[]).find(item=>item.name==="CINEVA-Android-APK"&&!item.expired);
-if(!artifact){setStatus("Latest build completed; APK package is not available");setPrimary(latestSuccess.html_url,"View latest successful build");meta.textContent="Build #"+latestSuccess.run_number+" · "+formatDate(latestSuccess.updated_at);return;}
-const apkZipUrl="https://api.github.com/repos/"+REPO+"/actions/artifacts/"+artifact.id+"/zip";
-setStatus("Latest Android build is ready");
-if(IOS){setPrimary("https://cineva4.djhawkrw.workers.dev/","Open CINEVA");help.textContent="On iPhone: open this site in Safari, tap Share, then choose “Add to Home Screen”. A signed iOS IPA is not currently published.";}
-else{setPrimary(apkZipUrl,"Download Android APK");help.textContent="The download is a ZIP package. Extract it, then tap app-debug.apk to install. Android may ask you to allow installation from your browser.";}
-meta.textContent="Build #"+latestSuccess.run_number+" · "+formatDate(latestSuccess.updated_at)+" · Package "+Math.max(1,Math.round((artifact.size_in_bytes||0)/1024/1024))+" MB";
-}catch(error){console.warn("CINEVA app build details could not be fetched:",error);setStatus("Live build details are temporarily unavailable");setPrimary(ACTIONS_URL,"Open official app builds");help.textContent=IOS?"On iPhone, use Safari → Share → Add to Home Screen to install CINEVA.":"Open the official build page to check the newest Android APK.";meta.textContent="The website will try again the next time you open or refresh a page.";}
+const response=await fetch(RELEASE_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
+if(response.status===404){
+setStatus("The first public APK release is still being prepared");
+setPrimary(ACTIONS_URL,"View Android build progress");
+help.textContent="The APK download will appear here automatically after the next successful build.";
+meta.textContent="No public APK release has been published yet.";
+return;
+}
+if(!response.ok)throw new Error("Public release lookup returned "+response.status);
+const release=await response.json();
+const asset=(release.assets||[]).find(item=>item.name==="app-debug.apk"&&item.state==="uploaded");
+if(!asset){
+setStatus("Latest release found, but APK file is not attached");
+setPrimary(release.html_url||ACTIONS_URL,"View CINEVA release");
+meta.textContent="The build workflow will attach the APK when it completes.";
+return;
+}
+setStatus("Latest Android APK is ready");
+if(IOS){
+setPrimary("https://cineva4.djhawkrw.workers.dev/","Open CINEVA");
+help.textContent="On iPhone: open this site in Safari, tap Share, then choose “Add to Home Screen”. A signed iOS IPA is not currently published.";
+}else{
+setPrimary(asset.browser_download_url,"Download Android APK");
+help.textContent="This is a direct public APK download. When it finishes, open the file and follow Android's install prompt.";
+}
+meta.textContent="Published "+formatDate(release.published_at||release.created_at)+" · "+Math.max(1,Math.round((asset.size||0)/1024/1024))+" MB · "+(release.tag_name||"Latest release");
+}catch(error){
+console.warn("CINEVA public APK details could not be fetched:",error);
+setStatus("APK details are temporarily unavailable");
+setPrimary(ACTIONS_URL,"Open official app builds");
+help.textContent=IOS?"On iPhone, use Safari → Share → Add to Home Screen to install CINEVA.":"The download link will update automatically once the public APK release is available.";
+meta.textContent="This popup uses the public CINEVA release feed and does not require GitHub sign-in.";
+}
 }
 loadLatestBuild();
 window.setTimeout(showPopup,850);
