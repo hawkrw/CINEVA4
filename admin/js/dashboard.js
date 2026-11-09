@@ -1595,6 +1595,11 @@ function openContentForm(type, record = null) {
             input.maxLength = 250;
         }
 
+        if (!isSeries && ["video_url", "download_url"].includes(name)) {
+            input.required = true;
+            input.autocomplete = "url";
+        }
+
         if (["season", "episode", "total_seasons"].includes(name)) {
             input.min = "1";
             input.step = "1";
@@ -1890,6 +1895,33 @@ async function saveContentForm(event) {
     if (!payload.title) {
         alert("A title is required.");
         return;
+    }
+
+    if (!isSeries) {
+        const normalizeEpisodeUrl = url => {
+            try { return new URL(String(url || "").trim()).href; }
+            catch { return ""; }
+        };
+
+        const watchUrl = normalizeEpisodeUrl(payload.video_url);
+        const downloadUrl = normalizeEpisodeUrl(payload.download_url);
+
+        if (!watchUrl || !downloadUrl) {
+            alert("Every episode must have its own Watch URL and Download URL.");
+            return;
+        }
+
+        const duplicate = episodesCache.find(item => {
+            if (contentId && String(item.id) === String(contentId)) return false;
+            const sameWatch = normalizeEpisodeUrl(item.video_url) === watchUrl;
+            const sameDownload = normalizeEpisodeUrl(item.download_url || item.download_link) === downloadUrl;
+            return sameWatch || sameDownload;
+        });
+
+        if (duplicate) {
+            alert("This Watch URL or Download URL is already assigned to another episode. Each episode must have unique links.");
+            return;
+        }
     }
 
     if (isSeries) {
@@ -2627,6 +2659,10 @@ function buildBulkPayload(values, kind) {
 
     validateBulkURL(values.thumbnail, "Thumbnail URL");
 
+    if (!values.video_url || !values.download_url) {
+        throw new Error("Every episode needs its own Watch URL and Download URL.");
+    }
+
     return {
         series_id: selectedSeriesId,
 
@@ -2738,6 +2774,37 @@ async function processBulkUpload(event) {
     if (filledCount === 0) {
         alert("Enter at least one item before uploading.");
         return;
+    }
+
+    if (kind === "episode" && prepared.length) {
+        const normalizeEpisodeUrl = url => {
+            try { return new URL(String(url || "").trim()).href; }
+            catch { return ""; }
+        };
+        const seenWatch = new Set(
+            episodesCache.map(item => normalizeEpisodeUrl(item.video_url)).filter(Boolean)
+        );
+        const seenDownload = new Set(
+            episodesCache.map(item => normalizeEpisodeUrl(item.download_url || item.download_link)).filter(Boolean)
+        );
+
+        for (const entry of prepared) {
+            const watchUrl = normalizeEpisodeUrl(entry.payload.video_url);
+            const downloadUrl = normalizeEpisodeUrl(entry.payload.download_url);
+
+            if (seenWatch.has(watchUrl) || seenDownload.has(downloadUrl)) {
+                setBulkItemStatus(entry.item, "failed", "This URL is already assigned to another episode. Use unique Watch and Download URLs.");
+                entry.invalid = true;
+                continue;
+            }
+
+            seenWatch.add(watchUrl);
+            seenDownload.add(downloadUrl);
+        }
+
+        for (let i = prepared.length - 1; i >= 0; i--) {
+            if (prepared[i].invalid) prepared.splice(i, 1);
+        }
     }
 
     if (prepared.length === 0) {
