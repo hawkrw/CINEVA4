@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080812">
+    <meta name="description" content="Your private CINEVA VIP Room. Submit movie and series requests and track their progress.">
+    <title>CINEVA VIP Room | Member Requests</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/vip-room.css">
+    <link rel="stylesheet" href="css/cineva-theme.css">
+    <link rel="stylesheet" href="css/contact-widget.css?v=20261109-1">
+    <link rel="canonical" href="https://cineva4.djhawkrw.workers.dev/vip-room.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CINEVA">
+    <meta property="og:title" content="CINEVA VIP Room">
+    <meta property="og:description" content="Submit movie and series requests and follow their progress.">
+    <meta property="og:url" content="https://cineva4.djhawkrw.workers.dev/vip-room.html">
+    <meta property="og:image" content="https://cineva4.djhawkrw.workers.dev/assets/images/logo.png">
+</head>
+<body>
+    <div class="vip-room-loader" id="vipRoomLoader" aria-label="Loading VIP Room">
+        <div class="vip-room-loader-brand">CINEVA<span>+</span></div>
+        <div class="vip-room-spinner" aria-hidden="true"></div>
+        <p>Opening your VIP Room...</p>
+    </div>
+
+    <header class="vip-room-header">
+        <a href="index.html" class="vip-room-brand" aria-label="CINEVA home">CINEVA<span>+</span></a>
+        <nav class="vip-room-nav" aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="series.html">Series</a>
+            <a href="vip.html">Membership</a>
+            <a href="vip-room.html" class="active" aria-current="page">VIP Room</a>
+        </nav>
+        <a href="profile.html" class="vip-room-account" id="vipRoomAccount">My Account</a>
+        <button type="button" class="vip-room-menu-toggle" id="vipRoomMenuToggle" aria-label="Open navigation" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <nav class="vip-room-mobile-nav" id="vipRoomMobileNav" aria-label="Mobile navigation" hidden>
+        <a href="index.html">Home</a>
+        <a href="movies.html">Movies</a>
+        <a href="series.html">Series</a>
+        <a href="vip.html">Membership</a>
+        <a href="vip-room.html" aria-current="page">VIP Room</a>
+        <a href="profile.html">My Account</a>
+    </nav>
+
+    <main class="vip-room-main">
+        <section class="vip-room-hero">
+            <div class="vip-room-hero-copy">
+                <span class="vip-room-eyebrow"><span aria-hidden="true">✦</span> PRIVATE MEMBERS AREA</span>
+                <h1>WELCOME TO THE <span>VIP ROOM</span></h1>
+                <p>Your watchlist starts here. Request the movies and series you want to see on CINEVA, then follow every update in one place.</p>
+                <a href="#newRequest" class="vip-room-primary-link">Request a title <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="vip-room-hero-art" aria-hidden="true">
+                <div class="vip-room-art-ring ring-one"></div>
+                <div class="vip-room-art-ring ring-two"></div>
+                <div class="vip-room-art-card"><span>CINEVA</span><strong>✦</strong><small>VIP MEMBER</small></div>
+            </div>
+        </section>
+
+        <section class="vip-room-status-grid" aria-label="Membership overview">
+            <article class="vip-room-status-card">
+                <span class="vip-room-card-label">MEMBERSHIP STATUS</span>
+                <strong id="vipRoomMembershipStatus">Checking membership...</strong>
+                <p id="vipRoomMembershipMessage">Verifying your active VIP access.</p>
+            </article>
+            <article class="vip-room-status-card">
+                <span class="vip-room-card-label">YOUR CURRENT PLAN</span>
+                <strong id="vipRoomPlanName">—</strong>
+                <p id="vipRoomExpiry">Expiry date will appear here.</p>
+            </article>
+            <article class="vip-room-status-card">
+                <span class="vip-room-card-label">YOUR REQUESTS</span>
+                <strong id="vipRoomRequestCount">—</strong>
+                <p>Movie and series requests submitted by you.</p>
+            </article>
+        </section>
+
+        <section class="vip-room-content-grid">
+            <section class="vip-room-panel vip-room-request-panel" id="newRequest">
+                <div class="vip-room-section-heading">
+                    <div>
+                        <span class="vip-room-eyebrow">MAKE IT HAPPEN</span>
+                        <h2>Request a <span>Movie or Series</span></h2>
+                        <p>Tell us what you want added to CINEVA.</p>
+                    </div>
+                    <span class="vip-room-section-icon" aria-hidden="true">＋</span>
+                </div>
+
+                <div class="vip-room-access-notice" id="vipRoomAccessNotice" role="status" aria-live="polite">
+                    <strong>Checking VIP access</strong>
+                    <p>Please wait while we verify your membership.</p>
+                </div>
+
+                <form id="vipRequestForm" class="vip-room-request-form">
+                    <label for="vipRequestType">What would you like to request?</label>
+                    <select id="vipRequestType" name="content_type" required>
+                        <option value="movie">Movie</option>
+                        <option value="series">TV Series</option>
+                    </select>
+
+                    <label for="vipRequestTitle">Movie or series title</label>
+                    <input id="vipRequestTitle" name="title" type="text" minlength="2" maxlength="160" placeholder="Enter the exact title" autocomplete="off" required>
+
+                    <div class="vip-room-form-row">
+                        <div>
+                            <label for="vipRequestYear">Release year <span>(optional)</span></label>
+                            <input id="vipRequestYear" name="release_year" type="number" min="1900" max="2099" inputmode="numeric" placeholder="e.g. 2026">
+                        </div>
+                        <div>
+                            <label for="vipRequestLanguage">Language <span>(optional)</span></label>
+                            <input id="vipRequestLanguage" name="language" type="text" maxlength="60" placeholder="e.g. Korean">
+                        </div>
+                    </div>
+
+                    <label for="vipRequestDetails">Additional details <span>(optional)</span></label>
+                    <textarea id="vipRequestDetails" name="details" rows="4" maxlength="1000" placeholder="Season, actors, preferred translation, or any useful details..."></textarea>
+                    <div class="vip-room-form-footer">
+                        <small><span id="vipRequestCharCount">0</span>/1000 characters</small>
+                        <button type="submit" id="vipRequestSubmit" disabled>Submit VIP Request <span aria-hidden="true">→</span></button>
+                    </div>
+                    <p class="vip-room-form-message" id="vipRequestMessage" role="status" aria-live="polite"></p>
+                </form>
+            </section>
+
+            <aside class="vip-room-panel vip-room-guidelines">
+                <span class="vip-room-eyebrow">HOW IT WORKS</span>
+                <h2>Your request, <span>step by step</span></h2>
+                <ol>
+                    <li><span>01</span><div><strong>Send your request</strong><p>Submit the exact movie or series title.</p></div></li>
+                    <li><span>02</span><div><strong>We review it</strong><p>Our team checks availability and priorities.</p></div></li>
+                    <li><span>03</span><div><strong>Track progress</strong><p>Follow status updates in your request history.</p></div></li>
+                    <li><span>04</span><div><strong>Enjoy on CINEVA</strong><p>When available, find it in the library.</p></div></li>
+                </ol>
+                <div class="vip-room-guideline-note"><span aria-hidden="true">✦</span> Requests are reviewed by the CINEVA team. Submission does not guarantee availability or a specific delivery date.</div>
+            </aside>
+        </section>
+
+        <section class="vip-room-panel vip-room-history">
+            <div class="vip-room-section-heading">
+                <div>
+                    <span class="vip-room-eyebrow">YOUR ACTIVITY</span>
+                    <h2>Request <span>History</span></h2>
+                    <p>See the latest progress on your requests.</p>
+                </div>
+                <button type="button" id="vipRoomRefresh" class="vip-room-refresh">↻ Refresh</button>
+            </div>
+            <div class="vip-room-history-list" id="vipRoomRequestList" aria-live="polite">
+                <div class="vip-room-empty-state">
+                    <span aria-hidden="true">✦</span>
+                    <strong>Loading your requests...</strong>
+                    <p>Your submitted requests will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="vip-room-upgrade" id="vipRoomUpgrade" hidden>
+            <div>
+                <span class="vip-room-eyebrow">VIP ACCESS REQUIRED</span>
+                <h2>Your next favorite starts in the <span>VIP Room</span></h2>
+                <p>Choose a membership plan to submit movie and series requests.</p>
+            </div>
+            <a href="vip.html#vipPlans">Explore VIP Plans <span aria-hidden="true">→</span></a>
+        </section>
+    </main>
+
+    <footer class="vip-room-footer">
+        <a href="index.html" class="vip-room-brand">CINEVA<span>+</span></a>
+        <p>Entertainment, with your requests in mind.</p>
+        <div><a href="vip.html">VIP Membership</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a></div>
+        <small>© <span id="vipRoomYear"></span> CINEVA. All rights reserved.</small>
+    </footer>
+
+    <script type="module" src="js/vip-room.js"></script>
+    <script src="js/contact-widget.js?v=20261109-1" defer></script>
+    <script src="/js/app-download-popup.js?v=20261109-2" defer></script>
+</body>
+</html>
