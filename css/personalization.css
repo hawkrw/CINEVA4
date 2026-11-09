@@ -1,0 +1,42 @@
+/* CINEVA personal streaming experience */
+.cineva-personal-section{padding:26px 0 8px;color:#fff}
+.cineva-personal-heading{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:16px}
+.cineva-personal-heading>div>span,.cineva-personal-kicker{font-size:10px;font-weight:800;letter-spacing:2px;color:#a78bfa}
+.cineva-personal-heading h2{margin:5px 0;font-size:clamp(21px,3vw,29px);font-weight:850}
+.cineva-personal-heading p{margin:0;color:#aaa8bf;font-size:12px}
+.cineva-personal-heading>a{color:#c4b5fd;text-decoration:none;font-size:12px;white-space:nowrap}
+.cineva-personal-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(125px,1fr);grid-auto-columns:clamp(125px,16vw,190px);gap:13px;overflow-x:auto;padding:2px 2px 14px;scrollbar-width:thin}
+.cineva-personal-card{min-width:0;color:#fff;text-decoration:none;display:flex;flex-direction:column;gap:6px}
+.cineva-personal-poster{position:relative;display:block;aspect-ratio:2/3;overflow:hidden;border-radius:13px;background:#171526;border:1px solid rgba(255,255,255,.08)}
+.cineva-personal-poster img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.cineva-personal-card:hover img{transform:scale(1.05)}
+.cineva-personal-play{position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,5,15,.15);opacity:0;transition:.2s}
+.cineva-personal-card:hover .cineva-personal-play{opacity:1}
+.cineva-personal-play i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#8b35f5}
+.cineva-progress-track{position:absolute;left:8px;right:8px;bottom:8px;height:4px;border-radius:9px;background:rgba(255,255,255,.4);overflow:hidden}
+.cineva-progress-track i{height:100%;display:block;background:linear-gradient(90deg,#ef315e,#8b35f5)}
+.cineva-personal-card-title{font-size:13px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cineva-personal-card>small{font-size:10px;color:#a7a4b8}
+.cineva-profile-switcher,.cineva-release-alerts{display:flex;align-items:center;gap:6px;border:1px solid rgba(167,139,250,.3);background:rgba(139,53,245,.12);color:#fff;border-radius:22px;padding:7px 10px;cursor:pointer;min-width:0}
+.cineva-profile-switcher>span{font-size:17px}.cineva-profile-switcher small{font-size:10px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cineva-profile-switcher i{font-size:9px;color:#bba7ff}
+.cineva-release-alerts{position:relative;width:36px;height:36px;justify-content:center;font-size:15px}
+.cineva-alert-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:#ef315e;right:5px;top:4px;box-shadow:0 0 0 3px #0d0d19}
+.cineva-personal-overlay{position:fixed;inset:0;z-index:99990;background:rgba(3,3,12,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:18px}
+.cineva-personal-overlay.is-open{display:flex}
+.cineva-personal-dialog{position:relative;width:min(520px,100%);max-height:90dvh;overflow:auto;padding:28px;border-radius:22px;background:linear-gradient(145deg,#17152a,#0d0d19);border:1px solid rgba(167,139,250,.25);box-shadow:0 25px 90px rgba(0,0,0,.55);color:#fff}
+.cineva-personal-dialog h2{font-size:28px;margin:7px 0}.cineva-personal-dialog>p{color:#aaa8bf;font-size:13px}
+.cineva-personal-close{position:absolute;right:16px;top:13px;border:0;background:none;color:#fff;font-size:27px;cursor:pointer}
+.cineva-profile-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:22px 0}
+.cineva-profile-choice{border:1px solid rgba(255,255,255,.1);background:#121221;border-radius:14px;padding:14px 6px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-width:0}
+.cineva-profile-choice>span{font-size:31px}.cineva-profile-choice strong{font-size:12px;overflow-wrap:anywhere}.cineva-profile-choice small{font-size:9px;color:#bba7ff}.cineva-profile-choice.is-active{border-color:#8b35f5;background:rgba(139,53,245,.16)}
+.cineva-create-profile{display:flex;gap:8px}.cineva-create-profile input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px;background:#090914;color:#fff}.cineva-create-profile button,.cineva-profile-manager-grid button{border:0;border-radius:10px;padding:11px 14px;background:linear-gradient(110deg,#8b35f5,#ef315e);color:#fff;font-weight:750;cursor:pointer}
+.cineva-profile-limit{display:block;color:#89869d;margin-top:10px}
+.cineva-release-panel{position:fixed;z-index:99980;right:18px;top:82px;width:min(380px,calc(100vw - 24px));max-height:70dvh;overflow:auto;background:#11111f;border:1px solid rgba(167,139,250,.25);border-radius:17px;box-shadow:0 20px 65px #0009;color:#fff;display:none}
+.cineva-release-panel.is-open{display:block}.cineva-release-head{position:sticky;top:0;background:#151426;padding:15px;display:flex;justify-content:space-between;align-items:center}.cineva-release-head button{background:none;border:0;color:#fff;font-size:24px}
+.cineva-release-list>a{display:flex;flex-direction:column;gap:5px;padding:13px 15px;border-top:1px solid #ffffff10;color:#fff;text-decoration:none}.cineva-release-list>a.is-unread{background:rgba(139,53,245,.12)}.cineva-release-list>a span,.cineva-release-list>a small,.cineva-release-empty{font-size:11px;color:#aaa8bf}
+.cineva-enhanced-details{margin:18px auto 0;max-width:1440px;padding:0 20px 24px;color:#fff}.cineva-detail-chips{display:flex;flex-wrap:wrap;gap:8px}.cineva-detail-chips span{padding:7px 10px;border-radius:20px;background:#17152a;border:1px solid #ffffff12;color:#c9c4dd;font-size:11px}
+.cineva-trailer,.cineva-cast{margin-top:22px}.cineva-trailer h3,.cineva-cast h3{font-size:17px;margin:0 0 12px}.cineva-trailer>div{position:relative;aspect-ratio:16/9;max-width:760px;border-radius:14px;overflow:hidden;background:#090914}.cineva-trailer iframe{width:100%;height:100%;border:0;position:absolute;inset:0}.cineva-cast>div{display:flex;gap:9px;overflow:auto}.cineva-cast>div>span{min-width:120px;padding:12px;border-radius:12px;background:#17152a;display:flex;flex-direction:column;gap:5px}.cineva-cast small{font-size:10px;color:#aaa8bf}
+.cineva-follow-series{margin-top:18px;border:1px solid rgba(167,139,250,.35);background:rgba(139,53,245,.13);color:#d8ccff;border-radius:22px;padding:11px 15px;cursor:pointer;font-weight:700}.cineva-follow-series.is-following{background:#222039;color:#c4b5fd}
+.cineva-dashboard-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cineva-dashboard-stats article{background:#141323;border:1px solid #ffffff12;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}.cineva-dashboard-stats span{color:#aaa8bf;font-size:11px}.cineva-dashboard-stats strong{font-size:22px;overflow-wrap:anywhere}.cineva-dashboard-history{margin-top:20px}.cineva-dashboard-history>div{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #ffffff12}.cineva-dashboard-history small{color:#aaa8bf}
+.cineva-profile-manager-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.cineva-profile-manager-grid article{display:flex;flex-direction:column;align-items:center;gap:7px;padding:16px;border-radius:14px;background:#141323;border:1px solid #ffffff12}.cineva-profile-manager-grid article.is-active{border-color:#8b35f5}.cineva-profile-manager-grid article>span{font-size:30px}.cineva-profile-manager-grid article strong{color:#fff}.cineva-profile-manager-grid article small{color:#aaa8bf}
+@media(max-width:600px){.cineva-personal-section{padding:20px 4% 6px}.cineva-personal-heading{align-items:start}.cineva-personal-heading>a{font-size:10px}.cineva-personal-row{grid-auto-columns:125px}.cineva-profile-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.cineva-personal-dialog{padding:24px 18px}.cineva-dashboard-stats{grid-template-columns:1fr 1fr}.cineva-profile-switcher small{display:none}.cineva-profile-switcher{padding:6px 8px}}
