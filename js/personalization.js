@@ -18,7 +18,7 @@ const posterOf = item => {
 };
 const watchHref = item => `/watch.html?id=${encodeURIComponent(item.content_id ?? item.id)}&type=${item.content_type || "movie"}`;
 let user = null, profiles = [], activeProfile = null, currentItem = null;
-let progressTimer = null, lastSavedSecond = -1;
+let progressTimer = null, lastSavedSecond = -1, hydratingLists = false;
 
 async function getProfileContext() {
   const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -42,6 +42,7 @@ async function getProfileContext() {
 }
 
 function activateLocalLists(profile, initial = false) {
+  hydratingLists = true;
   const favKey = `${FAV_KEY}:${profile.id}`;
   const listKey = `${LIST_KEY}:${profile.id}`;
   try {
@@ -56,6 +57,7 @@ function activateLocalLists(profile, initial = false) {
     window.dispatchEvent(new Event("cineva:favorites-updated"));
     window.dispatchEvent(new Event("cineva:watchlist-updated"));
   } catch (error) { console.warn("CINEVA profile list sync:", error); }
+  hydratingLists = false;
 }
 function persistLocalLists() {
   if (!activeProfile) return;
@@ -63,6 +65,7 @@ function persistLocalLists() {
     localStorage.setItem(`${FAV_KEY}:${activeProfile.id}`, localStorage.getItem(FAV_KEY) || "[]");
     localStorage.setItem(`${LIST_KEY}:${activeProfile.id}`, localStorage.getItem(LIST_KEY) || "[]");
   } catch (error) { console.warn("CINEVA profile list save:", error); }
+  if (!hydratingLists && user) syncSavedListsToRemote();
 }
 window.addEventListener("cineva:favorites-updated", persistLocalLists);
 window.addEventListener("cineva:watchlist-updated", persistLocalLists);
@@ -70,6 +73,59 @@ window.addEventListener("storage", event => {
   if (event.key === FAV_KEY || event.key === LIST_KEY) persistLocalLists();
 });
 
+async function syncSavedListsToRemote() {
+  if (!user || !activeProfile || hydratingLists) return;
+  const { data: existing, error } = await supabase.from("viewer_saved_items")
+    .select("id,list_type,content_type,content_id")
+    .eq("user_id", user.id).eq("profile_id", activeProfile.id);
+  if (error) { console.warn("CINEVA saved-list sync:", error.message); return; }
+  const desired = [];
+  for (const [listType, storageKey] of [["favorites",FAV_KEY],["watchlist",LIST_KEY]]) {
+    let items = [];
+    try { items = JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch {}
+    if (!Array.isArray(items)) items = [];
+    for (const item of items) {
+      if (!item?.id || !item?.title) continue;
+      desired.push({
+        user_id:user.id, profile_id:activeProfile.id, list_type:listType,
+        content_type:(item.content_type || item.type || "movie").toLowerCase()==="series"?"series":"movie",
+        content_id:String(item.id), title:String(item.title).slice(0,300),
+        poster_url:posterOf(item), category:item.category || null
+      });
+    }
+  }
+  const keys = new Set(desired.map(x=>`${x.list_type}:${x.content_type}:${x.content_id}`));
+  const removed = (existing || []).filter(x=>!keys.has(`${x.list_type}:${x.content_type}:${x.content_id}`));
+  for (const row of removed) {
+    await supabase.from("viewer_saved_items").delete().eq("id",row.id).eq("user_id",user.id);
+  }
+  if (desired.length) {
+    const {error:saveError}=await supabase.from("viewer_saved_items").upsert(desired,{onConflict:"profile_id,list_type,content_type,content_id"});
+    if(saveError) console.warn("CINEVA saved-list upload:",saveError.message);
+  }
+}
+async function syncSavedListsFromRemote() {
+  if (!user || !activeProfile) return;
+  const {data,error}=await supabase.from("viewer_saved_items").select("*")
+    .eq("user_id",user.id).eq("profile_id",activeProfile.id)
+    .order("created_at",{ascending:false});
+  if(error){console.warn("CINEVA saved-list download:",error.message);return;}
+  if(!data?.length) {
+    await syncSavedListsToRemote();
+    return;
+  }
+  const mapRow=row=>({id:row.content_id,title:row.title,content_type:row.content_type,type:row.content_type,category:row.category,poster:row.poster_url});
+  const favorites=data.filter(x=>x.list_type==="favorites").map(mapRow);
+  const watchlist=data.filter(x=>x.list_type==="watchlist").map(mapRow);
+  hydratingLists=true;
+  localStorage.setItem(FAV_KEY,JSON.stringify(favorites));
+  localStorage.setItem(LIST_KEY,JSON.stringify(watchlist));
+  localStorage.setItem(`${FAV_KEY}:${activeProfile.id}`,JSON.stringify(favorites));
+  localStorage.setItem(`${LIST_KEY}:${activeProfile.id}`,JSON.stringify(watchlist));
+  window.dispatchEvent(new Event("cineva:favorites-updated"));
+  window.dispatchEvent(new Event("cineva:watchlist-updated"));
+  hydratingLists=false;
+}
 function ensureOverlay() {
   if (document.getElementById("cinevaProfileOverlay")) return;
   const overlay = document.createElement("div");
@@ -102,6 +158,7 @@ function ensureOverlay() {
     activeProfile = selected;
     localStorage.setItem(PROFILE_KEY(user.id), selected.id);
     activateLocalLists(selected);
+    await syncSavedListsFromRemote();
     closeOverlay();
     renderProfileBadge();
     await refreshPersonalSections();
@@ -149,6 +206,7 @@ async function createProfile(event) {
   activeProfile = data;
   localStorage.setItem(PROFILE_KEY(user.id), data.id);
   activateLocalLists(data);
+  await syncSavedListsFromRemote();
   input.value = "";
   renderProfileChooser();
   renderProfileBadge();
@@ -391,6 +449,7 @@ async function initialize() {
     if (document.querySelector("#watch-content")) initializeWatchPageExperience();
     const authenticated = await getProfileContext();
     if (!authenticated) return;
+    await syncSavedListsFromRemote();
     renderProfileBadge();
     loadAlerts();
     ensureHomeSections();
