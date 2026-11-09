@@ -483,24 +483,34 @@ export async function searchContent(searchTerm) {
 
     if (!term) return [];
 
-    const pattern = `%${term}%`;
+    // Strip PostgREST filter delimiters from visitor input.
+    const safeTerm = term
+        .replace(/[(),%"\\\\]/g, " ")
+        .replace(/\\s+/g, " ")
+        .trim();
+
+    if (!safeTerm) return [];
+
+    const pattern = `%${safeTerm}%`;
+    const searchFilter =
+        `title.ilike.${pattern},original_title.ilike.${pattern},translator.ilike.${pattern},category.ilike.${pattern}`;
 
     const [moviesResult, seriesResult] = await Promise.all([
         supabase
             .from(APP_CONFIG.moviesTable)
-            .select("*")
+            .select("id,title,original_title,category,created_at,translator,year,release_date,rating,vote_average,poster,poster_path,thumbnail")
             .eq("is_active", true)
-            .ilike("title", pattern)
+            .or(searchFilter)
             .order("created_at", { ascending: false })
-            .limit(20),
+            .limit(30),
 
         supabase
             .from(APP_CONFIG.seriesTable)
-            .select("*")
+            .select("id,title,original_title,category,created_at,last_activity_at,translator,year,release_date,rating,poster,poster_path,image")
             .eq("is_active", true)
-            .ilike("title", pattern)
+            .or(searchFilter)
             .order("created_at", { ascending: false })
-            .limit(20)
+            .limit(30)
     ]);
 
     handleError("Movie search error", moviesResult.error);
