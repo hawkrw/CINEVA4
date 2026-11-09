@@ -1,8 +1,9 @@
-/* CINEVA — FAST, OFFLINE-TOLERANT APP CACHE
-   Cache-first for the app shell and same-origin assets.
-   Network refreshes happen in the background so repeat visits feel instant.
+/* CINEVA — RELIABLE OFFLINE CACHE
+   - Keep visited pages available offline.
+   - Never replace an unrelated page with the homepage.
+   - Refresh cached pages quietly while serving the exact requested page.
 */
-const CACHE_NAME = "cineva-shell-v5";
+const CACHE_NAME = "cineva-shell-v6";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -13,9 +14,17 @@ const APP_SHELL = [
 async function refreshCache(request) {
   try {
     const response = await fetch(request);
-    if (response && (response.ok || response.type === "opaque")) {
+    if (response && response.ok && response.type !== "opaque") {
       const cache = await caches.open(CACHE_NAME);
       await cache.put(request, response.clone());
+
+      // Static HTML is identical across query-string filters, so also keep
+      // a path-only copy for offline visits to pages with different queries.
+      if (request.mode === "navigate") {
+        const url = new URL(request.url);
+        const pathRequest = new Request(url.origin + url.pathname);
+        await cache.put(pathRequest, response.clone());
+      }
     }
     return response;
   } catch (error) {
@@ -26,8 +35,7 @@ async function refreshCache(request) {
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // Do not let one missing optional image prevent the service worker installing.
-    await Promise.allSettled(APP_SHELL.map(url => cache.add(url)));
+    await Promise.allSettled(APP_SHELL.map((url) => cache.add(url)));
     await self.skipWaiting();
   })());
 });
@@ -35,9 +43,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys
-      .filter(key => key.startsWith("cineva-shell-") && key !== CACHE_NAME)
-      .map(key => caches.delete(key)));
+    await Promise.all(
+      keys
+        .filter((key) => key.startsWith("cineva-shell-") && key !== CACHE_NAME)
+        .map((key) => caches.delete(key))
+    );
     await self.clients.claim();
   })());
 });
@@ -50,23 +60,41 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/rest/") || url.pathname.startsWith("/auth/")) return;
   if (request.headers.has("range")) return;
 
-  // HTML opens immediately from cache; the newest copy is saved for next visit.
   if (request.mode === "navigate") {
     const update = refreshCache(request);
     event.waitUntil(update);
+
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(request) || await cache.match("/index.html");
+      const exact = await cache.match(request);
+      const pathOnly = await cache.match(
+        new Request(url.origin + url.pathname)
+      );
+      const cached = exact || pathOnly;
+
       if (cached) return cached;
-      return (await update) || Response.error();
+
+      const fresh = await update;
+      if (fresh) return fresh;
+
+      // Only the actual homepage may fall back to the homepage cache.
+      if (url.pathname === "/" || url.pathname === "/index.html") {
+        const home = await cache.match("/index.html") || await cache.match("/");
+        if (home) return home;
+      }
+
+      return new Response(
+        "<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CINEVA — Offline</title><body style='margin:0;background:#080812;color:#fff;font:16px Arial,sans-serif;display:grid;min-height:100vh;place-items:center;text-align:center'><main style='padding:28px'><h1 style='color:#a855f7'>CINEVA</h1><p>This page is not available offline yet.</p><a style='color:#c69cff' href='/'>Return to Home</a></main></body></html>",
+        { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }
+      );
     })());
     return;
   }
 
-  // Cache-first assets make repeat page loads fast. Update quietly in the background.
   if (/\.(?:css|js|mjs|png|jpe?g|webp|avif|gif|svg|ico|woff2?|webmanifest)$/i.test(url.pathname)) {
     const update = refreshCache(request);
     event.waitUntil(update);
+
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(request);
