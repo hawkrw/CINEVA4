@@ -2135,6 +2135,7 @@ incrementContentView(item);
 displayContent(item);
 
         showContent();
+        window.dispatchEvent(new CustomEvent("cineva:content-ready", { detail: { item, contentType } }));
 
         setupMainActions(item);
         setupLikes(item);
