@@ -23,7 +23,14 @@ import { supabase } from "./config.js";
         if (siteName) {
             document.title = document.title.replace(/CINEVA/gi, siteName);
             document.querySelectorAll(".logo-text h2").forEach(node => {
-                node.textContent = siteName;
+                const accentStart = Math.max(0, siteName.length - 2);
+                node.replaceChildren(document.createTextNode(siteName.slice(0, accentStart)));
+                const accent = document.createElement("span");
+                accent.textContent = siteName.slice(accentStart);
+                node.appendChild(accent);
+            });
+            document.querySelectorAll(".logo-text small").forEach(node => {
+                if (tagline) node.textContent = tagline;
             });
             document.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(node => {
                 node.setAttribute("content", siteName);
