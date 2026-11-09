@@ -2850,12 +2850,19 @@ async function refreshContent() {
 
     await loadDashboardStatistics();
     renderCategoryManagement();
+    if (platformAdmin) await platformAdmin.loadAnalytics();
 }
 
 bind("refreshMoviesBtn", "click", loadMovies);
 bind("refreshSeriesBtn", "click", loadSeries);
-bind("visitorRefreshBtn", "click", loadVisitorAnalytics);
+bind("visitorRefreshBtn", "click", async () => {
+    await Promise.all([
+        loadVisitorAnalytics(),
+        platformAdmin?.loadAnalytics()
+    ]);
+});
 bind("categorySearch", "input", renderCategoryManagement);
+window.addEventListener("cineva:categories-updated", populateMovieCategories);
 bind("closeEpisodeManager", "click", closeEpisodeManager);
 
 /* =========================================
@@ -3181,10 +3188,7 @@ initializeBulkUploadButtons();
 bind("logoutButton", "click", logout);
 
 await refreshContent();
-        await Promise.all([
-            loadVisitorAnalytics(),
-            platformAdmin.loadAnalytics()
-        ]);
+        await loadVisitorAnalytics();
 
         if (selectedSeriesId !== null) {
             await loadEpisodes();
