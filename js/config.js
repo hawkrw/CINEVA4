@@ -54,39 +54,4 @@ export const APP_CONFIG = {
 };
 
 
-// =========================================
-// PRIVACY-FRIENDLY DAILY VISITOR COUNTING
-// One random browser identifier; no IP address or
-// personal profile data is collected.
-// =========================================
-if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin")) {
-    try {
-        const VISITOR_KEY = "cineva_visitor_id";
-        let visitorId = window.localStorage.getItem(VISITOR_KEY);
-
-        if (!visitorId) {
-            visitorId = window.crypto?.randomUUID
-                ? window.crypto.randomUUID()
-                : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, character => {
-                    const random = Math.random() * 16 | 0;
-                    return (character === "x" ? random : (random & 3 | 8)).toString(16);
-                });
-            window.localStorage.setItem(VISITOR_KEY, visitorId);
-        }
-
-        // Supabase defaults visit_day to the current Kigali calendar day.
-        supabase.from("site_visits").upsert({
-            visitor_id: visitorId,
-            path: window.location.pathname.slice(0, 500) || "/"
-        }, {
-            onConflict: "visitor_id,visit_day",
-            ignoreDuplicates: true
-        }).then(({ error }) => {
-            if (error) console.warn("CINEVA visitor tracking:", error.message);
-        }).catch(error => console.warn("CINEVA visitor tracking unavailable:", error));
-    } catch (error) {
-        console.warn("CINEVA visitor tracking could not initialize:", error);
-    }
-}
-
 console.log("CINEVA Supabase configuration loaded.");
