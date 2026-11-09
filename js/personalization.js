@@ -359,7 +359,8 @@ async function renderWatchDetails() {
   }
 }
 async function saveProgress(position, duration) {
-  if (!user || !activeProfile || !currentItem?.id) return;\n  if (currentItem.content_type === "series" && !currentItem.episode_id) return;
+  if (!user || !activeProfile || !currentItem?.id) return;
+  if (currentItem.content_type === "series" && !currentItem.episode_id) return;
   let positionSeconds=Math.max(0,Math.floor(Number(position)||0));
   const durationValue=Number(duration);
   const durationSeconds=Number.isFinite(durationValue)?Math.max(0,Math.floor(durationValue)):0;
@@ -379,7 +380,8 @@ async function restoreProgress(video) {
     .select("position_seconds")
     .eq("user_id", user.id).eq("profile_id", activeProfile.id)
     .eq("content_type", currentItem.content_type)
-    .eq("content_id", String(currentItem.id)).maybeSingle();
+    .eq("content_id", String(currentItem.id))
+    .eq("progress_key", currentItem.episode_id ? String(currentItem.episode_id) : "").maybeSingle();
   if (data?.position_seconds > 5 && Number.isFinite(video.duration) && video.duration > data.position_seconds + 10) {
     video.currentTime = data.position_seconds;
   }
