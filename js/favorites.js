@@ -95,6 +95,7 @@
     }
 
     syncButtons();
+    window.dispatchEvent(new Event("cineva:favorites-updated"));
     notify(exists ? "Removed from your favorites" : "Added to your favorites");
   }, true);
 
