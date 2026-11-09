@@ -82,7 +82,7 @@ const CATEGORY_MOVIE_FIELDS = [
 ].join(",");
 
 const CATEGORY_SERIES_FIELDS = [
-    "id", "title", "category", "created_at", "updated_at", "views",
+    "id", "title", "category", "created_at", "updated_at", "last_activity_at", "views",
     "translator", "year", "release_date", "rating", "poster",
     "poster_path", "backdrop", "backdrop_path"
 ].join(",");
@@ -131,6 +131,7 @@ export async function getHomepageData({
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
+            .order("last_activity_at", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
@@ -201,8 +202,13 @@ export async function getHomepageData({
     )
         .map(item => ({
             ...item,
-            // "Latest Added" always means the original publish/insert date.
-            latest_activity_at: item.created_at
+            // Series get a fresh position only when an episode is inserted.
+            // Views and playback never update last_activity_at.
+            latest_activity_at: item.content_type === "series"
+                ? item.last_activity_at || item.created_at
+                : item.created_at,
+            has_new_episode: item.content_type === "series" && Boolean(item.last_activity_at) &&
+                Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000
         }))
         .sort((a, b) =>
             (Date.parse(b.latest_activity_at || "") || 0) -
@@ -532,6 +538,7 @@ export async function getLatestContent(
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
+            .order("last_activity_at", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false })
             .limit(safeResultLimit)
     ]);
@@ -548,7 +555,9 @@ export async function getLatestContent(
     const series = (seriesResult.data || []).map(item => ({
         ...item,
         content_type: "series",
-        latest_activity_at: item.created_at
+        latest_activity_at: item.last_activity_at || item.created_at,
+        has_new_episode: Boolean(item.last_activity_at) &&
+            Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000
     }));
 
     return [...movies, ...series]
