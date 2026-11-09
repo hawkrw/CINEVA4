@@ -174,6 +174,9 @@ function writeStorage(key, data) {
             key,
             JSON.stringify(data)
         );
+        if (key === STORAGE_KEYS.favorites) {
+            window.dispatchEvent(new Event("cineva:favorites-updated"));
+        }
 
         return true;
 
