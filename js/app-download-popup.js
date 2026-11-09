@@ -1,8 +1,10 @@
 (() => {
 "use strict";
-// Show on every public website page load. Never interrupt the installed app or admin panel.
+// Show only on the public homepage. Never interrupt inner pages,
+// the administrator panel, or the installed native app.
 const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
-if (currentPath.startsWith("/admin/")) return;
+const isHomepage = currentPath === "/" || currentPath === "/index.html";
+if (!isHomepage) return;
 if (window.__CINEVA_APP_DOWNLOAD_POPUP__) return;
 // Native CINEVA app: never show the install prompt inside an installed app.
 const capacitor = window.Capacitor;
