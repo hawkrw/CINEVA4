@@ -1306,6 +1306,177 @@ document.addEventListener("keydown", event => {
 });
 
 
+
+/* =========================================
+   CINEVA — DIRECT IMAGE UPLOADS
+   Phone gallery, camera roll and desktop files
+========================================= */
+function attachImageUploader(urlInput, bucket, label) {
+    if (!urlInput) return;
+
+    const field = urlInput.closest(".cineva-field, .cineva-content-field");
+    if (!field) return;
+
+    field.querySelector(".cineva-image-uploader")?.remove();
+
+    if (!document.getElementById("cinevaImageUploaderStyles")) {
+        const style = document.createElement("style");
+        style.id = "cinevaImageUploaderStyles";
+        style.textContent = `
+            .cineva-image-uploader{display:grid;gap:9px;margin-top:11px}
+            .cineva-image-drop{display:flex;align-items:center;gap:12px;min-height:76px;padding:13px;border:1px dashed #625080;border-radius:12px;background:rgba(139,53,245,.07);color:#d9c8f5;cursor:pointer;transition:.2s}
+            .cineva-image-drop.is-dragover{border-color:#bd8cff;background:rgba(139,53,245,.16)}
+            .cineva-image-pick-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:11px;background:rgba(139,53,245,.18);font-size:20px}
+            .cineva-image-drop strong{display:block;color:#fff;font-size:11px}
+            .cineva-image-drop small{display:block;margin-top:5px;color:#9690aa;font-size:9px;line-height:1.5}
+            .cineva-image-preview{display:flex;align-items:center;gap:12px;min-width:0;padding:9px;border:1px solid #302b43;border-radius:10px;background:#0d0d19}
+            .cineva-image-preview[hidden]{display:none}
+            .cineva-image-preview img{width:58px;height:72px;flex:0 0 58px;object-fit:cover;border-radius:6px;background:#171525}
+            .cineva-image-preview.backdrop img{width:110px;height:62px;flex-basis:110px}
+            .cineva-image-preview span{min-width:0;overflow-wrap:anywhere;color:#bcb5ce;font-size:9px;line-height:1.5}
+            .cineva-image-status{min-height:14px;color:#a99bbf;font-size:9px;line-height:1.5}
+            .cineva-image-status[data-state="success"]{color:#72dfb1}
+            .cineva-image-status[data-state="error"]{color:#ff8c9e}
+            .cineva-image-drop:focus-within{outline:2px solid #9956ec;outline-offset:2px}
+            @media(max-width:600px){.cineva-image-drop{min-height:72px;padding:11px}.cineva-image-preview img{width:52px;height:66px;flex-basis:52px}}
+        `;
+        document.head.appendChild(style);
+    }
+
+    const picker = document.createElement("div");
+    picker.className = "cineva-image-uploader";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/jpeg,image/png,image/webp,image/avif";
+    fileInput.hidden = true;
+    fileInput.setAttribute("aria-label", `Choose ${label.toLowerCase()} image from device`);
+
+    const drop = document.createElement("label");
+    drop.className = "cineva-image-drop";
+    drop.tabIndex = 0;
+    drop.innerHTML = `
+        <span class="cineva-image-pick-icon" aria-hidden="true">▧</span>
+        <span><strong>Choose ${label} from this device</strong><small>Tap to browse or drag an image here · JPG, PNG, WebP or AVIF · Up to 15 MB</small></span>
+    `;
+    drop.appendChild(fileInput);
+
+    const preview = document.createElement("div");
+    preview.className = "cineva-image-preview" + (bucket === "banners" ? " backdrop" : "");
+    preview.hidden = true;
+    const previewImage = document.createElement("img");
+    previewImage.alt = `${label} preview`;
+    const previewName = document.createElement("span");
+    preview.append(previewImage, previewName);
+
+    const status = document.createElement("div");
+    status.className = "cineva-image-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    picker.append(drop, preview, status);
+    field.appendChild(picker);
+
+    const showPreview = (url, name = "Current image") => {
+        if (!url) {
+            preview.hidden = true;
+            previewImage.removeAttribute("src");
+            previewName.textContent = "";
+            return;
+        }
+        previewImage.src = url;
+        previewName.textContent = name;
+        preview.hidden = false;
+    };
+
+    showPreview(urlInput.value, urlInput.value ? "Current image · URL saved" : "");
+
+    const setStatus = (message, state = "") => {
+        status.textContent = message;
+        status.dataset.state = state;
+    };
+
+    const uploadFile = async file => {
+        if (!file) return;
+        const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+        if (!allowed.includes(file.type)) {
+            setStatus("Unsupported image. Choose JPG, PNG, WebP or AVIF.", "error");
+            return;
+        }
+        if (file.size > 15 * 1024 * 1024) {
+            setStatus("Image is too large. Maximum size is 15 MB.", "error");
+            return;
+        }
+
+        setStatus("Checking administrator session...");
+        drop.style.pointerEvents = "none";
+        try {
+            const { data: authData, error: authError } = await supabase.auth.getUser();
+            if (authError || !authData?.user) {
+                throw new Error("Your admin session has expired. Sign in again.");
+            }
+
+            const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const safeExtension = ["jpg", "jpeg", "png", "webp", "avif"].includes(extension)
+                ? extension : (file.type === "image/png" ? "png" : "jpg");
+            const safeName = file.name
+                .replace(/\.[^.]+$/, "")
+                .normalize("NFKD")
+                .replace(/[^a-zA-Z0-9_-]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+                .slice(0, 60) || "image";
+            const unique = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const path = `admin/${authData.user.id}/${Date.now()}-${unique}-${safeName}.${safeExtension}`;
+
+            setStatus("Uploading image to CINEVA storage...");
+            const { error: uploadError } = await supabase.storage
+                .from(bucket)
+                .upload(path, file, {
+                    cacheControl: "31536000",
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(path);
+            if (!publicData?.publicUrl) throw new Error("Upload completed, but the public image URL could not be created.");
+
+            urlInput.value = publicData.publicUrl;
+            urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+            urlInput.dispatchEvent(new Event("change", { bubbles: true }));
+            showPreview(publicData.publicUrl, `${file.name} · Uploaded`);
+            setStatus("Image uploaded. Its URL will be saved when you save this form.", "success");
+        } catch (error) {
+            console.error("CINEVA image upload failed:", error);
+            setStatus(error.message || "Image upload failed. Please try again.", "error");
+        } finally {
+            drop.style.pointerEvents = "";
+            fileInput.value = "";
+        }
+    };
+
+    fileInput.addEventListener("change", () => uploadFile(fileInput.files?.[0]));
+    drop.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            fileInput.click();
+        }
+    });
+    ["dragenter", "dragover"].forEach(type => drop.addEventListener(type, event => {
+        event.preventDefault();
+        drop.classList.add("is-dragover");
+    }));
+    ["dragleave", "dragend", "drop"].forEach(type => drop.addEventListener(type, event => {
+        event.preventDefault();
+        drop.classList.remove("is-dragover");
+    }));
+    drop.addEventListener("drop", event => {
+        const file = event.dataTransfer?.files?.[0];
+        if (file) uploadFile(file);
+    });
+}
+
 function createContentField(name, label, type = "text", value = "", full = false) {
     const wrapper = document.createElement("div");
 
@@ -1407,6 +1578,8 @@ function openContentForm(type, record = null) {
         }
 
         fieldsContainer.appendChild(field);
+        if (isSeries && name === "poster") attachImageUploader(input, "posters", "Poster");
+        if (isSeries && name === "backdrop") attachImageUploader(input, "banners", "Backdrop");
     });
 
     // Restore episode numbering from either supported column pair.
@@ -4537,6 +4710,9 @@ function openMovieForm(movie = null) {
         form.elements.namedItem(name).value =
             movie?.[name] ?? "";
     });
+
+    attachImageUploader(form.elements.namedItem("poster_path"), "posters", "Poster");
+    attachImageUploader(form.elements.namedItem("backdrop_path"), "banners", "Backdrop");
 
     attachCategorySuggestions(form.elements.namedItem("category"), "cinevaCategoryOptions");
 
