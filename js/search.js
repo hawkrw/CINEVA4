@@ -67,11 +67,20 @@ function safeImageUrl(value) {
         url = `/${url}`;
     }
 
-    if (/^(javascript|vbscript|data):/i.test(url)) {
+    // Resolve relative paths safely and allow only web URLs.
+    // This prevents unsupported schemes such as file:, blob: or custom
+    // protocols from being assigned to a result image.
+    try {
+        const parsed = new URL(url, window.location.href);
+
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            return SEARCH_CONFIG.placeholder;
+        }
+
+        return parsed.href;
+    } catch (error) {
         return SEARCH_CONFIG.placeholder;
     }
-
-    return url;
 }
 
 function getSearchPoster(item) {
