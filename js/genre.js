@@ -142,7 +142,7 @@ function getReleaseYear(item) {
 function getLatestDate(item) {
     const date =
         getContentType(item) === "series"
-            ? item.updated_at || item.created_at || item.release_date
+            ? item.last_activity_at || item.created_at || item.release_date
             : item.created_at || item.release_date;
 
     const timestamp = date ? new Date(date).getTime() : 0;
@@ -616,6 +616,15 @@ function createMovieCard(item) {
     typeBadge.className = "movie-type-badge";
     typeBadge.textContent = type === "series" ? "SERIES" : "MOVIE";
 
+    const newEpisodeBadge = type === "series" && item.last_activity_at &&
+        Date.now() - new Date(item.last_activity_at).getTime() <= 7 * 24 * 60 * 60 * 1000
+        ? Object.assign(document.createElement("span"), {
+            className: "movie-new-episode-badge",
+            textContent: "NEW EP",
+            ariaLabel: "New episode added"
+        })
+        : null;
+
     const overlay = document.createElement("div");
     overlay.className = "movie-card-overlay";
 
@@ -640,9 +649,13 @@ function createMovieCard(item) {
         translatorText.textContent = translatorName;
 
         translatorBadge.append(translatorIcon, translatorText);
-        posterWrap.append(image, typeBadge, translatorBadge, overlay);
+        posterWrap.append(image, typeBadge);
+        if (newEpisodeBadge) posterWrap.appendChild(newEpisodeBadge);
+        posterWrap.append(translatorBadge, overlay);
     } else {
-        posterWrap.append(image, typeBadge, overlay);
+        posterWrap.append(image, typeBadge);
+        if (newEpisodeBadge) posterWrap.appendChild(newEpisodeBadge);
+        posterWrap.appendChild(overlay);
     }
 
     const info = document.createElement("div");
