@@ -1,5 +1,8 @@
 (() => {
 "use strict";
+// The download prompt belongs only on the public homepage.
+const currentPath = window.location.pathname.replace(/\\/+$/, "") || "/";
+if (currentPath !== "/" && currentPath !== "/index.html") return;
 if (window.__CINEVA_APP_DOWNLOAD_POPUP__) return;
 // Native CINEVA app: never show the install prompt inside an installed app.
 const capacitor = window.Capacitor;
