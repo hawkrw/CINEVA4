@@ -1,7 +1,7 @@
 
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
-import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-2";
+import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
 
 /* =========================================
    CINEVA PRO — DASHBOARD SECURITY
