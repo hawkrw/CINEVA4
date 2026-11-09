@@ -299,7 +299,6 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser, refre
             if (button.dataset.categoryAction === "edit") openCategoryModal(category);
             if (button.dataset.categoryAction === "delete") deleteCategory(category.id);
         });
-        $("categorySearch")?.addEventListener("input", renderCategories);
     }
 
     function getCategoryNames() {
