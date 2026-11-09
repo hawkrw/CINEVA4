@@ -394,22 +394,21 @@ document.addEventListener("DOMContentLoaded", () => {
             sortFilter?.value || "latest";
 
         filteredMovies = allMovies.filter(movie => {
-            const title = String(
-                movie.title || movie.name || ""
-            ).toLowerCase();
+            const searchableFields = [
+                movie.title, movie.name, movie.original_title,
+                movie.translator, movie.category,
+                movie.overview, movie.description, movie.genre,
+                ...(Array.isArray(movie.genres) ? movie.genres : [])
+            ];
 
-            const category = String(
-                movie.category || ""
-            ).toLowerCase();
+            const searchableText = searchableFields
+                .filter(value => value !== null && value !== undefined)
+                .map(value => String(value).trim().toLocaleLowerCase())
+                .filter(Boolean)
+                .join(" ");
 
-            const overview = String(
-                movie.overview || movie.description || ""
-            ).toLowerCase();
-
-            const matchesSearch =
-                title.includes(searchTerm) ||
-                category.includes(searchTerm) ||
-                overview.includes(searchTerm);
+            const category = String(movie.category || "").trim().toLocaleLowerCase();
+            const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
 
             const matchesGenre =
                 selectedGenre === "all" ||
