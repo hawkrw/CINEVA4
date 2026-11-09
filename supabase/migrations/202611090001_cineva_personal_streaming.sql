@@ -149,6 +149,7 @@ create policy "Users manage own saved items" on public.viewer_saved_items for al
 grant select,insert,update,delete on public.viewer_saved_items to authenticated;
 revoke all on public.viewer_saved_items from anon;
 create index viewer_saved_items_profile_list_idx on public.viewer_saved_items(profile_id,user_id,list_type,created_at desc);
+create index viewer_saved_items_user_id_idx on public.viewer_saved_items(user_id);
 
 
 -- Limit browser roles to row-level-security-governed CRUD only.
