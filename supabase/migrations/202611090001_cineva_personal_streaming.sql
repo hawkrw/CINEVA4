@@ -31,6 +31,8 @@ create table public.watch_progress (
   profile_id uuid not null,
   content_type text not null check (content_type in ('movie','series')),
   content_id text not null,
+  episode_id text,
+  progress_key text generated always as (coalesce(episode_id,'')) stored,
   title text not null,
   poster_url text,
   category text,
@@ -38,7 +40,7 @@ create table public.watch_progress (
   duration_seconds integer not null default 0 check (duration_seconds >= 0),
   last_watched_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
-  unique(profile_id, content_type, content_id),
+  unique(profile_id, content_type, content_id, progress_key),
   constraint watch_progress_profile_owner_fk foreign key (profile_id, user_id) references public.viewer_profiles(id, user_id) on delete cascade
 );
 alter table public.watch_progress enable row level security;
