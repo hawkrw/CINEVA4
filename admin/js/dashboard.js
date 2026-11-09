@@ -2967,10 +2967,11 @@ async function loadVisitorAnalytics() {
         while (true) {
             const { data, error } = await supabase
                 .from("site_visits")
-                .select("visitor_id, visit_day")
+                .select("id, visitor_id, visit_day")
                 .gte("visit_day", yearStart)
                 .lte("visit_day", todayKey)
                 .order("visit_day", { ascending: true })
+                .order("id", { ascending: true })
                 .range(offset, offset + pageSize - 1);
 
             if (error) throw error;
