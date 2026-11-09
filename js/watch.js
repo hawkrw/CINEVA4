@@ -1881,6 +1881,7 @@ function setupFavorite(item) {
         try {
             localStorage.setItem("cineva_favorites", JSON.stringify(updated));
             updateButton();
+            window.dispatchEvent(new Event("cineva:favorites-updated"));
         } catch (error) {
             console.error("CINEVA favorite toggle failed:", error);
             alert("Unable to update favorites. Check your browser storage.");
