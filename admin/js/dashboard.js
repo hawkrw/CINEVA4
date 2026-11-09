@@ -3059,6 +3059,31 @@ function initializeNavigation() {
     const links = document.querySelectorAll("[data-page]");
     const pageTitle = $("pageTitle");
     const sidebar = $("sidebar");
+    const sidebarToggle = $("sidebarToggle");
+    let drawerOverlay = $("adminDrawerOverlay");
+    if (!drawerOverlay && sidebar) {
+        drawerOverlay = document.createElement("button");
+        drawerOverlay.type = "button";
+        drawerOverlay.id = "adminDrawerOverlay";
+        drawerOverlay.className = "admin-drawer-overlay";
+        drawerOverlay.setAttribute("aria-label", "Close navigation menu");
+        drawerOverlay.setAttribute("tabindex", "-1");
+        document.body.appendChild(drawerOverlay);
+    }
+
+    function closeDrawer() {
+        sidebar?.classList.remove("open");
+        drawerOverlay?.classList.remove("visible");
+        sidebarToggle?.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("admin-drawer-open");
+    }
+
+    function openDrawer() {
+        sidebar?.classList.add("open");
+        drawerOverlay?.classList.add("visible");
+        sidebarToggle?.setAttribute("aria-expanded", "true");
+        document.body.classList.add("admin-drawer-open");
+    }
 
     function openPage(page) {
         const target = $(`${page}Page`);
@@ -3090,7 +3115,7 @@ function initializeNavigation() {
                 : page.charAt(0).toUpperCase() + page.slice(1);
         }
 
-        sidebar?.classList.remove("open");
+        closeDrawer();
     }
 
     links.forEach(link => {
@@ -3108,8 +3133,16 @@ function initializeNavigation() {
     });
 
     bind("sidebarToggle", "click", () => {
-        sidebar?.classList.toggle("open");
+        if (sidebar?.classList.contains("open")) closeDrawer();
+        else openDrawer();
     });
+    drawerOverlay?.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeDrawer();
+    });
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 760) closeDrawer();
+    }, { passive: true });
 
     const requestedPage = location.hash.replace("#", "");
 
