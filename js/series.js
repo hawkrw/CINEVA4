@@ -137,12 +137,20 @@ function renderSeries(seriesList) {
             sortFilter?.value || "latest";
 
         let filtered = allSeries.filter(series => {
-            const title = (series.title || "").toLowerCase();
-            const category = (series.category || "").toLowerCase();
+            const searchableFields = [
+                series.title, series.original_title, series.translator,
+                series.category, series.overview, series.description, series.genre,
+                ...(Array.isArray(series.genres) ? series.genres : [])
+            ];
 
-            const matchesSearch =
-                title.includes(searchTerm) ||
-                category.includes(searchTerm);
+            const searchableText = searchableFields
+                .filter(value => value !== null && value !== undefined)
+                .map(value => String(value).trim().toLocaleLowerCase())
+                .filter(Boolean)
+                .join(" ");
+
+            const category = String(series.category || "").trim().toLocaleLowerCase();
+            const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
 
             const matchesGenre =
                 selectedGenre === "all" ||
