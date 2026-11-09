@@ -120,7 +120,7 @@ Deno.serve(async (req: Request) => {
     return response(200, { success: true, status: "failed" });
   }
 
-  if (transactionStatus !== "successful") return response(400, { success: false, message: "Unsupported transaction status." });
+  if (transactionStatus !== "successful" && transactionStatus !== "success") return response(400, { success: false, message: "Unsupported transaction status." });
   if (payment.status === "failed" || payment.status === "cancelled") {
     return response(409, { success: false, message: "This payment is no longer eligible for activation." });
   }
