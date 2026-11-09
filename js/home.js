@@ -583,7 +583,7 @@ function createMovieCard(item) {
         `
         : "";
 
-    const favoritePayload = escapeHTML(JSON.stringify({
+    const favoritePayload = escapeHTML(encodeURIComponent(JSON.stringify({
         id: item.id,
         title: item.title || item.name || "Untitled",
         poster: getPoster(item),
@@ -591,7 +591,7 @@ function createMovieCard(item) {
         category: getCategory(item),
         year: getYear(item),
         rating: getRating(item)
-    }));
+    })));
 
     return `
         <article class="movie-card">
