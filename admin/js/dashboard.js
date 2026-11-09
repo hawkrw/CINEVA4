@@ -1899,8 +1899,24 @@ async function saveContentForm(event) {
 
     if (!isSeries) {
         const normalizeEpisodeUrl = url => {
-            try { return new URL(String(url || "").trim()).href; }
-            catch { return ""; }
+            try {
+                const parsed = new URL(String(url || "").trim());
+                const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+
+                // MediaFire display filenames can differ while the actual
+                // file ID is identical. Compare the real file ID, not the
+                // decorative filename at the end of the URL.
+                if (host === "mediafire.com") {
+                    const match = parsed.pathname.match(/^\/file\/([^/]+)/i);
+                    if (match) return `mediafire.com/file/${match[1].toLowerCase()}`;
+                }
+
+                parsed.hash = "";
+                parsed.searchParams.sort();
+                return `${host}${parsed.pathname.replace(/\/$/, "")}${parsed.search}`;
+            } catch {
+                return "";
+            }
         };
 
         const watchUrl = normalizeEpisodeUrl(payload.video_url);
