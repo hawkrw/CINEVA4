@@ -1465,6 +1465,9 @@ function renderSeason(seasonNumber) {
     }
 
     el.episodesGrid.innerHTML = episodes.map(episode => {
+        const episodeIndex = currentEpisodes.findIndex(
+            item => String(item.id) === String(episode.id)
+        );
         const episodeNumber = getEpisodeNumber(episode);
 
         const parts = parseParts(episode);
@@ -1492,7 +1495,7 @@ function renderSeason(seasonNumber) {
                             class="episode-watch-btn"
                             type="button"
                             data-action="watch-episode-part"
-                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-episode-index="${episodeIndex}"
                             data-part-index="${index}"
                             ${watchUrl ? "" : "disabled"}
                         >
@@ -1504,7 +1507,7 @@ function renderSeason(seasonNumber) {
                             class="episode-download-btn"
                             type="button"
                             data-action="download-episode-part"
-                            data-episode-id="${escapeHTML(episode.id)}"
+                            data-episode-index="${episodeIndex}"
                             data-part-index="${index}"
                             ${downloadUrl ? "" : "disabled"}
                         >
@@ -1558,7 +1561,7 @@ function renderSeason(seasonNumber) {
                                     class="episode-watch-btn"
                                     type="button"
                                     data-action="play-episode"
-                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    data-episode-index="${episodeIndex}"
                                     ${episodeWatchUrl ? "" : "disabled"}
                                 >
                                     <i class="fa-solid fa-play"></i>
@@ -1569,7 +1572,7 @@ function renderSeason(seasonNumber) {
                                     class="episode-download-btn"
                                     type="button"
                                     data-action="download-episode"
-                                    data-episode-id="${escapeHTML(episode.id)}"
+                                    data-episode-index="${episodeIndex}"
                                     ${episodeDownloadUrl ? "" : "disabled"}
                                 >
                                     <i class="fa-solid fa-download"></i>
@@ -1587,9 +1590,10 @@ function renderSeason(seasonNumber) {
     // Attach one click handler to each episode action.
     el.episodesGrid.querySelectorAll("button[data-action]").forEach(button => {
         button.addEventListener("click", () => {
-            const episode = currentEpisodes.find(
-                item => String(item.id) === button.dataset.episodeId
-            );
+            const episodeIndex = Number(button.dataset.episodeIndex);
+            const episode = Number.isInteger(episodeIndex)
+                ? currentEpisodes[episodeIndex]
+                : null;
 
             if (!episode) return;
 
