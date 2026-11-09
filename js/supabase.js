@@ -485,8 +485,9 @@ export async function searchContent(searchTerm) {
 
     // Strip PostgREST filter delimiters from visitor input.
     const safeTerm = term
-        .replace(/[(),%"\\\\]/g, " ")
-        .replace(/\\s+/g, " ")
+        .replace(/[(),%"]/g, " ")
+        .split(String.fromCharCode(92)).join(" ")
+        .replace(/\s+/g, " ")
         .trim();
 
     if (!safeTerm) return [];
