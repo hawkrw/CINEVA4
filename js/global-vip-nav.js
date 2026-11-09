@@ -37,7 +37,7 @@
         border-radius:0 0 17px 17px; box-shadow:0 18px 35px rgba(0,0,0,.42);
         backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
       }
-      header nav.cineva-mobile-nav-target.cineva-mobile-nav-open { display:flex !important; }
+      header nav.cineva-mobile-nav-target.cineva-mobile-nav-open,\n      header nav.cineva-mobile-nav-target.active { display:flex !important; }
       header nav.cineva-mobile-nav-target > a { width:100%; min-height:42px; padding:10px 13px !important; border-radius:10px; }
       header nav.cineva-mobile-nav-target .cineva-vip-nav-link { justify-content:flex-start; border-radius:11px !important; }
       header:has(> .cineva-mobile-menu-toggle), header:has(.cineva-mobile-menu-toggle) { position:relative; }
@@ -63,10 +63,20 @@
     const nav = header.querySelector("nav");
     if (nav) {
       nav.classList.add("cineva-mobile-nav-target");
-      const alreadyHasVip = [...nav.querySelectorAll("a")].some((a) =>
+      const existingVip = [...nav.querySelectorAll("a")].find((a) =>
         /(^|\/)vip(?:\.html)?(?:[?#]|$)/i.test(a.getAttribute("href") || "")
       );
-      if (!alreadyHasVip) nav.appendChild(vipLink());
+      if (existingVip) {
+        existingVip.classList.add("cineva-vip-nav-link");
+        if (!existingVip.querySelector("i")) {
+          const icon = document.createElement("i");
+          icon.className = "fa-solid fa-crown";
+          icon.setAttribute("aria-hidden","true");
+          existingVip.prepend(icon);
+        }
+      } else {
+        nav.appendChild(vipLink());
+      }
     } else {
       const existingVip = [...header.querySelectorAll("a")].some((a) =>
         /(^|\/)vip(?:\.html)?(?:[?#]|$)/i.test(a.getAttribute("href") || "")
