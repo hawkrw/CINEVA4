@@ -58,14 +58,36 @@ function escapeHTML(value = "") {
 function safeImageUrl(value) {
     if (!value) return SEARCH_CONFIG.placeholder;
 
-    const url = String(value).trim();
+    let url = String(value).trim();
 
-    // Reject executable and unsupported image URLs.
+    // TMDB poster_path values are relative paths.
+    if (url.startsWith("/")) {
+        url = `https://image.tmdb.org/t/p/w342${url}`;
+    } else if (url.startsWith("assets/")) {
+        url = `/${url}`;
+    }
+
     if (/^(javascript|vbscript|data):/i.test(url)) {
         return SEARCH_CONFIG.placeholder;
     }
 
     return url;
+}
+
+function getSearchPoster(item) {
+    return safeImageUrl(
+        item.poster_path ||
+        item.poster_url ||
+        item.poster ||
+        item.thumbnail ||
+        item.image
+    );
+}
+
+function getSearchYear(item) {
+    const value = item.release_year || item.year || item.release_date || "";
+    const match = String(value).match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : "";
 }
 
 function getContentUrl(item) {
@@ -1101,21 +1123,13 @@ function renderResults(results, query) {
 
             const title = escapeHTML(item.title || "Untitled");
 
-            const poster = escapeHTML(
-                safeImageUrl(
-                    item.poster_url ||
-                    item.poster ||
-                    item.thumbnail
-                )
-            );
+            const poster = escapeHTML(getSearchPoster(item));
 
             const category = escapeHTML(
                 item.category || "Uncategorized"
             );
 
-            const year = escapeHTML(
-                item.release_year || item.year || ""
-            );
+            const year = escapeHTML(getSearchYear(item));
 
             const type =
                 item.content_type === "series" ||
