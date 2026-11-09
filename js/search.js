@@ -17,7 +17,7 @@
    - No dependency on additional CSS files
 ========================================================= */
 
-import { searchContent } from "./supabase.js";
+import { searchContent } from "./supabase.js?v=20261109-search-1";
 
 /* =========================================================
    CONFIGURATION
