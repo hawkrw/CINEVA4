@@ -41,6 +41,8 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser, refre
         const grid = $("categoryGrid");
         if (!grid) return;
         ensureCategoryAddButton();
+        const overviewText = document.querySelector(".category-overview-strip p");
+        if (overviewText) overviewText.textContent = "Create, rename and organize the shared category list used by movie and series records.";
 
         const search = ($("categorySearch")?.value || "").trim().toLocaleLowerCase();
         const visible = categories
@@ -282,6 +284,7 @@ export function initializePlatformAdmin({ getMovies, getSeries, adminUser, refre
         }
         if (refreshContent) await refreshContent();
         else await refreshCategories();
+        window.dispatchEvent(new CustomEvent("cineva:categories-updated"));
     }
 
     function initializeCategoryEvents() {
