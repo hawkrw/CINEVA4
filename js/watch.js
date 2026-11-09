@@ -1465,9 +1465,10 @@ function renderSeason(seasonNumber) {
     }
 
     el.episodesGrid.innerHTML = episodes.map(episode => {
-        const episodeIndex = currentEpisodes.findIndex(
-            item => String(item.id) === String(episode.id)
-        );
+        // Use the exact episode object in the loaded array. This avoids
+        // accidentally resolving multiple cards to the first row if an
+        // older record has a missing or duplicated identifier.
+        const episodeIndex = currentEpisodes.indexOf(episode);
         const episodeNumber = getEpisodeNumber(episode);
 
         const parts = parseParts(episode);
