@@ -33,8 +33,9 @@ const HOME_CONFIG = {
 
     tmdbImageBase: "https://image.tmdb.org/t/p/",
 
-    posterSize: "w500",
-    backdropSize: "w1280"
+    // Smaller TMDB images on phones reduce data use without changing card design.
+    posterSize: window.matchMedia("(max-width: 600px)").matches ? "w342" : "w500",
+    backdropSize: window.matchMedia("(max-width: 600px)").matches ? "w780" : "w1280"
 };
 
 
