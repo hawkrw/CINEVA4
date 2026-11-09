@@ -583,23 +583,9 @@ function createMovieCard(item) {
         `
         : "";
 
-    const favoritePayload = escapeHTML(encodeURIComponent(JSON.stringify({
-        id: item.id,
-        title: item.title || item.name || "Untitled",
-        poster: getPoster(item),
-        content_type: getContentType(item),
-        category: getCategory(item),
-        year: getYear(item),
-        rating: getRating(item)
-    })));
-
     return `
         <article class="movie-card">
-            <button class="card-favorite" type="button" data-favorite="${favoritePayload}"
-                aria-label="Add ${title} to favorites" aria-pressed="false" title="Add to favorites">
-                <i class="fa-regular fa-heart" aria-hidden="true"></i>
-            </button>
-            <a class="movie-card-link" href="${getContentUrl(item)}" aria-label="Watch ${title}">
+            <a class="movie-card-link` href="${getContentUrl(item)}" aria-label="Watch ${title}">
 
             <div class="movie-poster">
 
