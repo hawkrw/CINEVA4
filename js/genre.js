@@ -685,7 +685,25 @@ function createMovieCard(item) {
 
     info.append(heading, meta);
     link.append(posterWrap, info);
-    card.appendChild(link);
+
+    const favoriteButton = document.createElement("button");
+    favoriteButton.type = "button";
+    favoriteButton.className = "card-favorite";
+    favoriteButton.dataset.favorite = encodeURIComponent(JSON.stringify({
+        id: item.id,
+        title,
+        poster,
+        content_type: type,
+        category: getCategory(item),
+        year,
+        rating
+    }));
+    favoriteButton.setAttribute("aria-label", `Add ${title} to favorites`);
+    favoriteButton.setAttribute("aria-pressed", "false");
+    favoriteButton.title = "Add to favorites";
+    favoriteButton.innerHTML = '<i class="fa-regular fa-heart" aria-hidden="true"></i>';
+
+    card.append(link, favoriteButton);
 
     return card;
 }
