@@ -3,9 +3,18 @@
    CINEVA — SUPABASE CONFIGURATION
 ========================================= */
 
-// Import Supabase SDK
-import { createClient } from
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+// Load the Supabase SDK with a second CDN fallback for Android WebView networks.
+let createClient;
+try {
+    ({ createClient } = await import(
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    ));
+} catch (primaryError) {
+    console.warn("CINEVA: Primary Supabase CDN unavailable; trying fallback.", primaryError);
+    ({ createClient } = await import(
+        "https://esm.sh/@supabase/supabase-js@2"
+    ));
+}
 
 // =========================================
 // SUPABASE PROJECT CREDENTIALS
