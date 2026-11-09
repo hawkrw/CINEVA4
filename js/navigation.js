@@ -85,7 +85,7 @@
             });
 
             navMenu.addEventListener("click", (event) => {
-                if (event.target.closest("a")) {
+                if (event.target instanceof Element && event.target.closest("a")) {
                     closeMenu();
                 }
             });
@@ -583,7 +583,7 @@
            BACK TO TOP
         ===================================== */
 
-        const scrollTopButton = document.querySelector("#scrollTop");
+        const scrollTopButton = document.querySelector("#scrollTop, #back-to-top");
 
         if (scrollTopButton) {
             const updateScrollTopVisibility = () => {
