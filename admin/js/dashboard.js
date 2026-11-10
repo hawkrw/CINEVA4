@@ -1468,14 +1468,7 @@ function attachImageUploader(urlInput, bucket, label) {
                 throw new Error(authParams?.error || "ImageKit upload authentication is not configured.");
             }
 
-            const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-            const safeName = file.name
-                .replace(/\\.[^.]+$/, "")
-                .normalize("NFKD")
-                .replace(/[^a-zA-Z0-9_-]+/g, "-")
-                .replace(/^-+|-+$/g, "")
-                .slice(0, 70) || "image";
-            const imageKitFileName = `${safeName}-${Date.now()}.${extension}`;
+            const imageKitFileName = `${safeName}-${Date.now()}.${safeExtension}`;
 
             const uploadForm = new FormData();
             uploadForm.append("file", file);
