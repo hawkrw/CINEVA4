@@ -1437,33 +1437,66 @@ function attachImageUploader(urlInput, bucket, label) {
             const unique = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
             const path = `admin/${authData.user.id}/${Date.now()}-${unique}-${safeName}.${safeExtension}`;
 
-            setStatus("Uploading image to CINEVA storage...");
-            let uploadError = null;
-            for (let attempt = 1; attempt <= 3; attempt++) {
-                const result = await supabase.storage
-                    .from(bucket)
-                    .upload(path, file, {
-                        cacheControl: "31536000",
-                        contentType: file.type,
-                        upsert: true
-                    });
-                uploadError = result.error;
-                if (!uploadError) break;
+            setStatus("Preparing secure ImageKit upload...");
+            const { data: authParams, error: authParamsError } =
+                await supabase.functions.invoke("imagekit-upload-auth", {
+                    method: "POST"
+                });
 
-                const transient = !uploadError.statusCode ||
-                    ["408", "429", "500", "502", "503", "504"].includes(String(uploadError.statusCode));
-                if (!transient || attempt === 3) break;
+            if (authParamsError) {
+                throw new Error(authParamsError.message || "Could not authorize the image upload.");
+            }
+            if (!authParams?.token || !authParams?.signature || !authParams?.publicKey) {
+                throw new Error(authParams?.error || "ImageKit upload authentication is not configured.");
+            }
+
+            const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const safeName = file.name
+                .replace(/\\.[^.]+$/, "")
+                .normalize("NFKD")
+                .replace(/[^a-zA-Z0-9_-]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+                .slice(0, 70) || "image";
+            const imageKitFileName = `${safeName}-${Date.now()}.${extension}`;
+
+            const uploadForm = new FormData();
+            uploadForm.append("file", file);
+            uploadForm.append("fileName", imageKitFileName);
+            uploadForm.append("publicKey", authParams.publicKey);
+            uploadForm.append("token", authParams.token);
+            uploadForm.append("expire", String(authParams.expire));
+            uploadForm.append("signature", authParams.signature);
+            uploadForm.append("folder", `/cineva/${bucket}`);
+            uploadForm.append("useUniqueFileName", "true");
+
+            setStatus("Uploading image to ImageKit...");
+            let imageKitResponse;
+            let lastUploadError;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+                    method: "POST",
+                    body: uploadForm
+                });
+
+                imageKitResponse = await response.json().catch(() => ({}));
+                if (response.ok && imageKitResponse.url) break;
+
+                lastUploadError = new Error(
+                    imageKitResponse.message || imageKitResponse.help || `ImageKit upload failed (${response.status}).`
+                );
+                if (![408, 429, 500, 502, 503, 504].includes(response.status) || attempt === 3) {
+                    throw lastUploadError;
+                }
 
                 setStatus(`Connection interrupted. Retrying upload (${attempt}/2)...`);
                 await new Promise(resolve => setTimeout(resolve, attempt * 900));
             }
 
-            if (uploadError) throw uploadError;
+            if (!imageKitResponse?.url) {
+                throw lastUploadError || new Error("ImageKit did not return an image URL.");
+            }
 
-            const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(path);
-            if (!publicData?.publicUrl) throw new Error("Upload completed, but the public image URL could not be created.");
-
-            urlInput.value = publicData.publicUrl;
+            urlInput.value = imageKitResponse.url;
             urlInput.dispatchEvent(new Event("input", { bubbles: true }));
             urlInput.dispatchEvent(new Event("change", { bubbles: true }));
             showPreview(publicData.publicUrl, `${file.name} · Uploaded`);
