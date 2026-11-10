@@ -3531,7 +3531,20 @@ async function initializeDashboard() {
             return;
         }
 
-        const result = await verifyAdmin();
+        // Prevent a stalled network/auth request from leaving the
+        // full-screen boot loader visible forever.
+        const verificationTimeout = new Promise((_, reject) => {
+            window.setTimeout(() => {
+                reject(new Error(
+                    "Administrator verification timed out. Check your connection and tap Try Again."
+                ));
+            }, 15000);
+        });
+
+        const result = await Promise.race([
+            verifyAdmin(),
+            verificationTimeout
+        ]);
 
         if (!result.authorized) {
             if (result.error) {
