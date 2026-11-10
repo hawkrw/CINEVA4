@@ -346,3 +346,16 @@ body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,le
 .emoji, [data-emoji] {
   font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
 }
+
+
+/* CINEVA+ loading wordmark accent */
+.page-loader .loader-logo .loader-plus{
+  display:inline-block;
+  margin-left:3px;
+  color:var(--primary-light,#a855f7);
+  font-size:.78em;
+  font-weight:900;
+  line-height:1;
+  vertical-align:top;
+  text-shadow:0 0 18px rgba(168,85,247,.42);
+}
