@@ -120,21 +120,8 @@ h1,h2,h3,h4,h5,h6,
    Keep page-specific layouts and all existing functionality.
 ========================================================= */
 :root{
-  --cineva-font-body:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --cineva-font-display:"Outfit","Inter",system-ui,sans-serif;
   --cineva-page-gutter:clamp(15px,3.2vw,46px);
   --cineva-panel:linear-gradient(145deg,rgba(20,20,39,.96),rgba(12,12,25,.96));
-}
-html,body{font-family:var(--cineva-font-body)!important}
-body,button,input,select,textarea,optgroup{font-family:var(--cineva-font-body)!important}
-h1,h2,h3,h4,h5,h6,
-.hero-information h1,.hero-content h1,
-.genre-hero-copy h1,.viewall-hero h1,
-.watch-title,.categories-heading h1,
-.section-title h2,.section-heading h2{
-  font-family:var(--cineva-font-display)!important;
-  font-optical-sizing:auto;
-  letter-spacing:-.035em;
 }
 body{min-width:320px;max-width:100%;overflow-x:clip}
 img,video,iframe{max-width:100%}
@@ -343,4 +330,19 @@ input,select,textarea{
 @media(max-width:380px){
   .categories-page .genre-grid{gap:9px}
   .categories-page .genre-card{border-radius:12px}
+}
+
+
+/* =========================================================
+   CINEVA — PRESERVE THE ORIGINAL BROWSER FONT BEHAVIOUR
+   Keep existing font-family choices and native text rendering.
+========================================================= */
+:root, body {
+  font-family: revert !important;
+}
+body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,legend,figcaption,blockquote,button,input,select,textarea,optgroup):not(.fa):not([class*="fa-"]):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.material-icons):not(.material-symbols-outlined):not(.icon):not([class^="icon-"]):not([class*=" icon-"]):not(.iconify):not(.emoji):not([data-emoji]) {
+  font-family: revert !important;
+}
+.emoji, [data-emoji] {
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
 }
