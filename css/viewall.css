@@ -386,7 +386,7 @@ body {
     border-radius: 11px;
     outline: none;
 
-    font-family:;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 600;
 
@@ -443,7 +443,7 @@ body {
     border: 1px solid rgba(255,255,255,.10);
     border-radius: 10px;
 
-    font-family:;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 700;
 
@@ -643,7 +643,7 @@ body {
     border: 0;
     border-radius: 9px;
 
-    font-family:;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 800;
 
@@ -683,7 +683,7 @@ body {
     border: 0;
     border-radius: 11px;
 
-    font-family:;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 850;
     letter-spacing: .3px;
