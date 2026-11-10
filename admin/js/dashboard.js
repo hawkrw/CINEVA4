@@ -1492,8 +1492,11 @@ function attachImageUploader(urlInput, bucket, label) {
                 imageKitResponse = await response.json().catch(() => ({}));
                 if (response.ok && imageKitResponse.url) break;
 
+                const imageKitMessage = imageKitResponse.message || imageKitResponse.help || "";
                 lastUploadError = new Error(
-                    imageKitResponse.message || imageKitResponse.help || `ImageKit upload failed (${response.status}).`
+                    [401, 403].includes(response.status)
+                        ? "ImageKit rejected its API credentials. Check that IMAGEKIT_PRIVATE_KEY and IMAGEKIT_PUBLIC_KEY in Supabase Edge Function Secrets are active and belong to the same ImageKit account."
+                        : (imageKitMessage || `ImageKit upload failed (${response.status}).`)
                 );
                 if (![408, 429, 500, 502, 503, 504].includes(response.status) || attempt === 3) {
                     throw lastUploadError;
@@ -1510,7 +1513,7 @@ function attachImageUploader(urlInput, bucket, label) {
             urlInput.value = imageKitResponse.url;
             urlInput.dispatchEvent(new Event("input", { bubbles: true }));
             urlInput.dispatchEvent(new Event("change", { bubbles: true }));
-            showPreview(publicData.publicUrl, `${file.name} · Uploaded`);
+            showPreview(imageKitResponse.url, `${file.name} · Uploaded`);
             setStatus("Image uploaded. Its URL will be saved when you save this form.", "success");
         } catch (error) {
             console.error("CINEVA image upload failed:", error);
