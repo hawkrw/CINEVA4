@@ -2204,7 +2204,8 @@ function initializeSeriesEpisodeForms() {
 
 /* =========================================
    CINEVA PRO — BULK MOVIE & EPISODE UPLOAD
-   Maximum 10 records per batch.
+   Movies start with 10 rows. Episodes start
+   with 10 rows and can be expanded as needed.
    Each record is validated and saved separately.
 ========================================= */
 
@@ -2213,7 +2214,7 @@ let bulkUploadBusy = false;
 let bulkCancelRequested = false;
 let bulkUploadKind = null;
 
-const BULK_UPLOAD_LIMIT = 10;
+const BULK_UPLOAD_INITIAL_ROWS = 10;
 
 
 /* -----------------------------------------
@@ -2274,6 +2275,47 @@ function createBulkUploadModal() {
         .cineva-bulk-items {
             display: grid;
             gap: 15px;
+        }
+
+        .cineva-bulk-add-row-wrap {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .cineva-bulk-add-row-wrap.visible {
+            display: flex;
+        }
+
+        .cineva-bulk-add-row {
+            padding: 10px 14px;
+            color: #e7d7ff;
+            background: rgba(139,53,245,.14);
+            border: 1px solid rgba(168,85,247,.55);
+            border-radius: 8px;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cineva-bulk-row-count {
+            color: #aaaabd;
+            font-size: 11px;
+        }
+
+        .cineva-bulk-remove-row {
+            padding: 6px 9px;
+            color: #ff9cab;
+            background: rgba(239,49,94,.1);
+            border: 1px solid rgba(239,49,94,.3);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 10px;
+            cursor: pointer;
         }
 
         .cineva-bulk-item {
@@ -2442,6 +2484,13 @@ function createBulkUploadModal() {
                     class="cineva-bulk-items">
                 </div>
 
+                <div id="bulkUploadAddRowWrap" class="cineva-bulk-add-row-wrap">
+                    <button type="button" id="bulkUploadAddRow" class="cineva-bulk-add-row">
+                        + Add Another Episode
+                    </button>
+                    <span id="bulkUploadRowCount" class="cineva-bulk-row-count"></span>
+                </div>
+
                 <div class="cineva-bulk-actions">
 
                     <button
@@ -2472,6 +2521,15 @@ function createBulkUploadModal() {
     bulkUploadModal.querySelector("#bulkUploadForm")
         .addEventListener("submit", processBulkUpload);
 
+    bulkUploadModal.querySelector("#bulkUploadAddRow")
+        .addEventListener("click", () => {
+            if (bulkUploadKind !== "episode" || bulkUploadBusy) return;
+
+            const items = bulkUploadModal.querySelector("#bulkUploadItems");
+            items.appendChild(createBulkItem(items.children.length, "episode"));
+            updateBulkEpisodeRowCount();
+        });
+
     return bulkUploadModal;
 }
 
@@ -2497,7 +2555,33 @@ function createBulkItem(index, kind) {
     status.dataset.status = "pending";
     status.textContent = "Pending";
 
-    heading.append(number, status);
+    const headingActions = document.createElement("div");
+    headingActions.style.display = "flex";
+    headingActions.style.alignItems = "center";
+    headingActions.style.gap = "9px";
+
+    if (kind === "episode") {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "cineva-bulk-remove-row";
+        remove.textContent = "Remove";
+        remove.setAttribute("aria-label", "Remove this episode row");
+        remove.addEventListener("click", () => {
+            if (bulkUploadBusy) return;
+            const items = bulkUploadModal?.querySelector("#bulkUploadItems");
+            if (!items || items.children.length <= 1) {
+                alert("At least one episode row must remain.");
+                return;
+            }
+            item.remove();
+            renumberBulkEpisodeRows();
+            updateBulkEpisodeRowCount();
+        });
+        headingActions.appendChild(remove);
+    }
+
+    headingActions.appendChild(status);
+    heading.append(number, headingActions);
 
     const fieldsContainer = document.createElement("div");
     fieldsContainer.className = "cineva-bulk-fields";
@@ -2537,11 +2621,11 @@ function createBulkItem(index, kind) {
         input.name = name;
         input.autocomplete = "off";
 
-        // Native form validation prevents an episode row from being
-        // submitted without its own independent playback and download URLs.
+        // Watch URL is optional for episodes. Download URL remains
+        // required and is never substituted for the playback URL.
         if (
             kind === "episode" &&
-            ["title", "video_url", "download_url"].includes(name)
+            ["title", "download_url"].includes(name)
         ) {
             input.required = true;
         }
@@ -2599,7 +2683,7 @@ function openBulkUpload(kind) {
 
     description.textContent = kind === "movie"
         ? "Enter up to 10 movies. Each movie is validated and saved independently. Watch and Download URLs are separate."
-        : "Enter up to 10 episodes for this series. Each episode is validated and saved independently.";
+        : "10 episode rows are ready. Add as many more rows as you need. Watch URL is optional; Download URL remains separate and required.";
 
     submit.textContent = kind === "movie"
         ? "Upload Movies"
@@ -2607,9 +2691,13 @@ function openBulkUpload(kind) {
 
     submit.disabled = false;
 
-    for (let index = 0; index < BULK_UPLOAD_LIMIT; index++) {
+    for (let index = 0; index < BULK_UPLOAD_INITIAL_ROWS; index++) {
         items.appendChild(createBulkItem(index, kind));
     }
+
+    const addRowWrap = bulkUploadModal.querySelector("#bulkUploadAddRowWrap");
+    addRowWrap.classList.toggle("visible", kind === "episode");
+    updateBulkEpisodeRowCount();
 
     bulkUploadModal.hidden = false;
 
@@ -2620,6 +2708,21 @@ function openBulkUpload(kind) {
 /* -----------------------------------------
    BULK FIELD HELPERS
 ----------------------------------------- */
+
+function renumberBulkEpisodeRows() {
+    const items = bulkUploadModal?.querySelectorAll(".cineva-bulk-item") || [];
+    items.forEach((item, index) => {
+        const label = item.querySelector(".cineva-bulk-item-head strong");
+        if (label) label.textContent = `Ep${index + 1}`;
+        item.dataset.index = String(index);
+    });
+}
+
+function updateBulkEpisodeRowCount() {
+    const items = bulkUploadModal?.querySelectorAll(".cineva-bulk-item") || [];
+    const counter = bulkUploadModal?.querySelector("#bulkUploadRowCount");
+    if (counter) counter.textContent = `${items.length} episode rows ready`;
+}
 
 function getBulkItemValues(item) {
     const values = {};
@@ -2739,8 +2842,8 @@ function buildBulkPayload(values, kind) {
 
     validateBulkURL(values.thumbnail, "Thumbnail URL");
 
-    if (!values.video_url || !values.download_url) {
-        throw new Error("Every episode needs its own Watch URL and Download URL.");
+    if (!values.download_url) {
+        throw new Error("Download URL is required for each episode.");
     }
 
     return {
@@ -2879,22 +2982,21 @@ async function processBulkUpload(event) {
             const downloadUrl = normalizeEpisodeUrl(entry.payload.download_url);
 
             if (
-                !watchUrl ||
                 !downloadUrl ||
-                watchUrl === downloadUrl ||
-                usedUrls.has(watchUrl) ||
+                (watchUrl && watchUrl === downloadUrl) ||
+                (watchUrl && usedUrls.has(watchUrl)) ||
                 usedUrls.has(downloadUrl)
             ) {
                 setBulkItemStatus(
                     entry.item,
                     "failed",
-                    "Each episode needs two different URLs. Neither URL may be reused by another episode."
+                    "Download URL is required. Any supplied Watch URL must be different and unique."
                 );
                 entry.invalid = true;
                 continue;
             }
 
-            usedUrls.add(watchUrl);
+            if (watchUrl) usedUrls.add(watchUrl);
             usedUrls.add(downloadUrl);
         }
 
@@ -2959,8 +3061,8 @@ async function processBulkUpload(event) {
                         ? savedRows[0]
                         : savedRows;
 
-                    const expectedWatch = entry.payload.video_url;
-                    const expectedDownload = entry.payload.download_url;
+                    const expectedWatch = entry.payload.video_url || "";
+                    const expectedDownload = entry.payload.download_url || "";
 
                     if (
                         !saved ||
@@ -3034,7 +3136,7 @@ async function processBulkUpload(event) {
                 "Bulk upload finished.\n\n" +
                 `Saved: ${savedCount}\n` +
                 `Failed: ${failedCount}\n` +
-                `Skipped: ${BULK_UPLOAD_LIMIT - filledCount}` +
+                `Skipped: ${items.length - filledCount}` +
                 (
                     kind === "episode" && savedCount > 0
                         ? "\n\nParent series refreshed successfully."
@@ -3081,7 +3183,7 @@ function initializeBulkUploadButtons() {
     // Episodes bulk button.
     createManagementButton(
         "bulkAddEpisodesBtn",
-        "+ Bulk Add 10 Episodes",
+        "+ Bulk Add Episodes",
         "episodesTable",
         () => openBulkUpload("episode")
     );
