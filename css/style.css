@@ -98,7 +98,13 @@ body {
 
 }
 
-body,\nbutton,\ninput,\ntextarea,\nselect {\n    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n}
+body,
+button,
+input,
+textarea,
+select {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
 
 button,
 input,
