@@ -113,24 +113,17 @@ h1,h2,h3,h4,h5,h6,
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
 /* =========================================================
-   CINEVA — DEFAULT TEXT TYPOGRAPHY, ORIGINAL ICONS & SHAPES
-   Keep text on the browser/system font while preserving icon fonts,
-   emoji glyphs, SVG logos and decorative artwork.
+   CINEVA — BROWSER DEFAULT TEXT, ORIGINAL ICONS & SHAPES
+   Only reset text elements. Leave Font Awesome, emoji, SVG,
+   image logos and all CSS geometry/decorations untouched.
 ========================================================= */
 :root, body {
   font-family: revert !important;
 }
-body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,legend,figcaption,blockquote,button,input,select,textarea,optgroup) {
+body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,legend,figcaption,blockquote,button,input,select,textarea,optgroup):not(.fa):not([class*="fa-"]):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.material-icons):not(.material-symbols-outlined):not(.material-symbols-rounded):not(.icon):not([class^="icon-"]):not([class*=" icon-"]):not(.iconify):not(.emoji):not([data-emoji]) {
   font-family: revert !important;
 }
-/* Dedicated icon fonts and vector artwork must never inherit text reset. */
-[class*="fa-"], .fa, .fas, .far, .fal, .fab, .fad,
-.material-icons, .material-symbols-outlined, .material-symbols-rounded,
-[class^="icon-"], [class*=" icon-"], .iconify,
-svg, svg *, [data-icon], .brand-icon, .logo-icon {
-  font-family: revert !important;
-}
-/* Native emoji support on Android, Windows and Apple devices. */
+/* Emoji keep platform-native glyph fallback; no custom web font is required. */
 .emoji, [data-emoji] {
   font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
 }
