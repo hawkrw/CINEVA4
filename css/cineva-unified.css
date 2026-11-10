@@ -37,7 +37,7 @@ img{max-width:100%}button,input,select,textarea{font:inherit}a{text-decoration:n
 .hero-information h1 span,.hero-content h1 span,.info-hero h1 span{background:var(--cineva-gradient);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* Content, section headings, cards and information panels */
-.content-section,.info-content,.vip-benefits,.vip-plans,.vip-faq,.vip-room-main,.auth-main{width:min(calc(100% - 2 * var(--cineva-gutter)),var(--cineva-content-width));margin-inline:auto}
+.info-content,.vip-room-main,.auth-main{width:min(calc(100% - 2 * var(--cineva-gutter)),var(--cineva-content-width));margin-inline:auto}
 .content-section{padding-block:var(--cineva-section-gap)}
 .info-content{padding-block:32px 64px}
 .section-title h2,.section-heading h2,.info-card h2{color:#fff;letter-spacing:-.04em;font-weight:850}
