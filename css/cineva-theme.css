@@ -1,66 +1,132 @@
 /* =========================================================
-   CINEVA — GLOBAL VISUAL IDENTITY
-   One midnight / violet / rose palette across every page.
-   Typography remains Inter. Brand mark uses a rounded square
-   (squircle), not a circular crop.
+   CINEVA — SINGLE SOURCE OF TRUTH FOR THE BRAND SYSTEM
+   Five core brand colors:
+   midnight, deep slate, violet, lavender and rose.
+   White/grey and semantic status colors are supporting UI colors.
 ========================================================= */
 :root {
   color-scheme: dark;
-  --cineva-bg: #080812;
-  --cineva-bg-soft: #0d0d19;
-  --cineva-surface: #121221;
-  --cineva-surface-hover: #19192b;
-  --cineva-purple: #8b35f5;
-  --cineva-purple-light: #a855f7;
-  --cineva-purple-dark: #6420c9;
+
+  /* Five core brand colors */
+  --cineva-midnight: #080812;
+  --cineva-slate: #111322;
+  --cineva-violet: #8b35f5;
+  --cineva-lavender: #a855f7;
   --cineva-rose: #ef315e;
+
+  /* Shared surfaces and readable supporting colors */
+  --cineva-bg: var(--cineva-midnight);
+  --cineva-bg-soft: #0d0d19;
+  --cineva-surface: var(--cineva-slate);
+  --cineva-surface-hover: #19192b;
   --cineva-text: #ffffff;
   --cineva-muted: #b6b6c7;
-  --cineva-subtle: #77778e;
+  --cineva-subtle: #85859a;
   --cineva-border: rgba(255,255,255,.09);
-  --cineva-gradient: linear-gradient(135deg,#ef315e 0%,#a52df1 55%,#7137f5 100%);
+
+  --cineva-gradient: linear-gradient(135deg,var(--cineva-rose) 0%,var(--cineva-lavender) 55%,var(--cineva-violet) 100%);
+  --cineva-gradient-hover: linear-gradient(135deg,#ff5277 0%,#b86aff 55%,#965cff 100%);
   --cineva-shadow: 0 12px 34px rgba(139,53,245,.18);
+
+  /* Canonical legacy tokens */
+  --bg-primary: var(--cineva-bg);
+  --bg-secondary: var(--cineva-bg-soft);
+  --bg-card: var(--cineva-surface);
+  --bg-card-hover: var(--cineva-surface-hover);
+  --primary: var(--cineva-violet);
+  --primary-light: var(--cineva-lavender);
+  --primary-dark: #6420c9;
+  --secondary: var(--cineva-rose);
+  --secondary-dark: #c81d49;
+  --gradient-primary: var(--cineva-gradient);
+  --gradient-hover: var(--cineva-gradient-hover);
+  --text-primary: var(--cineva-text);
+  --text-secondary: var(--cineva-muted);
+  --text-muted: var(--cineva-subtle);
+  --border-color: var(--cineva-border);
+  --border-hover: rgba(168,85,247,.5);
+
+  /* Semantic colors are states, not extra brand colors */
+  --success: #22c58b;
+  --danger: #ef315e;
+  --warning: #f5bd4f;
+
+  --profile-bg: var(--cineva-bg);
+  --profile-purple: var(--cineva-violet);
+  --profile-blue: var(--cineva-lavender);
+  --profile-pink: var(--cineva-rose);
+
+  --watch-bg: var(--cineva-bg);
+  --watch-bg-soft: var(--cineva-bg-soft);
+  --watch-card: var(--cineva-surface);
+  --watch-card-light: var(--cineva-surface-hover);
+  --watch-primary: var(--cineva-violet);
+  --watch-primary-light: var(--cineva-lavender);
+  --watch-primary-dark: #6420c9;
+
+  --vip-bg: var(--cineva-bg);
+  --vip-bg-secondary: var(--cineva-bg-soft);
+  --vip-card: var(--cineva-surface);
+  --vip-card-hover: var(--cineva-surface-hover);
+  --vip-primary: var(--cineva-violet);
+  --vip-primary-light: var(--cineva-lavender);
+  --vip-secondary: var(--cineva-rose);
+
+  --movies-bg: var(--cineva-bg);
+  --movies-card: var(--cineva-surface);
+  --movies-card-hover: var(--cineva-surface-hover);
+  --movies-purple: var(--cineva-violet);
+  --movies-purple-light: var(--cineva-lavender);
+
+  --va-bg: var(--cineva-bg);
+  --va-bg-soft: var(--cineva-bg-soft);
+  --va-card: var(--cineva-surface);
+  --va-card-hover: var(--cineva-surface-hover);
+  --va-purple: var(--cineva-violet);
+  --va-purple-light: var(--cineva-lavender);
+  --va-pink: var(--cineva-rose);
+  --va-cyan: var(--cineva-lavender);
+
+  --auth-bg: var(--cineva-bg);
+  --auth-primary: var(--cineva-violet);
+  --auth-primary-light: var(--cineva-lavender);
+  --auth-secondary: var(--cineva-rose);
+
+  --background: var(--cineva-bg);
+  --surface: var(--cineva-surface);
+  --muted: var(--cineva-muted);
+  --cyan: var(--cineva-lavender);
+
+  --bg: var(--cineva-bg);
+  --card: var(--cineva-surface);
+  --card-hover: var(--cineva-surface-hover);
+  --purple: var(--cineva-violet);
+  --pink: var(--cineva-rose);
+
+  --vr-bg: var(--cineva-bg);
+  --vr-bg-soft: var(--cineva-bg-soft);
+  --vr-card: var(--cineva-surface);
+  --vr-card-hover: var(--cineva-surface-hover);
+  --vr-purple: var(--cineva-violet);
+  --vr-purple-light: var(--cineva-lavender);
+  --vr-pink: var(--cineva-rose);
 }
+
+/* Base document colors; component/page layout remains page-owned. */
 html { background: var(--cineva-bg); }
 body {
   background-color: var(--cineva-bg);
   color: var(--cineva-text);
-  /* Do not override page typography. Each page keeps its original font stack. */
 }
 ::selection { color:#fff; background:rgba(139,53,245,.72); }
 :focus-visible {
-  outline: 2px solid var(--cineva-purple-light);
+  outline: 2px solid var(--cineva-lavender);
   outline-offset: 3px;
 }
 a { -webkit-tap-highlight-color: transparent; }
+button, .btn, .primary-btn, .login-btn { accent-color: var(--cineva-violet); }
 
-/* Unified surface and border tokens, including legacy page tokens. */
-:root {
-  --bg-primary:var(--cineva-bg); --bg-secondary:var(--cineva-bg-soft);
-  --bg-card:var(--cineva-surface); --bg-card-hover:var(--cineva-surface-hover);
-  --primary:var(--cineva-purple); --primary-light:var(--cineva-purple-light);
-  --primary-dark:var(--cineva-purple-dark); --secondary:var(--cineva-rose);
-  --text-primary:var(--cineva-text); --text-secondary:var(--cineva-muted);
-  --text-muted:var(--cineva-subtle); --border-color:var(--cineva-border);
-  --profile-bg:var(--cineva-bg); --profile-purple:var(--cineva-purple);
-  --profile-blue:var(--cineva-purple-light); --profile-pink:var(--cineva-rose);
-  --watch-bg:var(--cineva-bg); --watch-bg-soft:var(--cineva-bg-soft);
-  --watch-card:var(--cineva-surface); --watch-card-light:var(--cineva-surface-hover);
-  --watch-primary:var(--cineva-purple); --watch-primary-light:var(--cineva-purple-light);
-  --vip-bg:var(--cineva-bg); --vip-bg-secondary:var(--cineva-bg-soft);
-  --vip-card:var(--cineva-surface); --vip-primary:var(--cineva-purple);
-  --vip-primary-light:var(--cineva-purple-light); --vip-secondary:var(--cineva-rose);
-  --movies-bg:var(--cineva-bg); --movies-purple:var(--cineva-purple);
-  --va-bg:var(--cineva-bg); --va-bg-soft:var(--cineva-bg-soft);
-  --va-card:var(--cineva-surface); --va-purple:var(--cineva-purple);
-  --va-purple-light:var(--cineva-purple-light); --va-pink:var(--cineva-rose);
-  --admin-bg:var(--cineva-bg); --admin-purple:var(--cineva-purple);
-  --admin-pink:var(--cineva-rose);
-  --auth-bg:var(--cineva-bg); --auth-primary:var(--cineva-purple);
-  --auth-primary-light:var(--cineva-purple-light); --auth-secondary:var(--cineva-rose);
-}
-
-/* Premium squircle logo frame: same visual shape across breakpoints. */
+/* Consistent premium squircle logo frame across all public pages. */
 .brand-icon, .main-header .brand-icon, .main-footer .footer-brand .brand-icon,
 .auth-brand-icon, .boot-logo, .sidebar-brand .brand-icon {
   border-radius: 16px !important;
@@ -79,6 +145,7 @@ a { -webkit-tap-highlight-color: transparent; }
   display:grid; place-items:center;
 }
 .auth-brand-icon img { width:100%; height:100%; object-fit:contain; padding:5px; }
+
 .info-logo::before, .profile-logo::before, .vip-header .brand::before,
 .auth-logo::before {
   content:"";
@@ -98,34 +165,19 @@ a { -webkit-tap-highlight-color: transparent; }
 .auth-logo::before { flex:0 0 34px; }
 .auth-logo::before { width:36px; height:36px; border-radius:12px; }
 
-/* Admin branding follows the same palette and rounded-square mark. */
 .admin-app .sidebar-brand .brand-icon {
   border-radius:13px !important;
   background:var(--cineva-gradient) !important;
 }
 .admin-app .sidebar, .admin-app .topbar,
-.auth-container .auth-card {
-  border-color:var(--cineva-border);
-}
-button, .btn, .primary-btn, .login-btn {
-  accent-color:var(--cineva-purple);
+.auth-container .auth-card { border-color:var(--cineva-border); }
+.admin-app .sidebar-brand .brand-icon,
+.admin-app .boot-logo {
+  color:transparent !important;
+  font-size:0 !important;
+  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat !important;
 }
 @media(max-width:600px) {
   .info-logo::before, .profile-logo::before, .vip-header .brand::before,
   .auth-logo::before { width:30px; height:30px; flex-basis:30px; border-radius:10px; }
-}
-
-.auth-container .brand-logo::before {
-  content:""; display:inline-block; width:34px; height:34px;
-  margin-right:10px; vertical-align:middle; border-radius:11px;
-  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat;
-  border:1px solid rgba(192,132,252,.32);
-}
-.admin-app .sidebar-brand .brand-icon {
-  color:transparent !important; font-size:0 !important;
-  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat !important;
-}
-.admin-app .boot-logo {
-  color:transparent !important; font-size:0 !important;
-  background:rgba(139,53,245,.15) url("../assets/images/logo.png") center/contain no-repeat !important;
 }
