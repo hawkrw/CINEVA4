@@ -3,6 +3,15 @@ import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
 import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
 
+// The HTML watchdog only protects failures before this module starts.
+// Cancel it immediately once dashboard.js has loaded successfully; the
+// separate 6-second administrator-verification timeout handles auth stalls.
+if (window.__cinevaBootWatchdog) {
+    window.clearTimeout(window.__cinevaBootWatchdog);
+    window.__cinevaBootWatchdog = null;
+}
+
+
 /* =========================================
    CINEVA PRO — DASHBOARD SECURITY
 ========================================= */
