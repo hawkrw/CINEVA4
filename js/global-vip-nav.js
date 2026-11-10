@@ -136,7 +136,7 @@
   });
 
   // VIP membership shortcut on all public pages except the homepage.
-  const currentPath = (window.location.pathname || "/").replace(/\\/+$/, "") || "/";
+  const currentPath = window.location.pathname || "/";
   const isHomePage = currentPath === "/" || currentPath.toLowerCase() === "/index.html";
   if (!isHomePage && !document.querySelector(".cineva-vip-floating")) {
     const floating = document.createElement("a");
