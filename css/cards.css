@@ -1742,3 +1742,61 @@ main .content-section .section-heading,
         font-size: 8px;
     }
 }
+
+
+/* Series catalogue card compatibility */
+.movie-poster .movie-card-category {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 4;
+    max-width: calc(100% - 20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 5px 9px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 6px;
+    background: rgba(8,8,18,.82);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+}
+.movie-poster .movie-translator-badge {
+    position: absolute;
+    right: 9px;
+    bottom: 9px;
+    z-index: 4;
+    max-width: calc(100% - 18px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 5px 8px;
+    border: 1px solid rgba(168,85,247,.5);
+    border-radius: 7px;
+    background: rgba(8,8,18,.86);
+    color: #e7d5ff;
+    font-size: 9px;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+}
+.movie-info > p {
+    margin-top: 6px;
+    color: var(--text-muted, #9292a8);
+    font-size: 11px;
+}
+@media (max-width: 600px) {
+    .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .movie-info {
+        padding: 10px 9px 12px;
+    }
+    .movie-info h3 {
+        font-size: 12px;
+    }
+}
