@@ -29,7 +29,7 @@ html {
 
 body {
     min-height: 100vh;
-    font-family:;
+    font-family: inherit;
     color: var(--text);
     background: var(--background);
     overflow-x: hidden;
