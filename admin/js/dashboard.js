@@ -141,7 +141,15 @@ function showBoot(message = "Verifying administrator access...") {
     if (adminApp) adminApp.hidden = true;
 }
 
+function clearBootWatchdog() {
+    if (window.__cinevaBootWatchdog) {
+        window.clearTimeout(window.__cinevaBootWatchdog);
+        window.__cinevaBootWatchdog = null;
+    }
+}
+
 function showError(message) {
+    clearBootWatchdog();
     if (errorMessage) errorMessage.textContent = message;
 
     if (bootScreen) bootScreen.hidden = true;
@@ -150,6 +158,7 @@ function showError(message) {
 }
 
 function showDashboard() {
+    clearBootWatchdog();
     if (bootScreen) bootScreen.hidden = true;
     if (errorScreen) errorScreen.hidden = true;
     if (adminApp) adminApp.hidden = false;
