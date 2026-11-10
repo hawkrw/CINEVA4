@@ -23,24 +23,35 @@ document.addEventListener("DOMContentLoaded", () => {
         })[char]);
     }
 
-    // Validate poster URLs.
-    function safeImageURL(value) {
-        try {
-            const url = new URL(value, window.location.href);
+    // Resolve Supabase poster URLs and TMDB poster_path values safely.
+    const POSTER_PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 
-            if (
-                url.protocol === "https:" ||
-                url.protocol === "http:"
-            ) {
+    function safeImageURL(value) {
+        if (value === null || value === undefined) return POSTER_PLACEHOLDER;
+
+        let candidate = String(value).trim();
+        if (!candidate) return POSTER_PLACEHOLDER;
+
+        // TMDB stores poster_path as a path, while admin uploads are full URLs.
+        if (candidate.startsWith("/assets/")) {
+            // Keep local CINEVA assets on the current origin.
+        } else if (candidate.startsWith("/")) {
+            candidate = "https://image.tmdb.org/t/p/w500" + candidate;
+        } else if (candidate.startsWith("assets/")) {
+            candidate = "/" + candidate;
+        }
+
+        try {
+            const url = new URL(candidate, window.location.href);
+            if (url.protocol === "https:" || url.protocol === "http:") {
                 return url.href;
             }
         } catch {
-            // Use placeholder below.
+            // Use the local placeholder below.
         }
 
-        return "assets/images/movie-placeholder.jpg";
+        return POSTER_PLACEHOLDER;
     }
-
     // Display series cards.
  
 // Display series cards with translator badges.
@@ -66,18 +77,22 @@ function renderSeries(seriesList) {
         const category = escapeHTML(series.category || "Series");
 
         const translator = escapeHTML(
-            series.translator?.trim() || ""
+            String(series.translator || "").trim()
         );
 
         const poster = escapeHTML(
             safeImageURL(
+                series.poster ||
+                series.image ||
                 series.poster_url ||
                 series.thumbnail_url ||
+                series.poster_path ||
                 ""
             )
         );
 
-        const year = escapeHTML(series.release_year || "");
+        const yearValue = series.year || series.release_year || (series.release_date ? String(series.release_date).slice(0, 4) : "");
+        const year = escapeHTML(yearValue);
         const rating = Number(series.rating || 0);
 
         return `
@@ -85,15 +100,15 @@ function renderSeries(seriesList) {
                 class="movie-card"
                 href="watch.html?id=${id}&type=series"
             >
-                <div class="movie-card-image">
+                <div class="movie-poster">
                     <img
                         src="${poster}"
                         alt="${title}"
                         loading="lazy"
-                        onerror="this.onerror=null;this.src='assets/images/movie-placeholder.jpg';"
+                        onerror="this.onerror=null;this.src='/assets/images/movie-placeholder.jpg';"
                     >
 
-                    <span class="movie-card-category">
+                    <span class="movie-type">
                         ${category}
                     </span>
 
@@ -105,13 +120,13 @@ function renderSeries(seriesList) {
                     ` : ""}
 
                     ${rating > 0 ? `
-                        <span class="movie-card-rating">
+                        <span class="movie-rating">
                             ★ ${rating.toFixed(1)}
                         </span>
                     ` : ""}
                 </div>
 
-                <div class="movie-card-info">
+                <div class="movie-info">
                     <h3>${title}</h3>
                     <p>${year || "TV Series"}</p>
                 </div>
@@ -140,7 +155,7 @@ function renderSeries(seriesList) {
             const searchableFields = [
                 series.title, series.original_title, series.translator,
                 series.category, series.overview, series.description, series.genre,
-                ...(Array.isArray(series.genres) ? series.genres : [])
+                ...(Array.isArray(series.genres) ? series.genres : [series.genres])
             ];
 
             const searchableText = searchableFields
