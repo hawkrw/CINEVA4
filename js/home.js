@@ -35,7 +35,7 @@ const HOME_CONFIG = {
 
     // Smaller TMDB images on phones reduce data use without changing card design.
     posterSize: window.matchMedia("(max-width: 600px)").matches ? "w342" : "w500",
-    backdropSize: window.matchMedia("(max-width: 600px)").matches ? "w780" : "w1280"
+    backdropSize: window.matchMedia("(max-width: 600px)").matches ? "w1280" : "original"
 };
 
 
@@ -222,6 +222,26 @@ function getPoster(item) {
 function getBackdrop(item) {
     if (!item) return "";
 
+    const getHDBackdropURL = value => {
+        const image = safeImageURL(value, HOME_CONFIG.backdropSize, true);
+        if (!image) return "";
+
+        // Upgrade existing TMDB backdrop URLs that were saved at poster-sized
+        // or medium resolution, without changing URLs from other image hosts.
+        try {
+            const url = new URL(image);
+            if (url.hostname === "image.tmdb.org") {
+                url.pathname = url.pathname.replace(
+                    /^(\/t\/p\/)[^/]+(?=\/)/,
+                    `$1${HOME_CONFIG.backdropSize}`
+                );
+            }
+            return url.href;
+        } catch {
+            return image;
+        }
+    };
+
     const backdropFields = [
         "backdrop_url",
         "backdrop",
@@ -237,22 +257,13 @@ function getBackdrop(item) {
             continue;
         }
 
-        const image = safeImageURL(
-            value,
-            HOME_CONFIG.backdropSize
-        );
-
+        const image = getHDBackdropURL(value);
         if (image) return image;
     }
 
     // TMDB backdrop path
     if (item.backdrop_path) {
-        const image = safeImageURL(
-            item.backdrop_path,
-            HOME_CONFIG.backdropSize,
-            true
-        );
-
+        const image = getHDBackdropURL(item.backdrop_path);
         if (image) return image;
     }
 
