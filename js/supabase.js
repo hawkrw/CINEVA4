@@ -131,7 +131,7 @@ export async function getHomepageData({
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
-            .order("last_activity_at", { ascending: false, nullsFirst: false })
+            .order("created_at", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
@@ -549,7 +549,7 @@ export async function getLatestContent(
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
-            .order("last_activity_at", { ascending: false, nullsFirst: false })
+            .order("created_at", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(safeResultLimit)
     ]);
@@ -566,7 +566,7 @@ export async function getLatestContent(
     const series = (seriesResult.data || []).map(item => ({
         ...item,
         content_type: "series",
-        latest_activity_at: item.last_activity_at || item.created_at,
+        latest_activity_at: item.created_at,
         has_new_episode: Boolean(item.last_activity_at) &&
             Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000
     }));
