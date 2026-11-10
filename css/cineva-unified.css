@@ -113,12 +113,24 @@ h1,h2,h3,h4,h5,h6,
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
 /* =========================================================
-   CINEVA — RESTORE BROWSER DEFAULT TYPOGRAPHY
-   No custom font families: let the browser/user system decide.
-   !important also neutralizes legacy font shorthand declarations.
+   CINEVA — DEFAULT TEXT TYPOGRAPHY, ORIGINAL ICONS & SHAPES
+   Keep text on the browser/system font while preserving icon fonts,
+   emoji glyphs, SVG logos and decorative artwork.
 ========================================================= */
-*,
-*::before,
-*::after {
+:root, body {
   font-family: revert !important;
+}
+body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,legend,figcaption,blockquote,button,input,select,textarea,optgroup) {
+  font-family: revert !important;
+}
+/* Dedicated icon fonts and vector artwork must never inherit text reset. */
+[class*="fa-"], .fa, .fas, .far, .fal, .fab, .fad,
+.material-icons, .material-symbols-outlined, .material-symbols-rounded,
+[class^="icon-"], [class*=" icon-"], .iconify,
+svg, svg *, [data-icon], .brand-icon, .logo-icon {
+  font-family: revert !important;
+}
+/* Native emoji support on Android, Windows and Apple devices. */
+.emoji, [data-emoji] {
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
 }
