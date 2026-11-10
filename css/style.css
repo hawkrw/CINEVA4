@@ -84,7 +84,7 @@ body {
     width: 100%;
     min-height: 100vh;
 
-    font-family:;
+    font-family: "Inter", sans-serif;
 
     background: var(--bg-primary);
 
@@ -103,7 +103,7 @@ button,
 input,
 textarea,
 select {
-    font-family:;
+    font-family: "Inter", sans-serif;
 }
 
 button,
@@ -2319,3 +2319,41 @@ body.cineva-community-open{overflow:hidden}
 .cineva-community-loading i{margin-right:7px;color:#b77bff}
 @media(max-width:600px){.cineva-community-overlay{align-items:flex-end}.cineva-community-modal{width:100%;height: min(92dvh,900px);height:min(92vh,900px);border:1px solid rgba(168,85,247,.24);border-bottom:0;border-radius:20px 20px 0 0;transform:translateY(35px)}.cineva-community-overlay.open .cineva-community-modal{transform:translateY(0)}.cineva-community-header{padding:16px 16px 13px}.cineva-community-tabs{padding:10px 9px;gap:4px}.cineva-community-tabs button{font-size:10px;gap:5px;padding:8px 3px}.cineva-community-pane{padding:17px 14px 22px}.cineva-community-section-heading h3{font-size:16px}.cineva-community-section-heading p{font-size:11px}.cineva-chat-messages{height:34vh;min-height:170px}.cineva-chat-form-footer{font-size:8px}.cineva-latest-item{padding:8px}.cineva-latest-poster{width:47px;height:63px;flex-basis:47px}}
 @media(prefers-reduced-motion:reduce){.cineva-community-overlay,.cineva-community-modal,.cineva-latest-item{transition:none}}
+
+
+/* CINEVA legacy page header compatibility */
+.main-header .header-container,
+.main-header .navbar.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: min(calc(100% - 48px), var(--container-width));
+    height: 100%;
+    margin-inline: auto;
+    gap: 18px;
+}
+.main-header .logo {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    white-space: nowrap;
+}
+.main-header .logo > span {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+@media (max-width: 950px) {
+    .main-header .header-container,
+    .main-header .navbar.container {
+        width: calc(100% - 32px);
+        justify-content: space-between;
+    }
+    .main-header .menu-toggle {
+        display: inline-flex;
+        flex: 0 0 42px;
+        margin-left: auto;
+    }
+}
