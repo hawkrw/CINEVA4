@@ -112,18 +112,235 @@ h1,h2,h3,h4,h5,h6,
 @media(max-width:650px){:root{--cineva-gutter:15px;--cineva-section-gap:38px}.info-header{min-height:64px;padding-inline:15px}.info-nav{width:100%;justify-content:flex-start;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.info-nav::-webkit-scrollbar{display:none}.info-nav a{white-space:nowrap}.info-hero,.vip-hero,.vip-room-hero{border-radius:17px}.info-hero{padding:30px 19px}.info-hero h1{font-size:clamp(32px,9vw,44px)}.info-content{padding-block:22px 42px}.info-footer{padding:27px 15px}.info-footer-links{gap:10px 16px}.main-footer{margin-top:38px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
+
+
 /* =========================================================
-   CINEVA — BROWSER DEFAULT TEXT, ORIGINAL ICONS & SHAPES
-   Only reset text elements. Leave Font Awesome, emoji, SVG,
-   image logos and all CSS geometry/decorations untouched.
+   CINEVA — SITE-WIDE HARMONY PASS
+   Shared typography, navigation, surfaces and page rhythm.
+   Keep page-specific layouts and all existing functionality.
 ========================================================= */
-:root, body {
-  font-family: revert !important;
+:root{
+  --cineva-font-body:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --cineva-font-display:"Outfit","Inter",system-ui,sans-serif;
+  --cineva-page-gutter:clamp(15px,3.2vw,46px);
+  --cineva-panel:linear-gradient(145deg,rgba(20,20,39,.96),rgba(12,12,25,.96));
 }
-body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,legend,figcaption,blockquote,button,input,select,textarea,optgroup):not(.fa):not([class*="fa-"]):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.material-icons):not(.material-symbols-outlined):not(.material-symbols-rounded):not(.icon):not([class^="icon-"]):not([class*=" icon-"]):not(.iconify):not(.emoji):not([data-emoji]) {
-  font-family: revert !important;
+html,body{font-family:var(--cineva-font-body)!important}
+body,button,input,select,textarea,optgroup{font-family:var(--cineva-font-body)!important}
+h1,h2,h3,h4,h5,h6,
+.hero-information h1,.hero-content h1,
+.genre-hero-copy h1,.viewall-hero h1,
+.watch-title,.categories-heading h1,
+.section-title h2,.section-heading h2{
+  font-family:var(--cineva-font-display)!important;
+  font-optical-sizing:auto;
+  letter-spacing:-.035em;
 }
-/* Emoji keep platform-native glyph fallback; no custom web font is required. */
-.emoji, [data-emoji] {
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
+body{min-width:320px;max-width:100%;overflow-x:clip}
+img,video,iframe{max-width:100%}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--cineva-lavender,#a855f7);outline-offset:3px}
+
+/* Consistent global navigation across every public page variant. */
+.main-header{
+  background:rgba(8,8,18,.92)!important;
+  border-bottom:1px solid rgba(255,255,255,.085)!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.2)!important;
+  backdrop-filter:blur(22px) saturate(145%);
+  -webkit-backdrop-filter:blur(22px) saturate(145%);
+}
+.main-header .navbar,.main-header .header-container{
+  max-width:1440px;
+  margin-inline:auto;
+}
+.main-header .nav-link{
+  color:var(--cineva-muted,#b6b6c7);
+  font-weight:650;
+  transition:color .2s ease,background .2s ease;
+}
+.main-header .nav-link:hover,.main-header .nav-link.active{color:#fff}
+.main-header .nav-link.active:after{
+  background:var(--cineva-gradient);
+}
+.main-header .nav-icon,.main-header .mobile-menu-btn,.main-header .menu-toggle{
+  transition:background .2s ease,border-color .2s ease,color .2s ease,transform .2s ease;
+}
+.main-header .nav-icon:hover,.main-header .mobile-menu-btn:hover,.main-header .menu-toggle:hover{
+  color:#fff;border-color:rgba(168,85,247,.42);background:rgba(139,53,245,.14);
+}
+.search-box,.search-box input{min-width:0;max-width:100%}
+
+/* Shared page canvas and content width. */
+.genre-page,.viewall-page,.categories-page,.watch-page-body{
+  background:
+    radial-gradient(ellipse at 12% -12%,rgba(139,53,245,.10),transparent 34%),
+    var(--cineva-bg,#080812)!important;
+  color:var(--cineva-text,#fff);
+}
+.genre-main,.viewall-page,.categories-page,.watch-page{
+  width:100%;max-width:100%;min-width:0;
+}
+.genre-content-section,.viewall-main{
+  width:100%;
+}
+.genre-content-section>.container,
+.viewall-page .container,
+.categories-page .container,
+.watch-page .container{
+  width:min(calc(100% - 2 * var(--cineva-page-gutter)),1440px);
+  margin-inline:auto;
+}
+
+/* Genre / browse / catalogue heroes use the same cinematic surface. */
+.genre-hero,.viewall-hero{
+  background:
+    radial-gradient(ellipse at 82% 18%,rgba(239,49,94,.13),transparent 36%),
+    radial-gradient(ellipse at 72% 80%,rgba(139,53,245,.22),transparent 42%),
+    linear-gradient(125deg,#111322,#111020 56%,#1a1029)!important;
+  border-bottom:1px solid rgba(255,255,255,.075);
+}
+.genre-hero-copy h1,.viewall-hero h1{
+  font-family:var(--cineva-font-display)!important;
+  font-weight:800;letter-spacing:-.05em;
+}
+.genre-hero-copy p,.viewall-hero-content>p{color:var(--cineva-muted)}
+.genre-stat,.viewall-stat,.genre-toolbar,.viewall-filters{
+  background:var(--cineva-panel);
+  border:1px solid var(--cineva-border);
+  box-shadow:0 14px 42px rgba(0,0,0,.16);
+}
+.genre-toolbar,.viewall-filters{border-radius:17px}
+.genre-select-wrap select,.genre-search-field input,
+#catalogueSearch,#typeFilter,#categoryFilter,#sortFilter{
+  color:#fff;background:#100e1d;border:1px solid var(--cineva-border);
+  border-radius:11px;min-width:0;
+}
+.genre-select-wrap select option,
+#typeFilter option,#categoryFilter option,#sortFilter option{
+  color:#fff;background:#171326;
+}
+.genre-grid,.viewall-grid,.movie-grid{
+  min-width:0;
+}
+.genre-grid .movie-card,.viewall-grid .movie-card{
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:14px;
+  background:linear-gradient(155deg,#171727,#10101c);
+  box-shadow:0 8px 25px rgba(0,0,0,.2);
+}
+.genre-grid .movie-card:hover,.viewall-grid .movie-card:hover{
+  border-color:rgba(168,85,247,.48);
+  box-shadow:0 15px 35px rgba(0,0,0,.35),0 0 22px rgba(145,60,255,.12);
+}
+.genre-empty,.genre-error,#viewallEmpty,.viewall-empty{
+  background:rgba(255,255,255,.025);
+  border:1px dashed rgba(255,255,255,.13);
+  border-radius:18px;
+}
+
+/* Categories landing page — same spacing, cards and visual language. */
+.categories-page{
+  min-height:calc(100vh - var(--cineva-header-height,76px));
+  padding:clamp(34px,5vw,68px) 0;
+}
+.categories-heading{
+  width:min(calc(100% - 2 * var(--cineva-page-gutter)),1440px);
+  margin:0 auto clamp(25px,4vw,42px);
+}
+.categories-heading h1{
+  color:#fff;font-size:clamp(30px,4.4vw,52px);font-weight:800;
+}
+.categories-heading p{max-width:650px;color:var(--cineva-muted);line-height:1.8}
+.categories-page .genre-grid{
+  width:min(calc(100% - 2 * var(--cineva-page-gutter)),1440px);
+  margin-inline:auto;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,2vw,22px);
+}
+.categories-page .genre-card{
+  min-width:0;overflow:hidden;border:1px solid var(--cineva-border);
+  border-radius:17px;background:var(--cineva-panel);
+  box-shadow:0 12px 32px rgba(0,0,0,.17);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+.categories-page .genre-card:hover{
+  transform:translateY(-5px);border-color:rgba(168,85,247,.48);
+  box-shadow:0 16px 36px rgba(0,0,0,.3);
+}
+.categories-page .genre-icon{border-radius:13px;overflow:hidden}
+.categories-note{color:var(--cineva-muted)}
+
+/* Watch experience: premium player frame, metadata, controls and panels. */
+.watch-page-body{
+  background:
+    radial-gradient(ellipse at 82% 2%,rgba(139,53,245,.13),transparent 32%),
+    #080812!important;
+}
+.watch-page{min-height:70vh}
+.watch-details-section,.player-section,.movie-parts-section,
+.episodes-section,.comments-section,.related-section{
+  border-color:var(--cineva-border);
+}
+.watch-details-section{background:transparent}
+.watch-information,.watch-poster,.player-section,.movie-parts-section,
+.episodes-section,.comments-section,.related-section,
+.comment-form-card,.player-topbar{
+  background:var(--cineva-panel);
+  border:1px solid var(--cineva-border);
+  border-radius:18px;
+  box-shadow:0 14px 42px rgba(0,0,0,.16);
+}
+.watch-title{color:#fff;font-weight:800;line-height:1.12}
+.watch-description,.watch-meta,.watch-small-label{color:var(--cineva-muted)}
+.video-player-wrapper{
+  overflow:hidden;border:1px solid rgba(168,85,247,.22);
+  border-radius:16px;background:#030308;
+  box-shadow:0 18px 48px rgba(0,0,0,.32);
+}
+.player-action-btn,.engagement-btn,.episode-card,.movie-part-card{
+  border-color:var(--cineva-border);
+}
+.player-action-btn:hover,.engagement-btn:hover{
+  border-color:rgba(168,85,247,.5);background:rgba(139,53,245,.13);
+}
+.primary-watch-btn,.download-watch-btn,.post-comment-btn{
+  border-radius:11px;font-weight:800;
+}
+.watch-section-heading h2{font-family:var(--cineva-font-display)!important}
+.related-grid,.related-horizontal-grid{min-width:0}
+.related-grid .movie-card,.related-horizontal-grid .movie-card{
+  border:1px solid var(--cineva-border);border-radius:14px;overflow:hidden;
+}
+.watch-loading,.watch-error{
+  color:var(--cineva-muted);
+}
+
+/* Shared footer, buttons, form controls and focus states. */
+.main-footer{
+  background:linear-gradient(180deg,rgba(13,13,25,.98),#080812 78%);
+  border-top:1px solid var(--cineva-border);
+}
+.primary-btn,.secondary-btn,.genre-reset-btn,.genre-empty-btn,
+#resetFilters,#loadMoreBtn,.watch-back-home{
+  border-radius:11px;font-weight:750;
+}
+input,select,textarea{
+  max-width:100%;color:#fff;
+}
+@media(max-width:950px){
+  .categories-page .genre-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .categories-page{padding:28px 0 48px}
+  .categories-page .genre-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .categories-heading{margin-bottom:22px}
+  .genre-hero,.viewall-hero{padding-top:clamp(88px,16vw,112px)}
+  .watch-page .container,.genre-content-section>.container,
+  .viewall-page .container{width:calc(100% - 30px)}
+  .watch-information,.player-section,.movie-parts-section,
+  .episodes-section,.comments-section,.related-section{border-radius:14px}
+}
+@media(max-width:380px){
+  .categories-page .genre-grid{gap:9px}
+  .categories-page .genre-card{border-radius:12px}
 }
