@@ -561,12 +561,12 @@
             if (boot) boot.hidden = true;
             if (message) {
                 message.textContent =
-                    "The dashboard could not finish loading its scripts. Check your internet connection, then try again. If this continues, contact support.";
+                    "The dashboard could not finish loading its scripts. The dashboard scripts did not start within 6 seconds. Check your connection and reload the page.";
             }
             if (error) error.hidden = false;
-        }, 25000);
+        }, 6000);
     </script>
-    <script type="module" src="./js/dashboard.js?v=20261110-6"></script>
+    <script type="module" src="./js/dashboard.js?v=20261110-7"></script>
 
     <script src="../js/contact-widget.js?v=20261109-1" defer></script>
 
