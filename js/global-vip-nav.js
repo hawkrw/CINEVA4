@@ -48,6 +48,12 @@
       .cineva-mobile-menu-toggle { min-width:38px; height:38px; }
       .cineva-vip-nav-link { padding:8px 11px !important; font-size:12px; }
     }
+/* VIP membership floating shortcut — left side on all pages except home. */
+.cineva-vip-floating{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:12000!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:42px!important;min-height:154px!important;padding:13px 10px!important;border:1px solid rgba(216,180,254,.42)!important;border-left:0!important;border-radius:0 14px 14px 0!important;color:#fff!important;background:linear-gradient(180deg,#9b45f5 0%,#6423b8 55%,#40166f 100%)!important;box-shadow:5px 8px 25px rgba(0,0,0,.34),0 0 22px rgba(139,53,245,.25)!important;text-decoration:none!important;writing-mode:vertical-rl!important;font-size:10px!important;font-weight:900!important;letter-spacing:1.25px!important;transition:width .2s ease,filter .2s ease,box-shadow .2s ease!important;-webkit-tap-highlight-color:transparent}
+.cineva-vip-floating i{font-size:15px!important;color:#ffe7a3!important}
+.cineva-vip-floating:hover,.cineva-vip-floating:focus-visible{width:48px!important;filter:brightness(1.12);box-shadow:7px 10px 28px rgba(0,0,0,.4),0 0 26px rgba(168,85,247,.4)!important;outline:none}
+@media(max-width:600px){.cineva-vip-floating{width:34px!important;min-height:126px!important;padding:10px 7px!important;font-size:8px!important;letter-spacing:1px!important;border-radius:0 11px 11px 0!important}.cineva-vip-floating i{font-size:13px!important}}
+
   `;
   document.head.appendChild(style);
 
@@ -142,8 +148,3 @@
     document.body.appendChild(floating);
   }
 })();
-/* VIP membership floating shortcut — left side on all pages except home. */
-.cineva-vip-floating{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:12000!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:42px!important;min-height:154px!important;padding:13px 10px!important;border:1px solid rgba(216,180,254,.42)!important;border-left:0!important;border-radius:0 14px 14px 0!important;color:#fff!important;background:linear-gradient(180deg,#9b45f5 0%,#6423b8 55%,#40166f 100%)!important;box-shadow:5px 8px 25px rgba(0,0,0,.34),0 0 22px rgba(139,53,245,.25)!important;text-decoration:none!important;writing-mode:vertical-rl!important;font-size:10px!important;font-weight:900!important;letter-spacing:1.25px!important;transition:width .2s ease,filter .2s ease,box-shadow .2s ease!important;-webkit-tap-highlight-color:transparent}
-.cineva-vip-floating i{font-size:15px!important;color:#ffe7a3!important}
-.cineva-vip-floating:hover,.cineva-vip-floating:focus-visible{width:48px!important;filter:brightness(1.12);box-shadow:7px 10px 28px rgba(0,0,0,.4),0 0 26px rgba(168,85,247,.4)!important;outline:none}
-@media(max-width:600px){.cineva-vip-floating{width:34px!important;min-height:126px!important;padding:10px 7px!important;font-size:8px!important;letter-spacing:1px!important;border-radius:0 11px 11px 0!important}.cineva-vip-floating i{font-size:13px!important}}
