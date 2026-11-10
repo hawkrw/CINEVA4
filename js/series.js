@@ -85,7 +85,7 @@ function renderSeries(seriesList) {
                 class="movie-card"
                 href="watch.html?id=${id}&type=series"
             >
-                <div class="movie-card-image">
+                <div class="movie-poster">
                     <img
                         src="${poster}"
                         alt="${title}"
@@ -111,7 +111,7 @@ function renderSeries(seriesList) {
                     ` : ""}
                 </div>
 
-                <div class="movie-card-info">
+                <div class="movie-info">
                     <h3>${title}</h3>
                     <p>${year || "TV Series"}</p>
                 </div>
