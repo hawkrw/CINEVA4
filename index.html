@@ -47,41 +47,14 @@
 
     <link rel="stylesheet" href="css/cineva-theme.css?v=20261110-1">
 
-    <!-- Homepage-only layout safeguards for narrow screens -->
+    <!-- Homepage content safeguards only; shared header styles come from the site-wide stylesheets. -->
     <style>
-        .main-header, .navbar { max-width: 100%; }
-        .navbar { min-width: 0; }
-        .navbar > *, .nav-actions, .logo { min-width: 0; }
-        .logo { flex-shrink: 0; }
-        .search-box {
-            flex: 1 1 220px;
-            min-width: 0;
-            max-width: 420px;
-        }
-        .search-box input { width: 100%; min-width: 0; }
-        .search-box button { flex: 0 0 auto; white-space: nowrap; }
-        .nav-actions { flex-shrink: 0; }
         img, video, iframe { max-width: 100%; }
-        @media (max-width: 950px) {
-            .navbar { gap: 10px; }
-            .search-box { flex: 1 1 150px; max-width: none; }
-        }
         @media (max-width: 600px) {
-            .navbar { gap: 7px; }
-            .search-box { flex: 1 1 90px; }
-            .search-box input { font-size: 11px; }
-            .search-box input::placeholder { opacity: .75; }
-            .search-box button { padding: 8px 9px; font-size: 10px; }
-            .logo-text small { white-space: nowrap; }
             .hero-buttons { flex-wrap: wrap; }
             .section-heading, .section-title { min-width: 0; }
             .section-title > div { min-width: 0; }
             .footer-container { min-width: 0; }
-        }
-        @media (max-width: 360px) {
-            .search-box input::placeholder { color: transparent; }
-            .search-box { flex-basis: 64px; }
-            .logo-text small { display: none; }
         }
     </style>
 
@@ -100,7 +73,7 @@
     <script type="application/ld+json">
     {"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://cineva4.djhawkrw.workers.dev/#organization","name":"CINEVA","url":"https://cineva4.djhawkrw.workers.dev/","logo":"https://cineva4.djhawkrw.workers.dev/assets/images/logo.png"},{"@type":"WebSite","@id":"https://cineva4.djhawkrw.workers.dev/#website","name":"CINEVA","url":"https://cineva4.djhawkrw.workers.dev/","publisher":{"@id":"https://cineva4.djhawkrw.workers.dev/#organization"},"inLanguage":"en"}]}
     </script>
-  <link rel="stylesheet" href="css/cineva-unified.css?v=20261110-9">
+  <link rel="stylesheet" href="css/cineva-unified.css?v=20261110-10">
 </head>
 
 <body>
@@ -168,7 +141,7 @@
                     Categories
                 </a>
 
-                <!-- Secure administrator entry for the installed app and website --></nav>
+                </nav>
              <!-- SEARCH -->
 
                 <form id="search-form" class="search-box">
