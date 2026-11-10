@@ -39,7 +39,7 @@ html {
 }
 
 body {
-    font-family:;
+    font-family: inherit;
     background: var(--vip-bg);
     color: var(--vip-text);
     overflow-x: hidden;
