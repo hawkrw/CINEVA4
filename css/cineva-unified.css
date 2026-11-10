@@ -111,3 +111,14 @@ h1,h2,h3,h4,h5,h6,
 @media(max-width:950px){:root{--cineva-header-height:68px;--cineva-gutter:18px}.info-header{min-height:68px;flex-wrap:wrap}.info-nav,.header-nav,.vip-room-nav{gap:8px 15px}.info-nav a,.header-nav a,.vip-room-nav a{font-size:12px}.info-hero{padding:34px 22px}}
 @media(max-width:650px){:root{--cineva-gutter:15px;--cineva-section-gap:38px}.info-header{min-height:64px;padding-inline:15px}.info-nav{width:100%;justify-content:flex-start;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.info-nav::-webkit-scrollbar{display:none}.info-nav a{white-space:nowrap}.info-hero,.vip-hero,.vip-room-hero{border-radius:17px}.info-hero{padding:30px 19px}.info-hero h1{font-size:clamp(32px,9vw,44px)}.info-content{padding-block:22px 42px}.info-footer{padding:27px 15px}.info-footer-links{gap:10px 16px}.main-footer{margin-top:38px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* =========================================================
+   CINEVA — RESTORE BROWSER DEFAULT TYPOGRAPHY
+   No custom font families: let the browser/user system decide.
+   !important also neutralizes legacy font shorthand declarations.
+========================================================= */
+*,
+*::before,
+*::after {
+  font-family: revert !important;
+}
