@@ -16,14 +16,14 @@
 
     <link rel="stylesheet" href="css/style.css?v=20261110-1">
     <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/cards.css?v=20261110-2">
     <link rel="stylesheet" href="css/responsive.css?v=20261109-2">
     <link rel="stylesheet" href="css/contact-widget.css?v=20261109-1">
 
     <style>
         .series-page {
             min-height: 100vh;
-            padding: 130px 5% 80px;
+            padding: 38px 5% 80px;
         }
 
         .series-heading {
@@ -100,7 +100,7 @@
 
         @media (max-width: 750px) {
             .series-page {
-                padding: 110px 4% 60px;
+                padding: 28px 4% 60px;
             }
 
             .series-toolbar {
@@ -114,11 +114,17 @@
 
         @media (max-width: 450px) {
             .series-toolbar {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .series-toolbar input {
-                grid-column: auto;
+                grid-column: 1 / -1;
+            }
+
+            .series-toolbar select {
+                min-width: 0;
+                padding-inline: 12px;
+                font-size: 13px;
             }
         }
     </style>
@@ -548,7 +554,7 @@
 </footer>
 
     <!-- JAVASCRIPT -->
-    <script type="module" src="js/series.js?v=20261109-2"></script>
+    <script type="module" src="js/series.js?v=20261110-2"></script>
 <script type="module" src="js/search.js?v=20261110-1"></script>
     <script src="js/navigation.js?v=20261109-2" defer></script>
     <script src="js/contact-widget.js?v=20261109-1"></script>
