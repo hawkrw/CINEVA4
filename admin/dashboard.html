@@ -552,7 +552,21 @@
 
     </div>
 
-    <script type="module" src="./js/dashboard.js?v=20261109-13"></script>
+    <script>
+        // Fallback for a module/CDN failure before dashboard.js can run.
+        window.__cinevaBootWatchdog = window.setTimeout(() => {
+            const boot = document.getElementById("adminBootScreen");
+            const error = document.getElementById("adminErrorScreen");
+            const message = document.getElementById("adminErrorMessage");
+            if (boot) boot.hidden = true;
+            if (message) {
+                message.textContent =
+                    "The dashboard could not finish loading its scripts. Check your internet connection, then try again. If this continues, contact support.";
+            }
+            if (error) error.hidden = false;
+        }, 25000);
+    </script>
+    <script type="module" src="./js/dashboard.js?v=20261110-6"></script>
 
     <script src="../js/contact-widget.js?v=20261109-1" defer></script>
 
