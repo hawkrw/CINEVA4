@@ -23,7 +23,7 @@
     <style>
         .series-page {
             min-height: 100vh;
-            padding: 130px 5% 80px;
+            padding: 38px 5% 80px;
         }
 
         .series-heading {
@@ -100,11 +100,11 @@
 
         @media (max-width: 750px) {
             .series-page {
-                padding: 110px 4% 60px;
+                padding: 28px 4% 60px;
             }
 
             .series-toolbar {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             }
 
             .series-toolbar input {
@@ -114,7 +114,7 @@
 
         @media (max-width: 450px) {
             .series-toolbar {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             }
 
             .series-toolbar input {
@@ -143,7 +143,7 @@
 
     <!-- HEADER -->
     <header class="main-header">
-        <div class="header-container">
+        <div class="navbar container header-container">
 
             <a href="/" class="logo">
                 CINE<span>VA</span>
