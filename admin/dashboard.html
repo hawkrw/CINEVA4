@@ -564,6 +564,14 @@
                     "The dashboard could not finish loading its scripts. The dashboard scripts did not start within 6 seconds. Check your connection and reload the page.";
             }
             if (error) error.hidden = false;
+
+            // Keep Retry usable even when dashboard.js failed to load.
+            const retry = document.getElementById("retryVerification");
+            if (retry) {
+                retry.addEventListener("click", () => {
+                    window.location.reload();
+                }, { once: true });
+            }
         }, 6000);
     </script>
     <script type="module" src="./js/dashboard.js?v=20261110-7"></script>
