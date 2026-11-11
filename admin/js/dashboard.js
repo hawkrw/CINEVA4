@@ -35,6 +35,14 @@ let platformAdmin = null;
 let selectedSeriesId = null;
 let selectedSeriesName = "";
 
+const DEFAULT_CONTENT_CATEGORIES = [
+    "Action", "Adventure", "Animation", "Biography", "Comedy",
+    "Crime", "Documentary", "Drama", "Erotic", "Family", "Fantasy",
+    "History", "Horror", "Highschool", "Indian", "Japanese",
+    "Korean", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller",
+    "War", "Western", "Chinese", "Filipino", "Musical"
+];
+
 const $ = id => document.getElementById(id);
 
 const bootScreen = $("adminBootScreen");
@@ -126,7 +134,14 @@ function attachCategorySuggestions(input, listId) {
         document.body.appendChild(list);
     }
     list.replaceChildren();
-    (platformAdmin?.getCategoryNames() || []).forEach(name => {
+    const names = new Set([
+        ...DEFAULT_CONTENT_CATEGORIES,
+        ...(platformAdmin?.getCategoryNames() || []),
+        ...moviesCache.map(item => item.category?.trim()),
+        ...seriesCache.map(item => item.category?.trim())
+    ].filter(Boolean));
+
+    [...names].sort((a, b) => a.localeCompare(b)).forEach(name => {
         const option = document.createElement("option");
         option.value = name;
         list.appendChild(option);
@@ -382,7 +397,9 @@ function populateMovieCategories() {
 
     const categories = [
         ...new Set([
+            ...DEFAULT_CONTENT_CATEGORIES,
             ...moviesCache.map(movie => movie.category?.trim()),
+            ...seriesCache.map(series => series.category?.trim()),
             ...(platformAdmin?.getCategoryNames() || [])
         ].filter(Boolean))
     ].sort((a, b) => a.localeCompare(b));
@@ -1642,8 +1659,13 @@ function openContentForm(type, record = null) {
             input.maxLength = 250;
         }
 
-        if (!isSeries && ["video_url", "download_url"].includes(name)) {
+        if (!isSeries && name === "download_url") {
             input.required = true;
+            input.autocomplete = "url";
+        }
+
+        if (!isSeries && name === "video_url") {
+            input.required = false;
             input.autocomplete = "url";
         }
 
@@ -1969,12 +1991,12 @@ async function saveContentForm(event) {
         const watchUrl = normalizeEpisodeUrl(payload.video_url);
         const downloadUrl = normalizeEpisodeUrl(payload.download_url);
 
-        if (!watchUrl || !downloadUrl) {
-            alert("Every episode must have its own Watch URL and Download URL.");
+        if (!downloadUrl) {
+            alert("Every episode must have its own Download URL. The Watch URL is optional.");
             return;
         }
 
-        if (watchUrl === downloadUrl) {
+        if (watchUrl && watchUrl === downloadUrl) {
             alert("The Watch URL and Download URL must be two different links.");
             return;
         }
@@ -2641,6 +2663,10 @@ function createBulkItem(index, kind) {
 
         wrapper.append(label, input);
         fieldsContainer.appendChild(wrapper);
+
+        if (kind === "movie" && name === "category") {
+            attachCategorySuggestions(input, "cinevaCategoryOptions");
+        }
     });
 
     const error = document.createElement("div");
@@ -4045,11 +4071,11 @@ function createMoviePartRow(part = {}, index = 0) {
         },
         {
             name: "watch_url",
-            label: "Part Watch URL *",
-            placeholder: "https://your-watch-link.com",
-            value: part.watch_url || "",
+            label: "Part Watch URL (Optional)",
+            placeholder: "Add a playback link now or later",
+            value: part.watch_url || part.video_url || "",
             type: "url",
-            required: true
+            required: false
         },
         {
             name: "download_url",
@@ -4181,10 +4207,11 @@ function collectMovieParts() {
         // Ignore a completely empty row.
         if (!title && !watchUrl && !downloadUrl) return;
 
-        // Every entered part must be complete.
-        if (!title || !watchUrl || !downloadUrl) {
+        // A part needs its own title and download link. Playback can be
+        // added later, so a missing Watch URL must never block saving.
+        if (!title || !downloadUrl) {
             throw new Error(
-                `Please complete the title, Watch URL and Download URL for Part ${index + 1}.`
+                `Please complete the title and Download URL for Part ${index + 1}. Watch URL is optional.`
             );
         }
 
@@ -4202,13 +4229,13 @@ function collectMovieParts() {
             }
         };
 
-        validateUrl(watchUrl, "Watch URL");
+        if (watchUrl) validateUrl(watchUrl, "Watch URL");
         validateUrl(downloadUrl, "Download URL");
 
         parts.push({
             part_number: parts.length + 1,
             title,
-            watch_url: watchUrl,
+            watch_url: watchUrl || null,
             download_url: downloadUrl
         });
     });
@@ -4698,14 +4725,7 @@ function createMovieModal() {
                     <div class="cineva-field">
                         <label>Movie Category *</label>
                         <select name="category" required>
-                            <option value="">Select movie category</option>
-                            <option value="Action">Action</option>
-                            <option value="Horror">Horror</option>
-                            <option value="Drama">Drama</option>
-                            <option value="Highschool">Highschool</option>
-                            <option value="Animation">Animation</option>
-                            <option value="Comedy">Comedy</option>
-                            <option value="Erotic">Erotic</option>
+                            <option value="">Loading available categories...</option>
                         </select>
 
                         <small class="cineva-field-hint">
@@ -5011,6 +5031,41 @@ function createMovieModal() {
 
 
 /* =========================================
+   MOVIE FORM CATEGORY OPTIONS
+   Combines active managed categories, existing
+   record categories and useful built-in choices.
+========================================= */
+
+function populateMovieFormCategories(select, selectedValue = "") {
+    if (!select) return;
+
+    const categories = new Set([
+        ...DEFAULT_CONTENT_CATEGORIES,
+        ...(platformAdmin?.getCategoryNames() || []),
+        ...moviesCache.map(item => item.category?.trim()),
+        ...seriesCache.map(item => item.category?.trim()),
+        selectedValue
+    ].filter(Boolean));
+
+    select.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select movie category";
+    select.appendChild(placeholder);
+
+    [...categories].sort((a, b) => a.localeCompare(b)).forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+    });
+
+    select.value = selectedValue || "";
+}
+
+
+/* =========================================
    OPEN MOVIE FORM
 ========================================= */
 
@@ -5048,6 +5103,11 @@ function openMovieForm(movie = null) {
         form.elements.namedItem(name).value =
             movie?.[name] ?? "";
     });
+
+    populateMovieFormCategories(
+        form.elements.namedItem("category"),
+        movie?.category || ""
+    );
 
     attachImageUploader(form.elements.namedItem("poster_path"), "posters", "Poster");
     attachImageUploader(form.elements.namedItem("backdrop_path"), "banners", "Backdrop");
