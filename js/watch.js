@@ -30,6 +30,7 @@ const el = {
     player: document.querySelector("#video-player"),
     playerEmpty: document.querySelector("#player-empty"),
     playerTitle: document.querySelector("#player-breadcrumb-title"),
+    actionBar: document.querySelector("#player-action-bar"),
 
     mainWatch: document.querySelector("#main-watch-btn"),
     mainDownload: document.querySelector("#main-download-btn"),
@@ -481,6 +482,11 @@ function updateWatchSeo(item) {
 
 function displayContent(item) {
     updateWatchSeo(item);
+
+    // Series use their individual episode controls; hide the movie-level action bar.
+    if (el.actionBar) {
+        el.actionBar.hidden = contentType === "series";
+    }
     document.title = `${item.title || "Watch"} | CINEVA`;
 
     if (el.title) {
