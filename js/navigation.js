@@ -364,7 +364,7 @@
             if (!notificationBtn || document.querySelector("#cinevaCommunityOverlay")) return;
 
             const [{ supabase }, { getLatestContent }] = await Promise.all([
-                import("./config.js"),
+                import("./config.js?v=20261111-authfix-1"),
                 import("./supabase.js")
             ]);
 
