@@ -1,4 +1,4 @@
-import { publicSupabase as supabase } from "./config.js";
+import { publicSupabase as supabase } from "./config.js?v=20261111-authfix-1";
 
 /* CINEVA — privacy-friendly daily visitor tracking.
    Uses a random browser ID; no IP address or account details are collected. */
