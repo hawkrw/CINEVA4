@@ -164,7 +164,7 @@ export async function getHomepageData({
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
-                .limit(250),
+                .limit(1000),
 
             supabase
                 .from(APP_CONFIG.seriesTable)
@@ -172,7 +172,7 @@ export async function getHomepageData({
                 .eq("is_active", true)
                 .or(categoryFilters)
                 .order("created_at", { ascending: false })
-                .limit(250)
+                .limit(1000)
         );
     }
 
@@ -256,6 +256,17 @@ export async function getHomepageData({
         );
 
         categoryNames.forEach(category => {
+            // Adventure is a dedicated movie collection: show every active
+            // Adventure movie uploaded, not just the standard six-card preview.
+            if (category.toLowerCase() === "adventure") {
+                categoryContent[category] = (results[4].data || [])
+                    .filter(item =>
+                        String(item.category || "").trim().toLowerCase() === "adventure"
+                    )
+                    .map(item => ({ ...item, content_type: "movie" }));
+                return;
+            }
+
             categoryContent[category] = categoryItems
                 .filter(item =>
                     String(item.category || "").trim().toLowerCase() ===
