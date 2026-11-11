@@ -22,15 +22,17 @@ async function recordDailyVisit() {
 
         const { error } = await supabase
             .from("site_visits")
-            .upsert({
+            .insert({
                 visitor_id: visitorId,
                 path: location.pathname.slice(0, 500) || "/"
-            }, {
-                onConflict: "visitor_id,visit_day",
-                ignoreDuplicates: true
             });
 
-        if (error) console.warn("CINEVA visitor tracking:", error.message);
+        // A duplicate means this browser has already been counted today.
+        // Plain INSERT uses the existing public INSERT policy and avoids
+        // requiring public SELECT/UPDATE permissions just for tracking.
+        if (error && error.code !== "23505") {
+            console.warn("CINEVA visitor tracking:", error.message);
+        }
     } catch (error) {
         console.warn("CINEVA visitor tracking unavailable:", error);
     }
