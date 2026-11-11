@@ -5115,6 +5115,7 @@ function openMovieForm(movie = null) {
         "overview",
         "poster_path",
         "backdrop_path",
+        "thumbnail",
         "video_url",
         "download_url"
     ];
@@ -5131,6 +5132,7 @@ function openMovieForm(movie = null) {
 
     attachImageUploader(form.elements.namedItem("poster_path"), "posters", "Poster");
     attachImageUploader(form.elements.namedItem("backdrop_path"), "banners", "Backdrop");
+    attachImageUploader(form.elements.namedItem("thumbnail"), "thumbnails", "Movie thumbnail");
 
     attachCategorySuggestions(form.elements.namedItem("category"), "cinevaCategoryOptions");
 
@@ -5207,6 +5209,7 @@ async function saveMovie(event) {
         overview: textValue("overview"),
         poster_path: textValue("poster_path"),
         backdrop_path: textValue("backdrop_path"),
+        thumbnail: textValue("thumbnail"),
 
         // Additional download buttons.
         download_links: downloadLinks,
