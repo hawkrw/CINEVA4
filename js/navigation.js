@@ -176,6 +176,16 @@
                         currentGenre.toLowerCase();
                 }
 
+                // The dedicated Series catalogue is an alias of the
+                // Series filter in genre.html, so keep its nav item active.
+                if (
+                    linkPage === "genre.html" &&
+                    linkType === "series" &&
+                    currentPage === "series.html"
+                ) {
+                    active = true;
+                }
+
                 // Other pages
                 if (
                     linkPage !== "index.html" &&
