@@ -266,7 +266,7 @@ function matchesGenre(item, requestedGenre) {
 function readUrlState() {
     const params = new URLSearchParams(window.location.search);
 
-    const requestedType = params.get("type") || "all";
+    const isSeriesRoute = window.location.pathname.replace(/\/+$/, "") === "/series";\n    const requestedType = params.get("type") || (isSeriesRoute ? "series" : "all");
     state.type = ["all", "movie", "series"].includes(requestedType)
         ? requestedType
         : "all";
