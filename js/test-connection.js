@@ -1,5 +1,5 @@
 
-import { publicSupabase as supabase } from "./config.js";
+import { publicSupabase as supabase } from "./config.js?v=20261111-authfix-1";
 
 async function testConnection() {
     console.log("Testing CINEVA Supabase connection...");
