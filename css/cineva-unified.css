@@ -817,3 +817,12 @@ body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,le
     cursor: pointer;
   }
 }
+
+
+/* Shared CINEVA footer social links across every public page. */
+.social-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+.social-links a{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;min-width:38px;border-radius:50%;text-decoration:none;font-size:16px}
+.social-links a:focus-visible{outline:2px solid var(--cineva-primary,#8b35f5);outline-offset:3px}
+.info-footer .social-links{justify-content:center;margin:0}
+.profile-footer .social-links,.auth-footer .social-links{justify-content:center;margin:0 0 12px}
+@media(max-width:480px){.social-links{gap:8px}.social-links a{width:36px;height:36px;min-width:36px}}
