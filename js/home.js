@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslators
-} from "./supabase.js?v=20261111-authfix-1";
+} from "./supabase.js?v=20261111-adventure-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -41,6 +41,7 @@ const HOME_CONFIG = {
 
 const CATEGORIES = [
     "Action",
+    "Adventure",
     "Horror",
     "Drama",
     "Highschool",
@@ -1294,7 +1295,7 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v2";
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v3";
 const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function readHomepageCache() {
