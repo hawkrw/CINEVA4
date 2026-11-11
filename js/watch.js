@@ -1438,6 +1438,12 @@ function getEpisodeDownloadLinks(episode) {
     return links;
 }
 
+/* Use the links stored on this episode record only. This keeps one
+   episode from inheriting the first download option of the season. */
+function getEpisodeDownloadUrl(episode = {}) {
+    return getEpisodeDownloadLinks(episode)[0]?.url || "";
+}
+
 /* =====================================================
    RENDER SELECTED SEASON — EPISODE PARTS
 ===================================================== */
@@ -1475,7 +1481,7 @@ function renderSeason(seasonNumber) {
         const hasParts = parts.length > 0;
 
         const episodeWatchUrl = getMediaVideoUrl(episode);
-        const episodeDownloadUrl = getMediaDownloadUrl(episode);
+        const episodeDownloadUrl = getEpisodeDownloadUrl(episode);
 
         const partButtons = parts.map((part, index) => {
             const watchUrl = getMediaVideoUrl(part);
@@ -1497,6 +1503,7 @@ function renderSeason(seasonNumber) {
                             type="button"
                             data-action="watch-episode-part"
                             data-episode-index="${episodeIndex}"
+                            data-episode-id="${escapeHTML(episode.id ?? "")}"
                             data-part-index="${index}"
                             ${watchUrl ? "" : "disabled"}
                         >
@@ -1592,9 +1599,16 @@ function renderSeason(seasonNumber) {
     el.episodesGrid.querySelectorAll("button[data-action]").forEach(button => {
         button.addEventListener("click", () => {
             const episodeIndex = Number(button.dataset.episodeIndex);
-            const episode = Number.isInteger(episodeIndex)
-                ? currentEpisodes[episodeIndex]
-                : null;
+            const episodeId = button.dataset.episodeId;
+            const episode = (
+                episodeId
+                    ? currentEpisodes.find(item => String(item.id) === episodeId)
+                    : null
+            ) || (
+                Number.isInteger(episodeIndex)
+                    ? currentEpisodes[episodeIndex]
+                    : null
+            );
 
             if (!episode) return;
 
@@ -1653,7 +1667,7 @@ function renderSeason(seasonNumber) {
 
             // Download an episode without parts.
             if (action === "download-episode") {
-                const url = getMediaDownloadUrl(episode);
+                const url = getEpisodeDownloadUrl(episode);
 
                 if (!url) {
                     alert("No Download URL is available for this episode.");
