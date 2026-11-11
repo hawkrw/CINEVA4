@@ -1686,8 +1686,20 @@ function openContentForm(type, record = null) {
         }
 
         fieldsContainer.appendChild(field);
-        if (isSeries && name === "poster") attachImageUploader(input, "posters", "Poster");
-        if (isSeries && name === "backdrop") attachImageUploader(input, "banners", "Backdrop");
+
+        // Route every content-image field through the same secure ImageKit uploader.
+        // Episode thumbnails are stored separately from posters and backdrops.
+        const imageUploadTargets = {
+            poster: ["posters", "Poster"],
+            backdrop: ["banners", "Backdrop"],
+            thumbnail: ["thumbnails", "Episode thumbnail"],
+            image: ["images", "Image"],
+            banner: ["banners", "Banner"]
+        };
+        if (imageUploadTargets[name]) {
+            const [imageFolder, imageLabel] = imageUploadTargets[name];
+            attachImageUploader(input, imageFolder, imageLabel);
+        }
     });
 
     // Restore episode numbering from either supported column pair.
