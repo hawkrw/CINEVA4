@@ -31,9 +31,34 @@ const SUPABASE_ANON_KEY =
 // INITIALIZE SUPABASE CLIENT
 // =========================================
 
+// Authenticated client: retains normal user/admin sessions for actions
+// that genuinely require an account.
 export const supabase = createClient(
     SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    SUPABASE_ANON_KEY,
+    {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true
+        }
+    }
+);
+
+// Public-data client: never reuses a browser's stored user access token.
+// Public movie/series reads must use the anon key even if an old user
+// session has expired, so public pages remain available without login.
+export const publicSupabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false,
+            storageKey: "cineva-public-auth"
+        }
+    }
 );
 
 // =========================================
