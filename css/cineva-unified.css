@@ -783,3 +783,37 @@ body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,le
     height: 42px;
   }
 }
+
+
+/* Compact header variant used by the Categories page. */
+@media (max-width: 950px) {
+  .main-header .header-container {
+    position: relative;
+    box-sizing: border-box;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "brand actions";
+    align-items: center;
+    gap: 10px;
+    width: calc(100% - 30px);
+    max-width: 1440px;
+    min-height: 66px;
+    margin-inline: auto;
+    padding: 10px 0;
+  }
+
+  .main-header .header-container > .logo {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .main-header .header-container > .menu-toggle {
+    grid-area: actions;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+}
