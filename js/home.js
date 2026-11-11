@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslators
-} from "./supabase.js?v=20261111-adventure-1";
+} from "./supabase.js?v=20261111-trending-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
