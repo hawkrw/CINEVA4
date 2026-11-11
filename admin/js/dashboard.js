@@ -361,6 +361,7 @@ async function loadMovies() {
     release_date,
     poster_path,
     backdrop_path,
+    thumbnail,
     video_url,
     download_url,
     download_links,
