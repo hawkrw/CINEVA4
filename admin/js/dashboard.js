@@ -1506,14 +1506,24 @@ function attachImageUploader(urlInput, bucket, label) {
                     body: uploadForm
                 });
 
-                imageKitResponse = await response.json().catch(() => ({}));
+                const responseText = await response.text().catch(() => "");
+                try {
+                    imageKitResponse = responseText ? JSON.parse(responseText) : {};
+                } catch {
+                    imageKitResponse = { message: responseText.slice(0, 500) };
+                }
                 if (response.ok && imageKitResponse.url) break;
 
-                const imageKitMessage = imageKitResponse.message || imageKitResponse.help || "";
+                // Show ImageKit's own diagnostic message instead of masking every
+                // authentication response with the same generic credentials warning.
+                // Never include upload signatures, tokens, or private keys in errors.
+                const imageKitMessage =
+                    imageKitResponse.message ||
+                    imageKitResponse.help ||
+                    imageKitResponse.error ||
+                    "No additional details were returned by ImageKit.";
                 lastUploadError = new Error(
-                    [401, 403].includes(response.status)
-                        ? "ImageKit rejected its API credentials. Check that IMAGEKIT_PRIVATE_KEY and IMAGEKIT_PUBLIC_KEY in Supabase Edge Function Secrets are active and belong to the same ImageKit account."
-                        : (imageKitMessage || `ImageKit upload failed (${response.status}).`)
+                    `ImageKit upload failed (HTTP ${response.status}): ${String(imageKitMessage).slice(0, 500)}`
                 );
                 if (![408, 429, 500, 502, 503, 504].includes(response.status) || attempt === 3) {
                     throw lastUploadError;
