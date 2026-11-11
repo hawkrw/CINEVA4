@@ -1761,26 +1761,24 @@ async function refreshSeriesLatestAdded(seriesId) {
    Case-insensitive; trims and normalizes spaces.
 ========================================= */
 async function findDuplicateContentTitle(table, title, excludeId = null) {
+    // The dashboard already loads the complete content lists into these
+    // caches. Use the same verified records for duplicate checks instead
+    // of making a second RLS-sensitive query while saving the form.
     const normalizedTitle = String(title || "")
         .trim()
-        .replace(/\\s+/g, " ")
+        .replace(/\s+/g, " ")
         .toLocaleLowerCase();
 
     if (!normalizedTitle) return null;
 
-    const { data, error } = await supabase
-        .from(table)
-        .select("id,title")
-        .ilike("title", normalizedTitle);
+    const cache = table === "movies" ? moviesCache : seriesCache;
 
-    if (error) throw error;
-
-    return (data || []).find(record => {
+    return cache.find(record => {
         if (excludeId && String(record.id) === String(excludeId)) return false;
 
         return String(record.title || "")
             .trim()
-            .replace(/\\s+/g, " ")
+            .replace(/\s+/g, " ")
             .toLocaleLowerCase() === normalizedTitle;
     }) || null;
 }
