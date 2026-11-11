@@ -546,3 +546,240 @@ body :where(h1,h2,h3,h4,h5,h6,p,a,span,small,strong,b,em,label,li,dt,dd,th,td,le
     width: min(100% - 64px, 1480px);
   }
 }
+
+
+/* =========================================================
+   CINEVA — SHARED RESPONSIVE HEADER (PHONE + TABLET)
+   Use the same brand/actions/search/menu arrangement on every
+   public page, with one predictable expandable mobile menu.
+========================================================= */
+@media (max-width: 950px) {
+  .main-header {
+    position: sticky !important;
+    top: 0;
+    z-index: 2000;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .main-header .navbar.container {
+    box-sizing: border-box;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "search search";
+    align-items: center;
+    gap: 10px 12px;
+    width: calc(100% - 30px) !important;
+    max-width: 1440px;
+    min-width: 0;
+    min-height: 0;
+    height: auto !important;
+    margin-inline: auto;
+    padding: 11px 0 12px;
+  }
+
+  .main-header .navbar > .logo {
+    grid-area: brand;
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    gap: 9px;
+  }
+
+  .main-header .brand-icon {
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+  }
+
+  .main-header .brand-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .main-header .logo-text {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .main-header .logo-text h2 {
+    margin: 0;
+    font-size: clamp(18px, 4.5vw, 22px);
+    line-height: 1.05;
+  }
+
+  .main-header .logo-text small {
+    display: block;
+    font-size: 8px;
+    line-height: 1.3;
+  }
+
+  .main-header .nav-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .main-header .nav-icon,
+  .main-header .sign-in-btn,
+  .main-header .mobile-menu-btn,
+  .main-header .menu-toggle {
+    flex: 0 0 auto;
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+  }
+
+  .main-header .sign-in-btn span {
+    display: none;
+  }
+
+  .main-header .mobile-menu-btn,
+  .main-header .menu-toggle {
+    display: inline-flex !important;
+    cursor: pointer;
+  }
+
+  .main-header .search-box {
+    grid-area: search;
+    display: flex;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 42px;
+    min-height: 42px;
+    margin: 0;
+    padding: 0 8px 0 12px;
+    gap: 7px;
+    box-sizing: border-box;
+  }
+
+  .main-header .search-box input {
+    min-width: 0;
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .main-header .search-box button {
+    flex: 0 0 auto;
+    min-width: 56px;
+    height: 32px;
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+
+  .main-header .nav-menu {
+    position: absolute !important;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 2001;
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    width: 100%;
+    max-height: min(72vh, 560px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 12px 15px 18px;
+    background: rgba(10, 10, 21, .985);
+    border: 1px solid rgba(255,255,255,.09);
+    border-top: 0;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.42);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-9px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+  }
+
+  .main-header .nav-menu.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .main-header .nav-menu .nav-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 43px;
+    box-sizing: border-box;
+    padding: 11px 13px;
+    border-radius: 9px;
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  .main-header .nav-menu .nav-link.active {
+    background: rgba(139,53,245,.15);
+  }
+}
+
+@media (max-width: 600px) {
+  .main-header .navbar.container {
+    width: calc(100% - 26px) !important;
+    gap: 9px 8px;
+    padding-block: 9px 10px;
+  }
+
+  .main-header .brand-icon {
+    flex-basis: 35px;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+  }
+
+  .main-header .nav-actions {
+    gap: 4px;
+  }
+
+  .main-header .nav-icon,
+  .main-header .sign-in-btn,
+  .main-header .mobile-menu-btn,
+  .main-header .menu-toggle {
+    width: 35px;
+    min-width: 35px;
+    height: 35px;
+    min-height: 35px;
+    border-radius: 9px;
+  }
+
+  .main-header .search-box {
+    height: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (min-width: 651px) and (max-width: 950px) {
+  .main-header .navbar.container {
+    width: calc(100% - 40px) !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 11px 15px;
+    padding-block: 12px;
+  }
+
+  .main-header .brand-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+}
