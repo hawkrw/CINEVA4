@@ -1,5 +1,5 @@
 
-import { supabase } from "./config.js";
+import { publicSupabase as supabase } from "./config.js";
 
 async function testConnection() {
     console.log("Testing CINEVA Supabase connection...");
