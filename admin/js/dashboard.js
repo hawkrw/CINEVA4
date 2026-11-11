@@ -4884,6 +4884,14 @@ function createMovieModal() {
                     </div>
 
                     <div class="cineva-field full">
+                        <label>Movie Thumbnail URL</label>
+                        <input
+                            name="thumbnail"
+                            type="url"
+                            placeholder="https://...">
+                    </div>
+
+                    <div class="cineva-field full">
                         <label>Main Movie Watch URL (Optional)</label>
                         <input
                             name="video_url"
