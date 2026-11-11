@@ -13,14 +13,15 @@
         const header = document.querySelector("#mainHeader");
 
         const menuToggle =
-            document.querySelector("#mobileMenuBtn") ||
-            document.querySelector("#menu-toggle");
+            document.querySelector("#mobileMenuBtn, #menu-toggle, .main-header .mobile-menu-btn, .main-header .menu-toggle");
 
         const navMenu =
-            document.querySelector("#navMenu") ||
-            document.querySelector("#nav-menu");
+            document.querySelector("#navMenu, #nav-menu, .main-header .nav-menu");
 
-        const navLinks = document.querySelectorAll(".nav-link");
+        // Keep desktop links and the mobile bottom bar in sync on every page.
+        const navLinks = document.querySelectorAll(
+            ".nav-link, .mobile-bottom-nav a"
+        );
 
         const themeToggle =
             document.querySelector("#themeToggle");
@@ -146,7 +147,7 @@
 
                 // Homepage
                 if (
-                    linkPage === "index.html" &&
+                    (linkPage === "index.html" || linkURL.pathname === "/") &&
                     currentPage === "index.html" &&
                     !linkURL.hash
                 ) {
@@ -190,6 +191,16 @@
                     linkURL.hash === "#categories" &&
                     currentPage === "index.html" &&
                     currentURL.hash === "#categories"
+                ) {
+                    active = true;
+                }
+
+                // The root URL is also the homepage, including on the
+                // mobile bottom navigation used by secondary pages.
+                if (
+                    linkURL.pathname === "/" &&
+                    !linkURL.hash &&
+                    currentPage === "index.html"
                 ) {
                     active = true;
                 }
