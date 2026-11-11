@@ -3,7 +3,7 @@
    Supabase JS v2
 ===================================================== */
 
-import { supabase, publicSupabase, APP_CONFIG } from "./config.js";
+import { supabase, publicSupabase, APP_CONFIG } from "./config.js?v=20261111-authfix-1";
 /* DEFAULT POSTER */
 const PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 
