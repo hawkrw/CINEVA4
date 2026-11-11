@@ -40,6 +40,8 @@ const el = {
     category: document.querySelector("#watch-category"),
     year: document.querySelector("#watch-year"),
     rating: document.querySelector("#watch-rating"),
+    translator: document.querySelector("#watch-translator"),
+    translatorName: document.querySelector("#watch-translator-name"),
     type: document.querySelector("#watch-type"),
 
     likeButton: document.querySelector("#like-btn"),
@@ -512,6 +514,12 @@ function displayContent(item) {
         el.rating.textContent = rating !== null
             ? `★ ${Number(rating).toFixed(1)}`
             : "Not rated";
+    }
+
+    const translator = String(item.translator || "").trim();
+    if (el.translator && el.translatorName) {
+        el.translatorName.textContent = translator;
+        el.translator.hidden = !translator;
     }
 
     if (el.type) {
