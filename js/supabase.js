@@ -4,7 +4,7 @@
    Reliable data fetching and error handling
 ========================================= */
 
-import { supabase, APP_CONFIG } from "./config.js";
+import { publicSupabase as supabase, APP_CONFIG } from "./config.js";
 
 /* =========================================
    01. DATABASE ERROR HANDLING
