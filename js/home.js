@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslators
-} from "./supabase.js";
+} from "./supabase.js?v=20261111-authfix-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
