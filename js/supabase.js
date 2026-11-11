@@ -124,14 +124,13 @@ export async function getHomepageData({
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
-        // Latest series are based only on original creation date.
-        // View counts, playback activity and episode updates must not make
-        // an existing title appear as newly added.
+        // Latest series are based strictly on original creation date.
+        // Views, clicks, playback and new episode activity never promote
+        // an older series into Latest Added or the hero slider.
         supabase
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
-            .order("last_activity_at", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
@@ -140,6 +139,7 @@ export async function getHomepageData({
             .from(APP_CONFIG.moviesTable)
             .select(HOMEPAGE_MOVIE_FIELDS)
             .eq("is_active", true)
+            .gt("views", 0)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(trendingCount),
@@ -149,6 +149,7 @@ export async function getHomepageData({
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
+            .gt("views", 0)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(trendingCount)
@@ -607,6 +608,7 @@ export async function getTrendingContent(limit = 12) {
             .from(APP_CONFIG.moviesTable)
             .select("*")
             .eq("is_active", true)
+            .gt("views", 0)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(resultLimit),
@@ -615,6 +617,7 @@ export async function getTrendingContent(limit = 12) {
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
+            .gt("views", 0)
             .order("views", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(resultLimit)
