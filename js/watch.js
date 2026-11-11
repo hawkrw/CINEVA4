@@ -3,7 +3,7 @@
    Supabase JS v2
 ===================================================== */
 
-import { supabase, APP_CONFIG } from "./config.js";
+import { supabase, publicSupabase, APP_CONFIG } from "./config.js";
 /* DEFAULT POSTER */
 const PLACEHOLDER = "/assets/images/movie-placeholder.jpg";
 
@@ -351,7 +351,7 @@ function showContent() {
 ===================================================== */
 
 async function fetchContent() {
-    let query = supabase
+    let query = publicSupabase
         .from(table)
         .select("*")
         .eq("is_active", true);
@@ -377,7 +377,7 @@ async function incrementContentView(item) {
     if (!item?.id) return;
 
     try {
-        const { data, error } = await supabase.rpc(
+        const { data, error } = await publicSupabase.rpc(
             "increment_content_view",
             {
                 p_content_type: contentType,
@@ -1251,7 +1251,7 @@ function getEpisodeSeason(episode = {}) {
 }
 
 async function fetchEpisodes(seriesId) {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
         .from("episodes")
         .select("*")
         .eq("series_id", seriesId)
@@ -1685,7 +1685,7 @@ function renderSeason(seasonNumber) {
 ===================================================== */
 
 async function fetchComments(item) {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
         .from("comments")
         .select("*")
         .eq("content_id", String(item.id))
@@ -1944,7 +1944,7 @@ function setupShare(item) {
 ===================================================== */
 
 async function fetchRelated(item) {
-    let query = supabase
+    let query = publicSupabase
         .from(table)
         .select("*")
         .eq("is_active", true)
