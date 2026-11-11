@@ -3438,3 +3438,9 @@
         font-size: 10px;
     }
 }
+
+
+/* Keep engagement actions visible when the movie-only controls are hidden. */
+.player-action-left[hidden] {
+    display: none !important;
+}
