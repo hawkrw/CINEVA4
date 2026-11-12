@@ -1,4 +1,4 @@
-import { supabase } from "../../js/config.js";
+import { supabase } from "../../js/config.js?v=20261112-admin-auth-fix-4";
 
 const $ = (id) => document.getElementById(id);
 const text = (id, value) => { const node = $(id); if (node) node.textContent = value ?? ""; };
