@@ -148,3 +148,9 @@
 /* Translator detail page: use the uploaded ImageKit portrait */
 .translator-profile-avatar{position:relative;overflow:hidden}
 .translator-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+
+
+/* Larger managed portraits in the homepage translator directory */
+.translators-section .translator-profile-avatar{width:72px;height:72px;flex-basis:72px}
+.translators-section .translator-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+@media(max-width:600px){.translators-section .translator-profile-avatar{width:58px;height:58px;flex-basis:58px}}
