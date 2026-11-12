@@ -718,7 +718,7 @@ function createHeroSlide(item, index) {
 
     const translator = escapeHTML(getTranslator(item));
     const translatorHTML = translator
-        ? `<span class="hero-translator-badge" title="Translated by ${translator}"><i class="fa-solid fa-language"></i><span>Translated by <strong>${translator}</strong></span></span>`
+        ? `<span class="hero-translator-badge" title="Translator: ${translator}"><i class="fa-solid fa-language"></i><span><strong>${translator}</strong></span></span>`
         : "";
 
     const rating = getRating(item);
