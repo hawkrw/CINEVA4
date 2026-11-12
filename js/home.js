@@ -580,14 +580,19 @@ function createMovieCard(item) {
         ? "Series"
         : "Movie";
 
+    const translatorProfile = translatorProfilesByName.get(translatorKey(translator));
+    const translatorPhoto = translatorProfile?.profile_image_url || "";
+    const translatorInitial = escapeHTML(translator.trim().charAt(0).toUpperCase() || "?");
     const translatorHTML = translator
         ? `
-            <span
-                class="movie-translator-badge"
-                title="Translator: ${translator}"
-            >
-                <i class="fa-solid fa-language"></i>
-                ${translator}
+            <span class="movie-translator-badge" title="Translator: ${translator}" data-translator-name="${translator}">
+                <span class="movie-translator-avatar">
+                    ${translatorPhoto
+                        ? `<img src="${escapeHTML(translatorPhoto)}" alt="" loading="lazy" decoding="async" onerror="this.remove();this.nextElementSibling.hidden=false">`
+                        : ""}
+                    <span class="movie-translator-avatar-fallback" ${translatorPhoto ? "hidden" : ""}>${translatorInitial}</span>
+                </span>
+                <span class="movie-translator-name">${translator}</span>
             </span>
         `
         : "";
@@ -1309,7 +1314,7 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v6";
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v7";
 const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function readHomepageCache() {
@@ -1338,9 +1343,13 @@ function saveHomepageCache(data) {
 function renderHomepageData(homepageData) {
     // Both the hero slider and Latest Added consume the same newest-first
     // movies + series feed, ranked only by created_at in Supabase.
-    const newestFirst = [...(homepageData.latest || [])].sort((a, b) =>
-        (Date.parse(b.created_at || "") || 0) - (Date.parse(a.created_at || "") || 0)
-    );
+    const createdAtMillis = item => {
+        const parsed = Date.parse(item?.created_at || "");
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+    const newestFirst = [...(homepageData.latest || [])]
+        .filter(item => item && item.id && item.created_at)
+        .sort((a, b) => createdAtMillis(b) - createdAtMillis(a));
     loadFeatured(newestFirst);
     loadLatest(newestFirst);
     loadTrending(homepageData.trending || []);
