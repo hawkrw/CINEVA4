@@ -680,7 +680,29 @@ export async function getOurTranslatorProfiles() {
         throw error;
     }
 
-    return data || [];
+    // Keep automatic discovery working for translator names added to new
+    // movie or series records after this profile directory was created.
+    const managed = data || [];
+    const known = new Set(managed.map(profile => String(profile.name || "").trim().toLowerCase()));
+    const discovered = await getOurTranslators();
+    const generated = discovered
+        .map(rawName => {
+            const key = String(rawName || "").replace(/\\s+/g, " ").trim().toLowerCase();
+            if (/^gaheza(?:\\s+simba)?$/.test(key)) return "Gaheza";
+            if (/^hakim(?:\\s+the\\s+(?:prof|mwarimu))?$/.test(key)) return "Hakim's";
+            return String(rawName || "").replace(/\\s+/g, " ").trim();
+        })
+        .filter(name => name && !known.has(name.toLowerCase()))
+        .map((name, index) => ({
+            id: null,
+            name,
+            profile_image_url: null,
+            bio: "CINEVA Translator",
+            sort_order: managed.length + index,
+            is_active: true
+        }));
+
+    return [...managed, ...generated];
 }
 
 /* =========================================
