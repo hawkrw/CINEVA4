@@ -359,8 +359,8 @@ async function handleProfileAction(event) {
 
 async function migrateLegacyImages() {
     const candidates = profiles.filter(profile => profile.profile_image_url && !/ik\.imagekit\.io|imagekit\.io/i.test(profile.profile_image_url));
-    if (!candidates.length) { alert("All translator profile photos are already stored on ImageKit."); return; }
-    if (!confirm("Move " + candidates.length + " existing translator photo(s) from Supabase Storage to ImageKit? Each database URL changes only after its new upload succeeds.")) return;
+    if (!candidates.length) { alert("All existing translator profile photos are already stored on ImageKit."); return; }
+    if (!confirm("Move " + candidates.length + " existing translator photo(s) to ImageKit? Each profile URL will be updated only after its new ImageKit upload succeeds. Original Supabase files will be kept as a safe backup.")) return;
     const button = $("migrateTranslatorImages");
     if (button) { button.disabled = true; button.textContent = "Migrating photos..."; }
     let moved = 0;
@@ -388,7 +388,7 @@ async function migrateLegacyImages() {
             }
         }
         renderProfiles();
-        alert("ImageKit migration finished. " + moved + " photo(s) moved successfully." +
+        alert("ImageKit migration finished. " + moved + " of " + candidates.length + " photo(s) moved successfully. Original Supabase files were kept." +
             (failures.length ? "\n\nNot moved:\n" + failures.join("\n") : ""));
     } finally {
         if (button) { button.disabled = false; button.textContent = "Move old photos to ImageKit"; }
