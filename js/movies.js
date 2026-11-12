@@ -12,7 +12,7 @@
    - Secure HTML rendering
 ========================================================= */
 
-import { getAllMovies } from "./supabase.js";
+import { getAllMovies } from "./supabase.js?v=20261112-latest-episode-promotion-2";
 
 /* =========================================================
    01. SETTINGS
