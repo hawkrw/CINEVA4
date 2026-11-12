@@ -197,24 +197,18 @@ export async function getHomepageData({
         handleError(labels[index], result.error);
     });
 
+    // Latest Added is one shared feed across movies and series.
+    // The original created_at timestamp is the only ranking rule:
+    // episode activity, updates, views and playback cannot promote old titles.
     const latest = combineContent(
         results[0].data,
         results[1].data
     )
-        .map(item => ({
-            ...item,
-            // Series get a fresh position only when an episode is inserted.
-            // Views and playback never update last_activity_at.
-            latest_activity_at: item.content_type === "series"
-                ? item.last_activity_at || item.created_at
-                : item.created_at,
-            has_new_episode: item.content_type === "series" && Boolean(item.last_activity_at) &&
-                Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000
-        }))
-        .sort((a, b) =>
-            (Date.parse(b.latest_activity_at || "") || 0) -
-            (Date.parse(a.latest_activity_at || "") || 0)
-        )
+        .sort((a, b) => {
+            const aCreated = Date.parse(a.created_at || "") || 0;
+            const bCreated = Date.parse(b.created_at || "") || 0;
+            return bCreated - aCreated;
+        })
         .slice(0, latestCount);
 
     const trending = [
