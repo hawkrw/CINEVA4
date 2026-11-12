@@ -124,13 +124,22 @@ export async function getHomepageData({
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
-        // Latest series are based strictly on original creation date.
-        // Views, clicks, playback and new episode activity never promote
-        // an older series into Latest Added or the hero slider.
+        // Newest series by original creation date (kept for the hero slider).
         supabase
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
             .eq("is_active", true)
+            .order("created_at", { ascending: false })
+            .limit(latestCount),
+
+        // Series with recently added episodes rise in Latest Added.
+        // last_activity_at is maintained from episode activity; the card
+        // already uses this timestamp for its seven-day NEW EP badge.
+        supabase
+            .from(APP_CONFIG.seriesTable)
+            .select(HOMEPAGE_SERIES_FIELDS)
+            .eq("is_active", true)
+            .order("last_activity_at", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false })
             .limit(latestCount),
 
@@ -181,7 +190,8 @@ export async function getHomepageData({
 
     const labels = [
         "Homepage latest movies",
-        "Homepage latest series",
+        "Homepage newest series for hero",
+        "Homepage recently updated series",
         "Homepage trending movies",
         "Homepage trending series"
     ];
@@ -197,22 +207,35 @@ export async function getHomepageData({
         handleError(labels[index], result.error);
     });
 
-    // Latest Added is one shared feed across movies and series.
-    // The original created_at timestamp is the only ranking rule:
-    // episode activity, updates, views and playback cannot promote old titles.
-    const latest = combineContent(
-        results[0].data,
-        results[1].data
-    )
+    // Latest Added mixes new movies with series whose episodes were
+    // recently added. Movies use created_at; series use last_activity_at.
+    const latest = [
+        ...(results[0].data || []).map(item => ({ ...item, content_type: "movie" })),
+        ...(results[2].data || []).map(item => ({ ...item, content_type: "series" }))
+    ]
         .sort((a, b) => {
-            const aCreated = Date.parse(a.created_at || "") || 0;
-            const bCreated = Date.parse(b.created_at || "") || 0;
-            return bCreated - aCreated;
+            const aDate = Date.parse(
+                a.content_type === "series"
+                    ? (a.last_activity_at || a.created_at || "")
+                    : (a.created_at || "")
+            ) || 0;
+            const bDate = Date.parse(
+                b.content_type === "series"
+                    ? (b.last_activity_at || b.created_at || "")
+                    : (b.created_at || "")
+            ) || 0;
+            return bDate - aDate;
         })
         .slice(0, latestCount);
 
+    // Keep the hero slider strictly based on when a title was first added.
+    const hero = combineContent(
+        results[0].data,
+        results[1].data
+    ).slice(0, latestCount);
+
     const trending = [
-        ...(results[2].data || []).map(item => ({
+        ...(results[4].data || []).map(item => ({
             ...item,
             content_type: "movie",
             views: Number(item.views) || 0
@@ -246,15 +269,15 @@ export async function getHomepageData({
 
     if (categoryFilters) {
         const categoryItems = combineContent(
-            results[4].data,
-            results[5].data
+            results[5].data,
+            results[6].data
         );
 
         categoryNames.forEach(category => {
             // Adventure is a dedicated movie collection: show every active
             // Adventure movie uploaded, not just the standard six-card preview.
             if (category.toLowerCase() === "adventure") {
-                categoryContent[category] = (results[4].data || [])
+                categoryContent[category] = (results[5].data || [])
                     .filter(item =>
                         String(item.category || "").trim().toLowerCase() === "adventure"
                     )
@@ -273,6 +296,7 @@ export async function getHomepageData({
 
     return {
         latest,
+        hero,
         trending,
         categories: categoryContent
     };
