@@ -235,13 +235,13 @@ export async function getHomepageData({
     ).slice(0, latestCount);
 
     const trending = [
-        ...(results[4].data || []).map(item => ({
+        ...(results[3].data || []).map(item => ({
             ...item,
             content_type: "movie",
             views: Number(item.views) || 0
         })),
 
-        ...(results[3].data || []).map(item => ({
+        ...(results[4].data || []).map(item => ({
             ...item,
             content_type: "series",
             views: Number(item.views) || 0
