@@ -536,13 +536,12 @@ export async function searchContent(searchTerm) {
    a title's position in "Latest Added".
 ========================================= */
 
-export async function getLatestContent(
-    limit = APP_CONFIG.latestLimit
-) {
+export async function getLatestContent(limit = APP_CONFIG.latestLimit) {
     const safeResultLimit = safeLimit(limit);
 
+    // Fetch the same newest-first slice from each table, then merge by the
+    // immutable creation timestamp. Never use last_activity_at for this feed.
     const [moviesResult, seriesResult] = await Promise.all([
-        // Latest movies are based on creation date
         supabase
             .from(APP_CONFIG.moviesTable)
             .select("*")
@@ -550,12 +549,10 @@ export async function getLatestContent(
             .order("created_at", { ascending: false })
             .limit(safeResultLimit),
 
-        // Latest series are based on original creation date, not activity.
         supabase
             .from(APP_CONFIG.seriesTable)
             .select("*")
             .eq("is_active", true)
-            .order("last_activity_at", { ascending: false, nullsFirst: false })
             .order("created_at", { ascending: false })
             .limit(safeResultLimit)
     ]);
@@ -563,30 +560,14 @@ export async function getLatestContent(
     handleError("Latest movies error", moviesResult.error);
     handleError("Latest series error", seriesResult.error);
 
-    const movies = (moviesResult.data || []).map(item => ({
-        ...item,
-        content_type: "movie",
-        latest_activity_at: item.created_at
-    }));
-
-    const series = (seriesResult.data || []).map(item => ({
-        ...item,
-        content_type: "series",
-        latest_activity_at: item.last_activity_at || item.created_at,
-        has_new_episode: Boolean(item.last_activity_at) &&
-            Date.now() - Date.parse(item.last_activity_at) <= 7 * 24 * 60 * 60 * 1000
-    }));
-
-    return [...movies, ...series]
-        .sort((a, b) => {
-            const dateA =
-                Date.parse(a.latest_activity_at || "") || 0;
-
-            const dateB =
-                Date.parse(b.latest_activity_at || "") || 0;
-
-            return dateB - dateA;
-        })
+    return combineContent(
+        moviesResult.data,
+        seriesResult.data
+    )
+        .sort((a, b) =>
+            (Date.parse(b.created_at || "") || 0) -
+            (Date.parse(a.created_at || "") || 0)
+        )
         .slice(0, safeResultLimit);
 }
 
