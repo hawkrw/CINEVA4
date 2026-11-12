@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261112-created-at-feed-1";
+} from "./supabase.js?v=20261112-translator-portrait-feed-2";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
