@@ -1,8 +1,9 @@
 
 import { supabase } from "../../js/config.js?v=20261112-admin-auth-fix-4";
 import { verifyAdmin } from "./admin-guard.js?v=20261112-admin-auth-fix-4";
-import { initializePlatformAdmin } from "./platform-admin.js?v=20261112-admin-auth-fix-4";
-import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-admin-auth-fix-4";
+
+// Load optional management modules only after the core dashboard has started.
+// This keeps their downloads out of the initial six-second boot window.
 
 // The HTML watchdog only protects failures before this module starts.
 // Cancel it immediately once dashboard.js has loaded successfully; the
@@ -3737,6 +3738,9 @@ async function initializeDashboard() {
        displayAdminProfile(result.user);
 showDashboard();
 
+const { initializePlatformAdmin } = await import(
+    "./platform-admin.js?v=20261112-admin-auth-fix-4"
+);
 platformAdmin = initializePlatformAdmin({
     getMovies: () => moviesCache,
     getSeries: () => seriesCache,
@@ -3744,7 +3748,11 @@ platformAdmin = initializePlatformAdmin({
     refreshContent: () => refreshContent()
 });
 await platformAdmin.initialize();
+
 try {
+    const { initializeTranslatorManagement } = await import(
+        "./translator-management.js?v=20261112-admin-auth-fix-4"
+    );
     await initializeTranslatorManagement();
 } catch (translatorError) {
     console.error("Translator management could not initialize; continuing dashboard startup:", translatorError);
