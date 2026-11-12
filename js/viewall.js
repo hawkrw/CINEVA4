@@ -14,7 +14,7 @@
    - Responsive catalogue rendering
 ========================================================= */
 
-import { getAllContent } from "./supabase.js";
+import { getAllContent } from "./supabase.js?v=20261112-latest-episode-promotion-2";
 
 /* =========================================================
    CONFIGURATION
