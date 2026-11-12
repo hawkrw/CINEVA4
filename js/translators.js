@@ -39,6 +39,9 @@ function poster(item) {
     if (!raw) return "assets/images/movie-placeholder.jpg";
     const value = String(raw).trim();
     if (/^https?:\/\//i.test(value)) return value;
+    if (value.startsWith("//")) return "https:" + value;
+    if (value.startsWith("/assets/")) return value;
+    if (value.startsWith("assets/")) return "/" + value;
     if (value.startsWith("/")) return "https://image.tmdb.org/t/p/w500" + value;
     return value;
 }
