@@ -44,6 +44,9 @@ const el = {
     rating: document.querySelector("#watch-rating"),
     translator: document.querySelector("#watch-translator"),
     translatorName: document.querySelector("#watch-translator-name"),
+    translatorAvatar: document.querySelector("#watch-translator-avatar"),
+    translatorImage: document.querySelector("#watch-translator-image"),
+    translatorInitial: document.querySelector("#watch-translator-initial"),
     type: document.querySelector("#watch-type"),
 
     likeButton: document.querySelector("#like-btn"),
@@ -481,6 +484,28 @@ function updateWatchSeo(item) {
     script.textContent = JSON.stringify(structuredData);
 }
 
+
+/* Load the matching translator portrait for the watch-page badge. */
+async function loadWatchTranslatorPhoto(name) {
+    if (!el.translatorImage || !name) return;
+    try {
+        const { data, error } = await supabase
+            .from("translator_profiles")
+            .select("profile_image_url")
+            .ilike("name", name)
+            .limit(1)
+            .maybeSingle();
+        if (error) throw error;
+        const imageUrl = String(data?.profile_image_url || "").trim();
+        if (!imageUrl) return;
+        el.translatorImage.onload = () => { el.translatorImage.hidden = false; };
+        el.translatorImage.onerror = () => { el.translatorImage.hidden = true; };
+        el.translatorImage.src = imageUrl;
+    } catch (error) {
+        console.warn("CINEVA watch translator portrait unavailable:", error);
+    }
+}
+
 function displayContent(item) {
     updateWatchSeo(item);
 
@@ -530,6 +555,9 @@ function displayContent(item) {
     if (el.translator && el.translatorName) {
         el.translatorName.textContent = translator;
         el.translator.hidden = !translator;
+        if (el.translatorInitial) el.translatorInitial.textContent = translator ? translator.charAt(0).toUpperCase() : "";
+        if (el.translatorImage) { el.translatorImage.hidden = true; el.translatorImage.removeAttribute("src"); }
+        if (translator) loadWatchTranslatorPhoto(translator);
     }
 
     if (el.type) {
