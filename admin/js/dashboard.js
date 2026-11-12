@@ -1,7 +1,7 @@
 
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
-import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
+import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";\nimport { initializeTranslatorManagement } from "./translator-management.js?v=20261112-1";
 
 // The HTML watchdog only protects failures before this module starts.
 // Cancel it immediately once dashboard.js has loaded successfully; the
@@ -3743,6 +3743,7 @@ platformAdmin = initializePlatformAdmin({
     refreshContent: () => refreshContent()
 });
 await platformAdmin.initialize();
+await initializeTranslatorManagement();
 
 initializeNavigation();
 initializeSeriesEpisodeForms();
