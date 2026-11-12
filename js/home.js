@@ -1410,7 +1410,32 @@ function normalizeTranslatorName(value = "") {
 
 async function loadOurTranslators() {
     const track = document.getElementById("translatorsTrack");
+    const scroller = document.getElementById("translatorsScroller");
+    const previous = document.getElementById("translatorRailPrev");
+    const next = document.getElementById("translatorRailNext");
     if (!track) return;
+
+    if (scroller && !scroller.dataset.controlsReady) {
+        scroller.dataset.controlsReady = "true";
+        const updateControls = () => {
+            const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+            if (previous) previous.disabled = scroller.scrollLeft <= 2;
+            if (next) next.disabled = scroller.scrollLeft >= maxScroll - 2;
+        };
+        const scrollRail = direction => scroller.scrollBy({
+            left: direction * Math.max(240, Math.round(scroller.clientWidth * 0.82)),
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+        });
+        previous?.addEventListener("click", () => scrollRail(-1));
+        next?.addEventListener("click", () => scrollRail(1));
+        scroller.addEventListener("scroll", updateControls, { passive: true });
+        window.addEventListener("resize", updateControls, { passive: true });
+        scroller.addEventListener("keydown", event => {
+            if (event.key === "ArrowLeft") { event.preventDefault(); scrollRail(-1); }
+            if (event.key === "ArrowRight") { event.preventDefault(); scrollRail(1); }
+        });
+        requestAnimationFrame(updateControls);
+    }
 
     try {
         const profiles = await getOurTranslatorProfiles();
@@ -1462,6 +1487,7 @@ async function loadOurTranslators() {
         }).join("");
         track.classList.add("is-static");
         track.style.animation = "none";
+        requestAnimationFrame(() => scroller && scroller.dispatchEvent(new Event("scroll")));
     } catch (error) {
         console.error("CINEVA translators error:", error);
         track.innerHTML = '<div class="translator-loading">Translator profiles are temporarily unavailable. Please try again shortly.</div>';
