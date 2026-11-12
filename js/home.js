@@ -71,6 +71,11 @@ let heroSlides = [];
 let currentSlide = 0;
 
 let sliderTimer = null;
+const translatorProfilesByName = new Map();
+
+function translatorKey(value = "") {
+    return normalizeTranslatorName(value).toLowerCase();
+}
 
 
 /* =========================================================
@@ -716,9 +721,12 @@ function createHeroSlide(item, index) {
         getCategory(item)
     );
 
-    const translator = escapeHTML(getTranslator(item));
+    const translatorName = getTranslator(item);
+    const translator = escapeHTML(translatorName);
+    const translatorProfile = translatorProfilesByName.get(translatorKey(translatorName));
+    const translatorPhoto = translatorProfile?.profile_image_url || "";
     const translatorHTML = translator
-        ? `<span class="hero-translator-badge" title="Translator: ${translator}"><i class="fa-solid fa-language"></i><span><strong>${translator}</strong></span></span>`
+        ? `<span class="hero-translator-badge" title="Translator: ${translator}" data-translator-name="${translator}"><span class="hero-translator-avatar">${translatorPhoto ? `<img src="${escapeHTML(translatorPhoto)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : `<i class="fa-solid fa-language"></i>`}</span><span><strong>${translator}</strong></span></span>`
         : "";
 
     const rating = getRating(item);
@@ -1406,6 +1414,23 @@ async function loadOurTranslators() {
 
     try {
         const profiles = await getOurTranslatorProfiles();
+        translatorProfilesByName.clear();
+        profiles.forEach(profile => {
+            const key = translatorKey(profile.name);
+            if (key) translatorProfilesByName.set(key, profile);
+        });
+        document.querySelectorAll(".hero-translator-badge[data-translator-name]").forEach(badge => {
+            const profile = translatorProfilesByName.get(translatorKey(badge.dataset.translatorName));
+            const avatar = badge.querySelector(".hero-translator-avatar");
+            if (!profile?.profile_image_url || !avatar || avatar.querySelector("img")) return;
+            const image = document.createElement("img");
+            image.src = profile.profile_image_url;
+            image.alt = "";
+            image.loading = "lazy";
+            image.decoding = "async";
+            image.onerror = () => image.remove();
+            avatar.replaceChildren(image);
+        });
         if (!profiles.length) {
             track.innerHTML = '<div class="translator-loading">No translator profiles available yet.</div>';
             track.classList.add("is-static");
