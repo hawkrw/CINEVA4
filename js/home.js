@@ -579,7 +579,7 @@ function createMovieCard(item) {
         ? `
             <span
                 class="movie-translator-badge"
-                title="Translated by ${translator}"
+                title="Translator: ${translator}"
             >
                 <i class="fa-solid fa-language"></i>
                 ${translator}
