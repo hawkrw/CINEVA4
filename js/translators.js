@@ -1,4 +1,4 @@
-import { getAllContent, getOurTranslatorProfiles } from "./supabase.js";
+import { getAllContent, getOurTranslatorProfiles } from "./supabase.js?v=20261112-latest-episode-promotion-2";
 
 const params = new URLSearchParams(window.location.search);
 const requestedName = params.get("name") || "";
