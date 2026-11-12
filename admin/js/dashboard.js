@@ -1,6 +1,6 @@
 
-import { supabase } from "../../js/config.js";
-import { verifyAdmin } from "./admin-guard.js";
+import { supabase } from "../../js/config.js?v=20261112-admin-login-fix-1";
+import { verifyAdmin } from "./admin-guard.js?v=20261112-admin-login-fix-1";
 import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
 import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-profile-photo-2";
 
