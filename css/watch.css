@@ -3444,3 +3444,10 @@
 .player-action-left[hidden] {
     display: none !important;
 }
+
+
+/* CINEVA — circular translator portrait on the watch page */
+.watch-meta .watch-translator-avatar { position:relative; display:inline-grid; place-items:center; width:28px; height:28px; flex:0 0 28px; overflow:hidden; border-radius:50%; background:linear-gradient(135deg,#a855f7,#6334c9); color:#fff; font-size:11px; font-weight:800; }
+.watch-meta .watch-translator-avatar img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; border-radius:50%; }
+.watch-meta .watch-translator-avatar img[hidden] { display:none !important; }
+.watch-meta .watch-translator-avatar > span { line-height:1; }
