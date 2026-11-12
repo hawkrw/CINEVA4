@@ -2,7 +2,7 @@
 import { supabase } from "../../js/config.js";
 import { verifyAdmin } from "./admin-guard.js";
 import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
-import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-2";
+import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-imagekit-1";
 
 // The HTML watchdog only protects failures before this module starts.
 // Cancel it immediately once dashboard.js has loaded successfully; the
