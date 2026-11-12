@@ -1753,7 +1753,4 @@ main .content-section .section-heading,
 .movie-translator-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 
-/* CINEVA — clearer translator portraits on content cards */
-.movie-translator-badge{min-height:36px;padding:6px 10px;gap:8px}
-.movie-translator-avatar{width:32px;height:32px;flex:0 0 32px;font-size:12px}
-@media(max-width:600px){.movie-translator-badge{min-height:34px;padding:5px 8px;gap:7px}.movie-translator-avatar{width:30px;height:30px;flex-basis:30px}}
+/* Keep translator badges at their original compact size; portraits link to profiles. */
