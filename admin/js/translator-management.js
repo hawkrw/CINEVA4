@@ -4,6 +4,35 @@ const $ = id => document.getElementById(id);
 let profiles = [];
 let modal = null;
 
+async function getImageKitAuth() {
+    const { data, error } = await supabase.functions.invoke("imagekit-upload-auth", { method: "POST" });
+    if (error) throw new Error(error.message || "Could not authorize the ImageKit upload.");
+    if (!data?.token || !data?.signature || !data?.publicKey) {
+        throw new Error(data?.error || "ImageKit upload authentication is not configured.");
+    }
+    return data;
+}
+
+async function uploadTranslatorImage(file, translatorName) {
+    const auth = await getImageKitAuth();
+    const safeName = String(translatorName || "translator").normalize("NFKD")
+        .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 55) || "translator";
+    const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const form = new FormData();
+    form.append("file", file);
+    form.append("fileName", safeName + "-" + Date.now() + "." + extension);
+    form.append("publicKey", auth.publicKey);
+    form.append("token", auth.token);
+    form.append("expire", String(auth.expire));
+    form.append("signature", auth.signature);
+    form.append("folder", "/cineva/translator-profiles");
+    form.append("useUniqueFileName", "true");
+    const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body: form });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.url) throw new Error(result.message || "ImageKit upload failed (HTTP " + response.status + ").");
+    return result.url;
+}
+
 function setMessage(message, isError = false) {
     const node = $("translatorProfileMessage");
     if (!node) return;
@@ -216,23 +245,16 @@ async function uploadProfileImage(event) {
         return;
     }
 
-    const name = file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-    const path = "translator-profiles/" + crypto.randomUUID() + "." + name;
-    setMessage("Uploading profile photo...");
-
-    const { error } = await supabase.storage.from("posters").upload(path, file, {
-        cacheControl: "31536000",
-        contentType: file.type,
-        upsert: false
-    });
-    if (error) {
+    setMessage("Uploading profile photo to ImageKit...");
+    try {
+        const translatorName = modal.querySelector('[name="name"]').value.trim() || file.name;
+        const imageUrl = await uploadTranslatorImage(file, translatorName);
+        modal.querySelector('[name="profile_image_url"]').value = imageUrl;
+    } catch (error) {
         console.error("Translator profile photo upload failed:", error);
         setMessage("Photo upload failed: " + error.message, true);
         return;
     }
-
-    const { data } = supabase.storage.from("posters").getPublicUrl(path);
-    modal.querySelector('[name="profile_image_url"]').value = data.publicUrl;
     updatePreview();
     setMessage("Profile photo uploaded. Save the profile to publish it.");
 }
@@ -335,9 +357,48 @@ async function handleProfileAction(event) {
     }
 }
 
+async function migrateLegacyImages() {
+    const candidates = profiles.filter(profile => profile.profile_image_url && !/ik\.imagekit\.io|imagekit\.io/i.test(profile.profile_image_url));
+    if (!candidates.length) { alert("All translator profile photos are already stored on ImageKit."); return; }
+    if (!confirm("Move " + candidates.length + " existing translator photo(s) from Supabase Storage to ImageKit? Each database URL changes only after its new upload succeeds.")) return;
+    const button = $("migrateTranslatorImages");
+    if (button) { button.disabled = true; button.textContent = "Migrating photos..."; }
+    let moved = 0;
+    const failures = [];
+    try {
+        for (const profile of candidates) {
+            try {
+                const response = await fetch(profile.profile_image_url, { mode: "cors", cache: "no-store" });
+                if (!response.ok) throw new Error("Could not download current photo (HTTP " + response.status + ").");
+                const blob = await response.blob();
+                if (!blob.type.startsWith("image/")) throw new Error("The current URL did not return an image.");
+                const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+                const file = new File([blob], profile.name + "." + ext, { type: blob.type });
+                const imageUrl = await uploadTranslatorImage(file, profile.name);
+                const { error } = await supabase.from("translator_profiles").update({
+                    profile_image_url: imageUrl, updated_at: new Date().toISOString()
+                }).eq("id", profile.id);
+                if (error) throw error;
+                profile.profile_image_url = imageUrl;
+                moved++;
+                if (button) button.textContent = "Migrating " + moved + "/" + candidates.length + "...";
+            } catch (error) {
+                console.error("Translator photo migration failed:", profile.name, error);
+                failures.push(profile.name + ": " + error.message);
+            }
+        }
+        renderProfiles();
+        alert("ImageKit migration finished. " + moved + " photo(s) moved successfully." +
+            (failures.length ? "\n\nNot moved:\n" + failures.join("\n") : ""));
+    } finally {
+        if (button) { button.disabled = false; button.textContent = "Move old photos to ImageKit"; }
+    }
+}
+
 export async function initializeTranslatorManagement() {
     $("addTranslatorProfile")?.addEventListener("click", () => openModal());
     $("refreshTranslatorProfiles")?.addEventListener("click", () => loadProfiles().catch(error => console.error(error)));
+    $("migrateTranslatorImages")?.addEventListener("click", migrateLegacyImages);
     $("translatorProfileSearch")?.addEventListener("input", renderProfiles);
     $("translatorProfileGrid")?.addEventListener("click", handleProfileAction);
     await loadProfiles();
