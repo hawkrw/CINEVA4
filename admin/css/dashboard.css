@@ -1817,3 +1817,6 @@ body.platform-modal-open { overflow: hidden; }
 .translator-checkbox { display: flex; align-items: center; gap: 9px; margin: 10px 0; color: #d8d2e6; font-size: 11px; }
 .translator-checkbox input { accent-color: #9b55ed; }
 @media(max-width:600px) { .translator-admin-heading { align-items: stretch; flex-direction: column; } .translator-admin-heading .primary-btn { width: 100%; } .translator-admin-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; } .translator-admin-card { padding: 10px; } .translator-admin-photo { width: 46px; height: 46px; flex-basis: 46px; border-radius: 13px; } .translator-admin-card-actions button { flex: 1 1 auto; } }
+
+.translator-admin-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+@media(max-width:600px){.translator-admin-heading-actions{width:100%;justify-content:stretch}.translator-admin-heading-actions>*{flex:1}}
