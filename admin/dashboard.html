@@ -85,6 +85,11 @@
                     <span>Categories</span>
                 </a>
 
+                <a href="#translators" class="nav-link" data-page="translators">
+                    <span class="nav-icon">✦</span>
+                    <span>Translators</span>
+                </a>
+
                 <div class="sidebar-label">SYSTEM</div>
 
                 <a href="#analytics" class="nav-link" data-page="analytics">
@@ -528,6 +533,28 @@
     <p class="analytics-footnote">Visitors are counted once per browser per day. Counts are based on visits recorded after tracking is enabled; earlier traffic cannot be reconstructed.</p>
 </section>
 
+
+<!-- =========================================
+     TRANSLATOR PROFILES
+========================================= -->
+<section class="dashboard-page" id="translatorsPage">
+    <div class="management-heading translator-admin-heading">
+        <div>
+            <span class="admin-eyebrow">CREATOR DIRECTORY</span>
+            <h2>Translator Profiles</h2>
+            <p>Manage the people shown in the homepage translator section and hero badges.</p>
+        </div>
+        <button type="button" class="primary-btn" id="addTranslatorProfile">+ Add Translator</button>
+    </div>
+    <div class="management-toolbar translator-admin-toolbar">
+        <input type="search" id="translatorProfileSearch" placeholder="Search translator profiles...">
+        <button type="button" id="refreshTranslatorProfiles">Refresh</button>
+    </div>
+    <div class="translator-admin-summary" id="translatorProfileSummary">Loading translator profiles...</div>
+    <div class="translator-admin-grid" id="translatorProfileGrid">
+        <div class="category-loading">Loading translator profiles...</div>
+    </div>
+</section>
 
 <!-- =========================================
      SETTINGS
