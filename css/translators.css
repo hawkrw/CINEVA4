@@ -150,7 +150,7 @@
 .translator-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 
 
-/* Larger managed portraits in the homepage translator directory */
-.translators-section .translator-profile-avatar{width:72px;height:72px;flex-basis:72px}
+/* Keep translator directory portraits at their original profile-card size. */
+.translators-section .translator-profile-avatar{width:68px;height:68px;flex-basis:68px}
 .translators-section .translator-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
-@media(max-width:600px){.translators-section .translator-profile-avatar{width:58px;height:58px;flex-basis:58px}}
+@media(max-width:600px){.translators-section .translator-profile-avatar{width:48px;height:48px;flex-basis:48px}}
