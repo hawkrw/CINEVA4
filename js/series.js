@@ -1,5 +1,5 @@
 
-import { getAllSeries } from "./supabase.js";
+import { getAllSeries } from "./supabase.js?v=20261112-latest-episode-promotion-2";
 
 document.addEventListener("DOMContentLoaded", () => {
     const seriesGrid = document.querySelector("#series-grid");
