@@ -711,10 +711,10 @@ export async function getOurTranslatorProfiles() {
 
     const generated = discovered
         .map(rawName => {
-            const key = String(rawName || "").replace(/\\s+/g, " ").trim().toLowerCase();
-            if (/^gaheza(?:\\s+simba)?$/.test(key)) return "Gaheza";
-            if (/^hakim(?:\\s+the\\s+(?:prof|mwarimu))?$/.test(key)) return "Hakim's";
-            return String(rawName || "").replace(/\\s+/g, " ").trim();
+            const key = String(rawName || "").replace(/\s+/g, " ").trim().toLowerCase();
+            if (/^gaheza(?:\s+simba)?$/.test(key)) return "Gaheza";
+            if (/^hakim(?:\s+the\s+(?:prof|mwarimu))?$/.test(key)) return "Hakim's";
+            return String(rawName || "").replace(/\s+/g, " ").trim();
         })
         .filter(name => name && !known.has(name.toLowerCase()))
         .map((name, index) => ({
