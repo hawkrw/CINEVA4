@@ -668,28 +668,47 @@ export async function getAllContent() {
    17.1. FETCH MANAGED TRANSLATOR PROFILES
 ========================================= */
 export async function getOurTranslatorProfiles() {
-    const { data, error } = await supabase
-        .from("translator_profiles")
-        .select("id,name,profile_image_url,bio,sort_order,is_active")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
+    // Managed profile records and content-based translator discovery are
+    // independent sources. A temporary profile-table/RLS issue must not
+    // blank the entire homepage directory when movie/series names remain
+    // readable.
+    const [managedResult, discoveryResult] = await Promise.allSettled([
+        supabase
+            .from("translator_profiles")
+            .select("id,name,profile_image_url,bio,sort_order,is_active")
+            .eq("is_active", true)
+            .order("sort_order", { ascending: true })
+            .order("name", { ascending: true }),
+        getOurTranslators()
+    ]);
 
-    if (error) {
-        console.error("CINEVA translator profiles failed:", error);
-        throw error;
+    let managed = [];
+    let managedFailed = false;
+    if (managedResult.status === "fulfilled" && !managedResult.value.error) {
+        managed = managedResult.value.data || [];
+    } else {
+        managedFailed = true;
+        const error = managedResult.status === "rejected"
+            ? managedResult.reason
+            : managedResult.value.error;
+        console.warn("CINEVA managed translator profiles unavailable; using discovered names:", error);
     }
 
-    // Keep automatic discovery working for translator names added to new
-    // movie or series records after this profile directory was created.
-    const managed = data || [];
-    const known = new Set(managed.map(profile => String(profile.name || "").trim().toLowerCase()));
     let discovered = [];
-    try {
-        discovered = await getOurTranslators();
-    } catch (discoveryError) {
-        console.warn("CINEVA translator auto-discovery unavailable; showing managed profiles:", discoveryError);
+    if (discoveryResult.status === "fulfilled") {
+        discovered = discoveryResult.value || [];
+    } else {
+        console.warn("CINEVA translator name discovery unavailable:", discoveryResult.reason);
     }
+
+    if (managedFailed && !discovered.length) {
+        throw new Error("Translator profiles and translator names are currently unavailable.");
+    }
+
+    const known = new Set(
+        managed.map(profile => String(profile.name || "").trim().toLowerCase())
+    );
+
     const generated = discovered
         .map(rawName => {
             const key = String(rawName || "").replace(/\\s+/g, " ").trim().toLowerCase();
