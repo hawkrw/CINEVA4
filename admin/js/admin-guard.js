@@ -1,5 +1,5 @@
 
-import { supabase } from "../../js/config.js";
+import { supabase } from "../../js/config.js?v=20261112-admin-login-fix-2";
 
 /* =========================================
    CINEVA PRO — ADMIN AUTHORIZATION GUARD
