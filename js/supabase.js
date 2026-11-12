@@ -684,7 +684,12 @@ export async function getOurTranslatorProfiles() {
     // movie or series records after this profile directory was created.
     const managed = data || [];
     const known = new Set(managed.map(profile => String(profile.name || "").trim().toLowerCase()));
-    const discovered = await getOurTranslators();
+    let discovered = [];
+    try {
+        discovered = await getOurTranslators();
+    } catch (discoveryError) {
+        console.warn("CINEVA translator auto-discovery unavailable; showing managed profiles:", discoveryError);
+    }
     const generated = discovered
         .map(rawName => {
             const key = String(rawName || "").replace(/\\s+/g, " ").trim().toLowerCase();
