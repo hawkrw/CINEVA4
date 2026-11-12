@@ -665,6 +665,25 @@ export async function getAllContent() {
 }
 
 /* =========================================
+   17.1. FETCH MANAGED TRANSLATOR PROFILES
+========================================= */
+export async function getOurTranslatorProfiles() {
+    const { data, error } = await supabase
+        .from("translator_profiles")
+        .select("id,name,profile_image_url,bio,sort_order,is_active")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+
+    if (error) {
+        console.error("CINEVA translator profiles failed:", error);
+        throw error;
+    }
+
+    return data || [];
+}
+
+/* =========================================
    17. FETCH UNIQUE TRANSLATORS
    Movies and series are handled independently
 ========================================= */
