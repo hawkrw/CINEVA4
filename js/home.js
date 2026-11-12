@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261112-translator-imagekit-2";
+} from "./supabase.js?v=20261112-created-at-feed-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -1309,7 +1309,7 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v3";
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v4";
 const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function readHomepageCache() {
@@ -1336,8 +1336,13 @@ function saveHomepageCache(data) {
 }
 
 function renderHomepageData(homepageData) {
-    loadFeatured(homepageData.latest || []);
-    loadLatest(homepageData.latest || []);
+    // Both the hero slider and Latest Added consume the same newest-first
+    // movies + series feed, ranked only by created_at in Supabase.
+    const newestFirst = [...(homepageData.latest || [])].sort((a, b) =>
+        (Date.parse(b.created_at || "") || 0) - (Date.parse(a.created_at || "") || 0)
+    );
+    loadFeatured(newestFirst);
+    loadLatest(newestFirst);
     loadTrending(homepageData.trending || []);
     loadCategories(homepageData.categories || {});
 }
