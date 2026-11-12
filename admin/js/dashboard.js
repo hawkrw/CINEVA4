@@ -3751,7 +3751,7 @@ await platformAdmin.initialize();
 
 try {
     const { initializeTranslatorManagement } = await import(
-        "./translator-management.js?v=20261112-admin-auth-fix-4"
+        "./translator-management.js?v=20261112-translator-syntax-fix-1"
     );
     await initializeTranslatorManagement();
 } catch (translatorError) {
