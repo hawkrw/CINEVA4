@@ -15,8 +15,8 @@
 
 import {
     getHomepageData,
-    getOurTranslators
-} from "./supabase.js?v=20261111-trending-1";
+    getOurTranslatorProfiles
+} from "./supabase.js?v=20261112-translator-profiles-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -716,6 +716,11 @@ function createHeroSlide(item, index) {
         getCategory(item)
     );
 
+    const translator = escapeHTML(getTranslator(item));
+    const translatorHTML = translator
+        ? `<span class="hero-translator-badge" title="Translated by ${translator}"><i class="fa-solid fa-language"></i><span>Translated by <strong>${translator}</strong></span></span>`
+        : "";
+
     const rating = getRating(item);
 
     const ratingHTML = rating
@@ -791,6 +796,7 @@ function createHeroSlide(item, index) {
                         }
 
                         ${ratingHTML}
+                        ${translatorHTML}
 
                     </div>
 
@@ -1399,41 +1405,42 @@ async function loadOurTranslators() {
     if (!track) return;
 
     try {
-        const names = await getOurTranslators();
-        const grouped = [...new Set(names.map(normalizeTranslatorName))]
-            .filter(Boolean)
-            .sort((a, b) => a.localeCompare(b));
-
-        if (!grouped.length) {
-            track.innerHTML = '<div class="translator-loading">No translators available yet.</div>';
-            track.style.animation = "none";
+        const profiles = await getOurTranslatorProfiles();
+        if (!profiles.length) {
+            track.innerHTML = '<div class="translator-loading">No translator profiles available yet.</div>';
+            track.classList.add("is-static");
             return;
         }
 
-        const cards = grouped.map(name => {
-            const safeName = escapeHTML(name);
-            const initial = escapeHTML(name.charAt(0).toUpperCase());
-            const href = `translator.html?name=${encodeURIComponent(name)}`;
+        track.innerHTML = profiles.map(profile => {
+            const safeName = escapeHTML(profile.name);
+            const safeBio = escapeHTML(profile.bio || "CINEVA Translator");
+            const image = profile.profile_image_url
+                ? `<img src="${escapeHTML(profile.profile_image_url)}" alt="${safeName}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
+                : "";
+            const initial = escapeHTML((profile.name || "?").trim().charAt(0).toUpperCase());
+            const href = `translator.html?name=${encodeURIComponent(profile.name)}`;
 
             return `
-                <a class="translator-card" href="${href}" aria-label="View all content translated by ${safeName}">
-                    <span class="translator-avatar">${initial}</span>
+                <a class="translator-card translator-profile-card" href="${href}" aria-label="View titles translated by ${safeName}">
+                    <span class="translator-avatar translator-profile-avatar">
+                        ${image}
+                        <span class="translator-avatar-fallback" ${profile.profile_image_url ? "hidden" : ""}>${initial}</span>
+                    </span>
                     <span class="translator-details">
                         <strong>${safeName}</strong>
-                        <span>Explore translated titles <i class="fa-solid fa-arrow-right"></i></span>
+                        <span>${safeBio}</span>
                     </span>
-                    <i class="fa-solid fa-chevron-right translator-card-arrow" aria-hidden="true"></i>
+                    <i class="fa-solid fa-arrow-up-right-from-square translator-card-arrow" aria-hidden="true"></i>
                 </a>
             `;
         }).join("");
-
-        track.innerHTML = cards + cards;
-        track.style.animationDuration = `${Math.max(75, grouped.length * 8)}s`;
-        track.classList.toggle("is-static", grouped.length < 2);
+        track.classList.add("is-static");
+        track.style.animation = "none";
     } catch (error) {
         console.error("CINEVA translators error:", error);
-        track.innerHTML = '<div class="translator-loading">Unable to load translators right now.</div>';
-        track.style.animation = "none";
+        track.innerHTML = '<div class="translator-loading">Unable to load translator profiles right now.</div>';
+        track.classList.add("is-static");
     }
 }
 
