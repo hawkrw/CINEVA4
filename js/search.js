@@ -60,8 +60,12 @@ function safeImageUrl(value) {
 
     let url = String(value).trim();
 
-    // TMDB poster_path values are relative paths.
-    if (url.startsWith("/")) {
+    // Preserve local CINEVA assets; only TMDB-style paths use the TMDB host.
+    if (url.startsWith("//")) {
+        url = `https:${url}`;
+    } else if (url.startsWith("/assets/")) {
+        // Already an origin-relative CINEVA asset path.
+    } else if (url.startsWith("/")) {
         url = `https://image.tmdb.org/t/p/w342${url}`;
     } else if (url.startsWith("assets/")) {
         url = `/${url}`;
