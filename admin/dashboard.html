@@ -591,7 +591,7 @@
             if (boot) boot.hidden = true;
             if (message) {
                 message.textContent =
-                    "The dashboard could not finish loading its scripts. The dashboard scripts did not start within 20 seconds. Check your connection and reload the page.";
+                    "The dashboard could not finish loading its scripts. The dashboard scripts did not start within 6 seconds. Check your connection and reload the page.";
             }
             if (error) error.hidden = false;
 
@@ -602,7 +602,7 @@
                     window.location.reload();
                 }, { once: true });
             }
-        }, 20000);
+        }, 6000);
     </script>
     <script type="module" src="./js/dashboard.js?v=20261112-admin-auth-fix-4"></script>
 
