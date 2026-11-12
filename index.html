@@ -441,7 +441,15 @@
         <h2 id="translatorsTitle">Our <span>Translators</span></h2>
         <p>Discover the talented translators bringing entertainment closer to you.</p>
     </div>
-    <div class="translators-wrapper" aria-label="CINEVA translators">
+    <div class="translator-rail-controls" aria-label="Translator carousel controls">
+        <button class="translator-rail-button" id="translatorRailPrev" type="button" aria-label="Scroll translators left" disabled>
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button class="translator-rail-button" id="translatorRailNext" type="button" aria-label="Scroll translators right">
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="translators-wrapper" id="translatorsScroller" aria-label="CINEVA translators" tabindex="0">
         <div class="translators-track" id="translatorsTrack" aria-live="polite">
             <div class="translator-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading translators...</div>
         </div>
