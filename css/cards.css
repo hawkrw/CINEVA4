@@ -1742,3 +1742,12 @@ main .content-section .section-heading,
         font-size: 8px;
     }
 }
+
+
+/* Translator portraits replace the generic language symbol on movie cards. */
+.movie-translator-badge{display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 20px)}
+.movie-translator-avatar{position:relative;display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;overflow:hidden;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,#a855f7,#6334c9);color:#fff;font-size:10px;font-weight:900}
+.movie-translator-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.movie-translator-avatar-fallback{display:grid;place-items:center;width:100%;height:100%}
+.movie-translator-avatar-fallback[hidden]{display:none}
+.movie-translator-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
