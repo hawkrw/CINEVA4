@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261112-translator-profiles-1";
+} from "./supabase.js?v=20261112-translator-imagekit-2";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -1464,7 +1464,7 @@ async function loadOurTranslators() {
         track.style.animation = "none";
     } catch (error) {
         console.error("CINEVA translators error:", error);
-        track.innerHTML = '<div class="translator-loading">Unable to load translator profiles right now.</div>';
+        track.innerHTML = '<div class="translator-loading">Translator profiles are temporarily unavailable. Please try again shortly.</div>';
         track.classList.add("is-static");
     }
 }
