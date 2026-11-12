@@ -1309,7 +1309,7 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v5";
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v6";
 const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function readHomepageCache() {
