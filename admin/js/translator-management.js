@@ -234,7 +234,7 @@ function updatePreview() {
     }
 }
 
-async function uploadProfileImage(event) {
+async async function uploadProfileImage(event) {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -259,7 +259,7 @@ async function uploadProfileImage(event) {
         return;
     }
     updatePreview();
-    setMessage("Profile photo uploaded. Save the profile to publish it.");
+    setMessage("Profile photo uploaded to ImageKit. Tap Save Profile / Update Profile to publish it.");
 }
 
 function openModal(profile = null) {
