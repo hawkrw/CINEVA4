@@ -1,4 +1,4 @@
-import { getAllContent } from "./supabase.js";
+import { getAllContent, getOurTranslatorProfiles } from "./supabase.js";
 
 const params = new URLSearchParams(window.location.search);
 const requestedName = params.get("name") || "";
@@ -77,6 +77,24 @@ if (!requestedName.trim()) {
     nameNode.textContent = name;
     avatarNode.textContent = name.charAt(0).toUpperCase();
     document.querySelector('meta[name="description"]')?.setAttribute("content", `Browse movies and TV series translated by ${name} on CINEVA.`);
+
+    // Use the exact profile image uploaded from CINEVA PRO.
+    getOurTranslatorProfiles().then(profiles => {
+        const profile = profiles.find(item => translatorGroup(item.name) === selectedGroup);
+        if (!profile?.profile_image_url || !avatarNode) return;
+        const image = document.createElement("img");
+        image.src = profile.profile_image_url;
+        image.alt = name + " profile photo";
+        image.loading = "eager";
+        image.decoding = "async";
+        image.onerror = () => {
+            image.remove();
+            avatarNode.textContent = name.charAt(0).toUpperCase();
+        };
+        avatarNode.replaceChildren(image);
+    }).catch(error => {
+        console.warn("Translator profile photo unavailable:", error);
+    });
 
     let collection = [];
 
