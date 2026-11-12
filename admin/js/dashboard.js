@@ -1,8 +1,8 @@
 
-import { supabase } from "../../js/config.js?v=20261112-admin-auth-fix-3";
-import { verifyAdmin } from "./admin-guard.js?v=20261112-admin-auth-fix-3";
-import { initializePlatformAdmin } from "./platform-admin.js?v=20261109-3";
-import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-profile-photo-2";
+import { supabase } from "../../js/config.js?v=20261112-admin-auth-fix-4";
+import { verifyAdmin } from "./admin-guard.js?v=20261112-admin-auth-fix-4";
+import { initializePlatformAdmin } from "./platform-admin.js?v=20261112-admin-auth-fix-4";
+import { initializeTranslatorManagement } from "./translator-management.js?v=20261112-admin-auth-fix-4";
 
 // The HTML watchdog only protects failures before this module starts.
 // Cancel it immediately once dashboard.js has loaded successfully; the
