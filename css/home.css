@@ -2240,3 +2240,22 @@
         font-size: 9px;
     }
 }
+
+
+/* Hero translator credit */
+.hero-translator-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border: 1px solid rgba(190,145,255,.32);
+    border-radius: 999px;
+    background: rgba(92,45,145,.24);
+    color: #e6d4ff;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+.hero-translator-badge > i { color: #c38aff; font-size: 13px; }
+.hero-translator-badge strong { color: #fff; font-weight: 800; }
+.hero-meta .hero-translator-badge { margin: 3px 0; }
