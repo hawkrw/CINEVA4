@@ -1315,7 +1315,7 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v7";
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v8";
 const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function readHomepageCache() {
@@ -1348,11 +1348,13 @@ function renderHomepageData(homepageData) {
         const parsed = Date.parse(item?.created_at || "");
         return Number.isFinite(parsed) ? parsed : 0;
     };
-    const newestFirst = [...(homepageData.latest || [])]
+    const newestFirst = [...(homepageData.hero || homepageData.latest || [])]
         .filter(item => item && item.id && item.created_at)
         .sort((a, b) => createdAtMillis(b) - createdAtMillis(a));
+    const latestFeed = [...(homepageData.latest || newestFirst)]
+        .filter(item => item && item.id && item.created_at);
     loadFeatured(newestFirst);
-    loadLatest(newestFirst);
+    loadLatest(latestFeed);
     loadTrending(homepageData.trending || []);
     loadCategories(homepageData.categories || {});
 }
