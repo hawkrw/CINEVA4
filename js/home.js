@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261112-translator-portrait-feed-2";
+} from "./supabase.js?v=20261112-latest-episode-promotion-2";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -1342,8 +1342,8 @@ function saveHomepageCache(data) {
 }
 
 function renderHomepageData(homepageData) {
-    // Both the hero slider and Latest Added consume the same newest-first
-    // movies + series feed, ranked only by created_at in Supabase.
+    // The hero remains ordered by original creation date. Latest Added uses
+    // the activity-ranked feed so series with fresh episodes rise naturally.
     const createdAtMillis = item => {
         const parsed = Date.parse(item?.created_at || "");
         return Number.isFinite(parsed) ? parsed : 0;
