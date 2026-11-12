@@ -52,6 +52,9 @@ function renderProfiles() {
 
     if (summary) {
         const active = profiles.filter(profile => profile.is_active).length;
+        const legacyPhotos = profiles.filter(profile => profile.profile_image_url && !/ik\.imagekit\.io|imagekit\.io/i.test(profile.profile_image_url)).length;
+        const migrateButton = $("migrateTranslatorImages");
+        if (migrateButton && !migrateButton.disabled) migrateButton.textContent = legacyPhotos ? "Move " + legacyPhotos + " old photo" + (legacyPhotos === 1 ? "" : "s") + " to ImageKit" : "All photos on ImageKit";
         summary.textContent = profiles.length + " profiles · " + active + " active · " + (profiles.length - active) + " hidden";
     }
 
