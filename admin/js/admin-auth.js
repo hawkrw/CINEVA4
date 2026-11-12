@@ -1,6 +1,6 @@
 
-import { supabase } from "../../js/config.js";
-import { verifyAdmin } from "./admin-guard.js";
+import { supabase } from "../../js/config.js?v=20261112-admin-login-fix-1";
+import { verifyAdmin } from "./admin-guard.js?v=20261112-admin-login-fix-1";
 
 /* =========================================
    CINEVA PRO — ADMIN LOGIN
