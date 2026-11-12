@@ -144,3 +144,7 @@
 @media(prefers-reduced-motion:reduce){
     .translators-section .translators-wrapper{scroll-behavior:auto}
 }
+
+/* Translator detail page: use the uploaded ImageKit portrait */
+.translator-profile-avatar{position:relative;overflow:hidden}
+.translator-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
