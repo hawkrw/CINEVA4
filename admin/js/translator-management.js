@@ -1,4 +1,4 @@
-import { supabase } from "../../js/config.js?v=20261112-admin-auth-fix-4";
+import { supabase } from "../../js/config.js?v=20261112-translator-syntax-fix-1";
 
 const $ = id => document.getElementById(id);
 let profiles = [];
@@ -234,7 +234,7 @@ function updatePreview() {
     }
 }
 
-async async function uploadProfileImage(event) {
+async function uploadProfileImage(event) {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
