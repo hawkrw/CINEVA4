@@ -1473,7 +1473,8 @@ async function loadOurTranslators() {
                     image.alt = "";
                     image.loading = "lazy";
                     image.decoding = "async";
-                    avatar.replaceChildren(image);
+                    if (fallback) avatar.insertBefore(image, fallback);
+                    else avatar.replaceChildren(image);
                 }
                 image.src = profile.profile_image_url;
                 image.onerror = () => {
