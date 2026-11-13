@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261113-latest-episode-label-1";
+} from "./supabase.js?v=20261113-latest-episode-text-2";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
