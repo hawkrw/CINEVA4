@@ -8,7 +8,9 @@ const SIGNAL_TABLE = "cineva_content_updates";
 const CHANNEL_NAME = "cineva-live-content-updates";
 const HOME_CACHE_PREFIX = "cineva_homepage_cache_";
 const SCROLL_KEY = "cineva_live_update_scroll";
-const POLL_INTERVAL_MS = 60000;
+const IS_DESKTOP = window.matchMedia("(pointer: fine) and (min-width: 768px)").matches;
+const POLL_INTERVAL_MS = IS_DESKTOP ? 15000 : 30000;
+const SW_CHECK_INTERVAL_MS = IS_DESKTOP ? 3 * 60 * 1000 : 5 * 60 * 1000;
 
 let lastVersion = null;
 let pendingReload = false;
@@ -126,7 +128,7 @@ async function startLiveUpdates() {
             }
         });
 
-    // A light fallback catches updates if a device temporarily loses Realtime.
+    // Desktop checks more frequently; mobile keeps a lighter fallback interval.
     window.setInterval(async () => {
         if (document.visibilityState !== "visible") return;
         try {
@@ -141,6 +143,34 @@ async function startLiveUpdates() {
             console.warn("CINEVA: Update sync check unavailable.", error);
         }
     }, POLL_INTERVAL_MS);
+
+    // Check the deployed service-worker script so installed desktop browsers
+    // receive new website code without manual cache clearing.
+    if ("serviceWorker" in navigator) {
+        const checkServiceWorker = async () => {
+            if (document.visibilityState !== "visible" || !navigator.onLine) return;
+            try {
+                const registration = await navigator.serviceWorker.getRegistration("/");
+                if (registration) await registration.update();
+            } catch (error) {
+                console.warn("CINEVA: Automatic app update check unavailable.", error);
+            }
+        };
+
+        checkServiceWorker();
+        window.setInterval(checkServiceWorker, SW_CHECK_INTERVAL_MS);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") checkServiceWorker();
+        });
+        window.addEventListener("online", checkServiceWorker);
+
+        let refreshingForWorker = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshingForWorker) return;
+            refreshingForWorker = true;
+            window.location.reload();
+        });
+    }
 }
 
 readSavedScroll();
