@@ -3,7 +3,7 @@
    - Never replace an unrelated page with the homepage.
    - Refresh cached pages quietly while serving the exact requested page.
 */
-const CACHE_NAME = "cineva-shell-v20";
+const CACHE_NAME = "cineva-shell-v21";
 const APP_SHELL = [
   "/",
   "/index.html",
