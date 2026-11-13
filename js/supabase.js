@@ -326,7 +326,7 @@ export async function getHomepageData({
                 const episode = Number(row.episode_number ?? row.episode ?? 0);
                 if (episode > 0) {
                     const title = String(row.title || "").trim().toLowerCase();
-                    const isFinal = row.is_final === true || title === "final" || title.includes("final episode");
+                    const isFinal = row.is_final === true || title.includes("final");
                     latestEpisodeBySeries.set(id, { season, episode, isFinal });
                 }
             });
