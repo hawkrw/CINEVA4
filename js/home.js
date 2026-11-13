@@ -16,7 +16,7 @@
 import {
     getHomepageData,
     getOurTranslatorProfiles
-} from "./supabase.js?v=20261112-latest-episode-promotion-2";
+} from "./supabase.js?v=20261113-latest-episode-label-1";
 /* =========================================================
    01. HOMEPAGE SETTINGS
 ========================================================= */
@@ -580,21 +580,14 @@ function createMovieCard(item) {
         ? "Series"
         : "Movie";
 
-    const translatorProfile = translatorProfilesByName.get(translatorKey(translator));
-    const translatorPhoto = translatorProfile?.profile_image_url || "";
-    const translatorInitial = escapeHTML(translator.trim().charAt(0).toUpperCase() || "?");
+    // Content cards intentionally keep translator names text-only; portraits
+    // appear beside translator names on detail and discovery pages instead.
     const translatorHTML = translator
-        ? `
-            <span class="movie-translator-badge" title="Translator: ${translator}" data-translator-name="${translator}">
-                <span class="movie-translator-avatar">
-                    ${translatorPhoto
-                        ? `<img src="${escapeHTML(translatorPhoto)}" alt="" loading="lazy" decoding="async" onerror="this.remove();this.nextElementSibling.hidden=false">`
-                        : ""}
-                    <span class="movie-translator-avatar-fallback" ${translatorPhoto ? "hidden" : ""}>${translatorInitial}</span>
-                </span>
-                <span class="movie-translator-name">${translator}</span>
-            </span>
-        `
+        ? `<span class="movie-translator-badge" title="Translator: ${translator}">${translator}</span>`
+        : "";
+
+    const latestEpisodeHTML = getContentType(item) === "series" && Number(item.latest_episode_number) > 0
+        ? `<div class="movie-latest-episode" aria-label="Latest episode: Season ${Number(item.latest_episode_season) || 1}, Episode ${Number(item.latest_episode_number)}"><span class="movie-latest-episode-line"></span><span class="movie-latest-episode-label">S${String(Number(item.latest_episode_season) || 1).padStart(2,"0")} · EP ${String(Number(item.latest_episode_number)).padStart(2,"0")}</span></div>`
         : "";
 
     const ratingHTML = rating
@@ -637,6 +630,8 @@ function createMovieCard(item) {
                 <h3 title="${title}">
                     ${title}
                 </h3>
+
+                ${latestEpisodeHTML}
 
                 <div class="movie-meta">
 
