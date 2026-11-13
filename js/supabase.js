@@ -310,7 +310,7 @@ export async function getHomepageData({
     if (seriesIds.length) {
         const { data: episodeRows, error: episodeError } = await supabase
             .from("episodes")
-            .select("series_id, season_number, episode_number, season, episode")
+            .select("series_id, season_number, episode_number, season, episode, title, is_final")
             .eq("is_active", true)
             .in("series_id", seriesIds)
             .order("season_number", { ascending: false })
@@ -324,7 +324,11 @@ export async function getHomepageData({
                 if (latestEpisodeBySeries.has(id)) return;
                 const season = Number(row.season_number ?? row.season ?? 0);
                 const episode = Number(row.episode_number ?? row.episode ?? 0);
-                if (episode > 0) latestEpisodeBySeries.set(id, { season, episode });
+                if (episode > 0) {
+                    const title = String(row.title || "").trim().toLowerCase();
+                    const isFinal = row.is_final === true || title === "final" || title.includes("final episode");
+                    latestEpisodeBySeries.set(id, { season, episode, isFinal });
+                }
             });
             seriesCollections.flat().forEach(item => {
                 if (item?.content_type !== "series") return;
@@ -332,6 +336,7 @@ export async function getHomepageData({
                 if (latestEpisode) {
                     item.latest_episode_season = latestEpisode.season;
                     item.latest_episode_number = latestEpisode.episode;
+                    item.latest_episode_is_final = latestEpisode.isFinal;
                 }
             });
         }
