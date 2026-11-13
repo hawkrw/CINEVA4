@@ -1711,37 +1711,6 @@ main .content-section .section-heading,
 }
 
 
-/* Fresh episode indicator for series cards */
-.movie-new-episode-badge {
-    position: absolute;
-    top: 10px;
-    left: 9px;
-    z-index: 6;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 23px;
-    padding: 5px 8px;
-    border: 1px solid rgba(255,255,255,.24);
-    border-radius: 7px;
-    background: linear-gradient(110deg, #ef315e, #8b35f5);
-    color: #fff;
-    font-size: 9px;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: .55px;
-    box-shadow: 0 5px 16px rgba(0,0,0,.38);
-    pointer-events: none;
-}
-@media (max-width: 600px) {
-    .movie-new-episode-badge {
-        top: 7px;
-        left: 7px;
-        min-height: 21px;
-        padding: 4px 6px;
-        font-size: 8px;
-    }
-}
 
 
 /* Translator portraits replace the generic language symbol on movie cards. */
