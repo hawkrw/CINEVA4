@@ -9,6 +9,7 @@ const VISIT_DAY_KEY = "cineva_visit_day";
 async function recordDailyVisit() {
     try {
         let visitorId = localStorage.getItem(VISITOR_KEY);
+        const isFirstTrackedVisit = !visitorId;
 
         if (!visitorId) {
             visitorId = window.crypto?.randomUUID
@@ -28,8 +29,13 @@ async function recordDailyVisit() {
             String(now.getDate()).padStart(2, "0")
         ].join("-");
 
-        // Avoid sending duplicate daily inserts from every page navigation.
+        // Existing installs may already have today's visit row from the older
+        // tracker. Mark today locally once instead of generating a duplicate 409.
         if (localStorage.getItem(VISIT_DAY_KEY) === visitDay) return;
+        if (!isFirstTrackedVisit && !localStorage.getItem(VISIT_DAY_KEY)) {
+            localStorage.setItem(VISIT_DAY_KEY, visitDay);
+            return;
+        }
 
         const { error } = await supabase
             .from("site_visits")
