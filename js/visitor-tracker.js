@@ -4,6 +4,7 @@ import { publicSupabase as supabase } from "./config.js?v=20261111-authfix-1";
    Uses a random browser ID; no IP address or account details are collected. */
 
 const VISITOR_KEY = "cineva_visitor_id";
+const VISIT_DAY_KEY = "cineva_visit_day";
 
 async function recordDailyVisit() {
     try {
@@ -20,22 +21,30 @@ async function recordDailyVisit() {
             localStorage.setItem(VISITOR_KEY, visitorId);
         }
 
+        const now = new Date();
+        const visitDay = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, "0"),
+            String(now.getDate()).padStart(2, "0")
+        ].join("-");
+
+        // Avoid sending duplicate daily inserts from every page navigation.
+        if (localStorage.getItem(VISIT_DAY_KEY) === visitDay) return;
+
         const { error } = await supabase
             .from("site_visits")
-            .upsert({
+            .insert({
                 visitor_id: visitorId,
                 path: location.pathname.slice(0, 500) || "/"
-            }, {
-                onConflict: "visitor_id,visit_day",
-                ignoreDuplicates: true
             });
 
-        // A duplicate means this browser has already been counted today.
-        // Plain INSERT uses the existing public INSERT policy and avoids
-        // requiring public SELECT/UPDATE permissions just for tracking.
-        if (error && error.code !== "23505") {
-            console.warn("CINEVA visitor tracking:", error.message);
+        // A unique conflict means this visitor was already counted today.
+        if (!error || error.code === "23505") {
+            localStorage.setItem(VISIT_DAY_KEY, visitDay);
+            return;
         }
+
+        console.warn("CINEVA visitor tracking:", error.message);
     } catch (error) {
         console.warn("CINEVA visitor tracking unavailable:", error);
     }
