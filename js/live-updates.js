@@ -150,8 +150,8 @@ async function startLiveUpdates() {
         const checkServiceWorker = async () => {
             if (document.visibilityState !== "visible" || !navigator.onLine) return;
             try {
-                const registration = await navigator.serviceWorker.getRegistration("/");
-                if (registration) await registration.update();
+                const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
+                await registration.update();
             } catch (error) {
                 console.warn("CINEVA: Automatic app update check unavailable.", error);
             }
