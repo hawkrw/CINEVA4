@@ -1754,3 +1754,8 @@ main .content-section .section-heading,
 
 
 /* Keep translator badges at their original compact size; portraits link to profiles. */
+
+
+/* Compact green latest-episode text on series cards. */
+.movie-latest-episode{display:block;margin:5px 0 6px;color:#34d399;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:.25px;text-transform:uppercase}
+@media(max-width:600px){.movie-latest-episode{margin:4px 0 5px;font-size:9px;letter-spacing:.15px}}
