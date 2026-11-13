@@ -22,9 +22,12 @@ async function recordDailyVisit() {
 
         const { error } = await supabase
             .from("site_visits")
-            .insert({
+            .upsert({
                 visitor_id: visitorId,
                 path: location.pathname.slice(0, 500) || "/"
+            }, {
+                onConflict: "visitor_id,visit_day",
+                ignoreDuplicates: true
             });
 
         // A duplicate means this browser has already been counted today.
