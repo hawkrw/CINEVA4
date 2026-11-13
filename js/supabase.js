@@ -134,7 +134,7 @@ export async function getHomepageData({
 
         // Series with recently added episodes rise in Latest Added.
         // last_activity_at is maintained from episode activity; the card
-        // already uses this timestamp for its seven-day NEW EP badge.
+        // keeps the Latest Added series feed ordered by recent episode activity.
         supabase
             .from(APP_CONFIG.seriesTable)
             .select(HOMEPAGE_SERIES_FIELDS)
