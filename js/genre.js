@@ -266,8 +266,9 @@ function matchesGenre(item, requestedGenre) {
 function readUrlState() {
     const params = new URLSearchParams(window.location.search);
 
+    const routePath = window.location.pathname.replace(/\/+$/, "").toLowerCase();
     const isSeriesRoute =
-        window.location.pathname.replace(/\/+$/, "") === "/series";
+        routePath === "/series" || routePath === "/series.html";
 
     const requestedType =
         params.get("type") || (isSeriesRoute ? "series" : "all");
