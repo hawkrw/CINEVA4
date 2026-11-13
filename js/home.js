@@ -587,7 +587,7 @@ function createMovieCard(item) {
         : "";
 
     const latestEpisodeHTML = getContentType(item) === "series" && Number(item.latest_episode_number) > 0
-        ? `<div class="movie-latest-episode" aria-label="Latest episode: Season ${Number(item.latest_episode_season) || 1}, Episode ${Number(item.latest_episode_number)}"><span class="movie-latest-episode-line"></span><span class="movie-latest-episode-label">S${String(Number(item.latest_episode_season) || 1).padStart(2,"0")} · EP ${String(Number(item.latest_episode_number)).padStart(2,"0")}</span></div>`
+        ? `<div class="movie-latest-episode" aria-label="${item.latest_episode_is_final ? "Complete" : `Latest episode: Season ${Number(item.latest_episode_season) || 1}, Episode ${Number(item.latest_episode_number)}`}">${item.latest_episode_is_final ? "COMPLETE" : `S${String(Number(item.latest_episode_season) || 1).padStart(2,"0")} · EP ${String(Number(item.latest_episode_number)).padStart(2,"0")}`}</div>`
         : "";
 
     const ratingHTML = rating
