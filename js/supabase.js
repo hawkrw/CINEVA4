@@ -294,6 +294,49 @@ export async function getHomepageData({
         });
     }
 
+    // Attach the highest active season/episode number to each series card.
+    const seriesCollections = [
+        latest,
+        hero,
+        trending,
+        ...Object.values(categoryContent)
+    ];
+    const seriesIds = [...new Set(
+        seriesCollections.flat()
+            .filter(item => item?.content_type === "series")
+            .map(item => item.id)
+            .filter(id => id !== null && id !== undefined)
+    )];
+    if (seriesIds.length) {
+        const { data: episodeRows, error: episodeError } = await supabase
+            .from("episodes")
+            .select("series_id, season_number, episode_number, season, episode")
+            .eq("is_active", true)
+            .in("series_id", seriesIds)
+            .order("season_number", { ascending: false })
+            .order("episode_number", { ascending: false });
+        if (episodeError) {
+            console.warn("CINEVA: Latest episode numbers unavailable:", episodeError);
+        } else {
+            const latestEpisodeBySeries = new Map();
+            (episodeRows || []).forEach(row => {
+                const id = String(row.series_id);
+                if (latestEpisodeBySeries.has(id)) return;
+                const season = Number(row.season_number ?? row.season ?? 0);
+                const episode = Number(row.episode_number ?? row.episode ?? 0);
+                if (episode > 0) latestEpisodeBySeries.set(id, { season, episode });
+            });
+            seriesCollections.flat().forEach(item => {
+                if (item?.content_type !== "series") return;
+                const latestEpisode = latestEpisodeBySeries.get(String(item.id));
+                if (latestEpisode) {
+                    item.latest_episode_season = latestEpisode.season;
+                    item.latest_episode_number = latestEpisode.episode;
+                }
+            });
+        }
+    }
+
     return {
         latest,
         hero,
