@@ -1140,17 +1140,7 @@
                 loader.style.display = "none";
                 loader.setAttribute("aria-hidden", "true");
             }
-            if (reason && !document.getElementById("cinevaBootNotice")) {
-                const notice = document.createElement("div");
-                notice.id = "cinevaBootNotice";
-                notice.setAttribute("role", "status");
-                notice.style.cssText = "position:relative;z-index:20;margin:14px auto;padding:12px 16px;max-width:900px;border:1px solid rgba(168,85,247,.35);border-radius:12px;background:#121221;color:#e8def8;font:13px/1.5 Arial,sans-serif;text-align:center";
-                notice.textContent = "CINEVA is taking longer than expected to load its content. Check your internet connection and tap to retry.";
-                notice.tabIndex = 0;
-                notice.addEventListener("click", () => window.location.reload());
-                const main = document.querySelector("main") || document.body;
-                main.prepend(notice);
-            }
+            // Keep the page usable when startup is slow, without showing a blocking warning banner.
         };
         window.setTimeout(() => revealHomepage("timeout"), 10000);
         window.addEventListener("unhandledrejection", (event) => {
