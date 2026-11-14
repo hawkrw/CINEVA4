@@ -1309,15 +1309,21 @@ function hidePageLoader() {
    One shared homepage database request
 ========================================================= */
 
-const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v8";
-const HOMEPAGE_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+const HOMEPAGE_CACHE_KEY = "cineva_homepage_cache_v9";
+const HOMEPAGE_CACHE_MAX_AGE = 5 * 60 * 1000;
 
 function readHomepageCache() {
     try {
         const cached = JSON.parse(localStorage.getItem(HOMEPAGE_CACHE_KEY) || "null");
-        return cached && cached.data && cached.savedAt
-            ? cached
-            : null;
+        if (!cached || !cached.data || !cached.savedAt) return null;
+
+        // Do not let an old desktop/browser cache masquerade as current content.
+        if (Date.now() - Number(cached.savedAt) > HOMEPAGE_CACHE_MAX_AGE) {
+            localStorage.removeItem(HOMEPAGE_CACHE_KEY);
+            return null;
+        }
+
+        return cached;
     } catch {
         return null;
     }
@@ -1348,6 +1354,11 @@ function renderHomepageData(homepageData) {
     const latestFeed = [...(homepageData.latest || newestFirst)]
         .filter(item => item && item.id && item.created_at);
     loadFeatured(newestFirst);
+    console.info("CINEVA: Hero slider titles (newest first):", newestFirst.map(item => ({
+        title: item.title,
+        created_at: item.created_at,
+        type: item.content_type
+    })));
     loadLatest(latestFeed);
     loadTrending(homepageData.trending || []);
     loadCategories(homepageData.categories || {});
