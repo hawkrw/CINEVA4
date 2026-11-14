@@ -37,13 +37,13 @@ jobs:
           test -n "$SUPABASE_PROJECT_ID" || (echo "Missing SUPABASE_PROJECT_ID repository secret" && exit 1)
 
       - name: Deploy TMDB image importer
-        run: supabase functions deploy tmdb-image-import --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+        run: supabase functions deploy tmdb-image-import --remote "$SUPABASE_PROJECT_ID" --yes --no-verify-jwt
 
       - name: Deploy ImageKit upload authorization
-        run: supabase functions deploy imagekit-upload-auth --project-ref "$SUPABASE_PROJECT_ID"
+        run: supabase functions deploy imagekit-upload-auth --remote "$SUPABASE_PROJECT_ID" --yes
 
       - name: Deploy VIP payment initiation
-        run: supabase functions deploy vip-create-payment --project-ref "$SUPABASE_PROJECT_ID"
+        run: supabase functions deploy vip-create-payment --remote "$SUPABASE_PROJECT_ID" --yes
 
       - name: Deploy Paypack webhook
-        run: supabase functions deploy vip-paypack-webhook --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+        run: supabase functions deploy vip-paypack-webhook --remote "$SUPABASE_PROJECT_ID" --yes --no-verify-jwt
